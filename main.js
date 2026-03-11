@@ -1,40 +1,5 @@
-const onboardingShell = document.querySelector("[data-onboarding-shell]");
-const onboardingCommand = document.querySelector("[data-onboarding-command]");
-const onboardingTabs = document.querySelectorAll("[data-onboarding-version-tab]");
-const betaHighlights = document.querySelector("[data-beta-highlights]");
 const copyButton = document.querySelector("[data-copy-button]");
 const copyFeedback = document.querySelector("[data-copy-feedback]");
-
-function setOnboardingVersion(version) {
-  if (!onboardingShell || !onboardingCommand || !copyButton || !betaHighlights) {
-    return;
-  }
-
-  const stableCommand = onboardingCommand.dataset.commandStable ?? "";
-  const betaCommand = onboardingCommand.dataset.commandBeta ?? "";
-  const nextCommand = version === "beta" ? betaCommand : stableCommand;
-
-  onboardingShell.dataset.onboardingVersion = version;
-  onboardingCommand.textContent = nextCommand;
-  copyButton.dataset.copyText = nextCommand;
-
-  if (version === "beta") {
-    betaHighlights.hidden = false;
-    betaHighlights.classList.remove("is-visible");
-    window.requestAnimationFrame(() => {
-      betaHighlights.classList.add("is-visible");
-    });
-  } else {
-    betaHighlights.classList.remove("is-visible");
-    betaHighlights.hidden = true;
-  }
-
-  onboardingTabs.forEach((tab) => {
-    const isActive = tab.dataset.onboardingVersionTab === version;
-    tab.classList.toggle("is-active", isActive);
-    tab.setAttribute("aria-selected", String(isActive));
-  });
-}
 
 async function copyText(text) {
   try {
@@ -61,15 +26,6 @@ async function copyText(text) {
   }
 }
 
-onboardingTabs.forEach((tab) => {
-  tab.addEventListener("click", () => {
-    const version = tab.dataset.onboardingVersionTab;
-    if (version === "stable" || version === "beta") {
-      setOnboardingVersion(version);
-    }
-  });
-});
-
 copyButton?.addEventListener("click", async () => {
   const text = copyButton.dataset.copyText ?? "";
   if (!text) {
@@ -91,5 +47,3 @@ copyButton?.addEventListener("click", async () => {
     }
   }, 1600);
 });
-
-setOnboardingVersion("stable");
