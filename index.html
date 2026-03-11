@@ -43,144 +43,218 @@
     <main>
       <section class="hero">
         <div class="container hero-shell">
-          <div class="hero-copy">
-            <p class="eyebrow">ClawMem</p>
-            <h1 class="title">
-              <span class="title-line">Own your memory</span>
-              <span class="title-muted">
-                <span class="title-inline">
-                  <span>inside OpenClaw</span>
-                  <span class="cursor"></span>
+          <div class="hero-layout">
+            <div class="hero-copy" data-reveal>
+              <p class="eyebrow">ClawMem</p>
+              <h1 class="title">
+                <span class="title-line">Own your memory</span>
+                <span class="title-muted">
+                  <span class="title-inline">
+                    <span>inside OpenClaw</span>
+                    <span class="cursor"></span>
+                  </span>
                 </span>
-              </span>
-            </h1>
-            <p class="subtitle">
-              ClawMem records your chats, turns them into a living memory graph, proves the source
-              messages were not tampered with, and lets you inspect or edit memory before it shapes
-              future answers.
-            </p>
+              </h1>
+              <p class="subtitle">
+                See what your agent remembers, manage it directly, and trace where every memory
+                came from.
+              </p>
 
-            <div class="cta-grid">
-              <div class="cta-card surface-card">
-                <p class="cta-label">For your agent</p>
-                <div class="cta-command">
-                  <code
-                    data-onboarding-command
-                  >
-                    Read https://clawmem.ai/SKILL.md and follow the instructions to install
-                    ClawMem, start recording chats, and build your memory graph in OpenClaw
-                  </code>
-                  <button
-                    type="button"
-                    class="copy-button"
-                    data-copy-button
-                    data-copy-text="Read https://clawmem.ai/SKILL.md and follow the instructions to install ClawMem, start recording chats, and build your memory graph in OpenClaw"
-                    aria-label="Copy onboarding instructions"
-                    title="Copy onboarding instructions"
-                  >
-                    <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" aria-hidden="true">
-                      <path
-                        d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="1.7"
-                      ></path>
-                      <path
-                        d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="1.7"
-                      ></path>
-                    </svg>
-                    <svg class="copy-icon copy-icon-success" viewBox="0 0 24 24" aria-hidden="true">
-                      <path
-                        d="M20 7L10 17l-5-5"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                      ></path>
-                    </svg>
-                  </button>
+              <div class="hero-pills" aria-label="Core capabilities">
+                <span class="hero-pill">Recorded from chat</span>
+                <span class="hero-pill">Source-verifiable</span>
+                <span class="hero-pill">User-editable</span>
+              </div>
+
+              <div class="cta-grid">
+                <div class="cta-card surface-card">
+                  <p class="cta-label">For your agent</p>
+                  <div class="cta-command">
+                    <code
+                      data-onboarding-command
+                    >
+                      Read https://clawmem.ai/SKILL.md and follow the instructions to install
+                      ClawMem, start recording chats, and build your memory graph in OpenClaw
+                    </code>
+                    <button
+                      type="button"
+                      class="copy-button"
+                      data-copy-button
+                      data-copy-text="Read https://clawmem.ai/SKILL.md and follow the instructions to install ClawMem, start recording chats, and build your memory graph in OpenClaw"
+                      aria-label="Copy onboarding instructions"
+                      title="Copy onboarding instructions"
+                    >
+                      <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="1.7"
+                        ></path>
+                        <path
+                          d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="1.7"
+                        ></path>
+                      </svg>
+                      <svg class="copy-icon copy-icon-success" viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M20 7L10 17l-5-5"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                        ></path>
+                      </svg>
+                    </button>
+                  </div>
+                  <p class="sr-only" data-copy-feedback aria-live="polite"></p>
                 </div>
-                <p class="sr-only" data-copy-feedback aria-live="polite"></p>
+              </div>
+
+              <div class="hero-highlights">
+                <article class="highlight-card surface-card" data-reveal>
+                  <p class="highlight-kicker">Proof</p>
+                  <h2 class="highlight-title">Trace every memory</h2>
+                  <p class="highlight-description">Back to the source message.</p>
+                </article>
+                <article class="highlight-card surface-card" data-reveal>
+                  <p class="highlight-kicker">Graph</p>
+                  <h2 class="highlight-title">See context form</h2>
+                  <p class="highlight-description">Entities, links, and signals stay visible.</p>
+                </article>
+                <article class="highlight-card surface-card" data-reveal>
+                  <p class="highlight-kicker">Control</p>
+                  <h2 class="highlight-title">Edit before reuse</h2>
+                  <p class="highlight-description">Keep the graph aligned with reality.</p>
+                </article>
               </div>
             </div>
 
-            <div class="hero-highlights">
-              <article class="highlight-card surface-card">
-                <h2 class="highlight-title">Tamper-evident chat history</h2>
-                <p class="highlight-description">
-                  Every memory can be traced back to the original user messages, so what the agent
-                  knows stays auditable.
+            <aside class="memory-stage surface-card" aria-hidden="true" data-reveal>
+              <div class="memory-stage-head">
+                <p class="memory-stage-kicker">Live graph memory</p>
+                <p class="memory-stage-status">
+                  <span class="memory-stage-dot"></span>
+                  Syncing from chat
                 </p>
-              </article>
-              <article class="highlight-card surface-card">
-                <h2 class="highlight-title">See the memory graph</h2>
-                <p class="highlight-description">
-                  Explore how chats become entities, relationships, and long-term memory instead of
-                  trusting invisible recall.
-                </p>
-              </article>
-              <article class="highlight-card surface-card">
-                <h2 class="highlight-title">Edit what the model keeps</h2>
-                <p class="highlight-description">
-                  Correct wrong memories, merge duplicates, and shape the graph as your context
-                  changes.
-                </p>
-              </article>
-            </div>
+              </div>
+
+              <div class="memory-stage-body">
+                <div class="memory-events">
+                  <article class="memory-event is-active" data-memory-event>
+                    <span class="memory-event-label">Chat</span>
+                    <p>Book the May trip to Japan.</p>
+                  </article>
+                  <article class="memory-event" data-memory-event>
+                    <span class="memory-event-label">Preference</span>
+                    <p>Window seats, quiet hotels.</p>
+                  </article>
+                  <article class="memory-event" data-memory-event>
+                    <span class="memory-event-label">Update</span>
+                    <p>Kyoto first. Budget stays flexible.</p>
+                  </article>
+                </div>
+
+                <div class="memory-graph">
+                  <span class="graph-core-glow"></span>
+                  <span class="graph-orbit graph-orbit-one"></span>
+                  <span class="graph-orbit graph-orbit-two"></span>
+                  <span class="graph-line graph-line-one"></span>
+                  <span class="graph-line graph-line-two"></span>
+                  <span class="graph-line graph-line-three"></span>
+                  <span class="graph-line graph-line-four"></span>
+                  <span class="graph-line graph-line-five"></span>
+                  <span class="graph-line graph-line-six"></span>
+
+                  <div class="graph-node graph-node-root is-active" data-graph-node>
+                    <span>May trip</span>
+                  </div>
+                  <div class="graph-node graph-node-one" data-graph-node>
+                    <span>Japan</span>
+                  </div>
+                  <div class="graph-node graph-node-two" data-graph-node>
+                    <span>Kyoto</span>
+                  </div>
+                  <div class="graph-node graph-node-three" data-graph-node>
+                    <span>Travel</span>
+                  </div>
+                  <div class="graph-node graph-node-four" data-graph-node>
+                    <span>Window seat</span>
+                  </div>
+                  <div class="graph-node graph-node-five" data-graph-node>
+                    <span>Hotel</span>
+                  </div>
+                  <div class="graph-node graph-node-six" data-graph-node>
+                    <span>Budget</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="memory-log">
+                <article class="memory-log-card is-active" data-memory-log-card>
+                  <span class="memory-log-step">Entity</span>
+                  <strong>Japan trip</strong>
+                  <p>Built from 1 source message</p>
+                </article>
+                <article class="memory-log-card" data-memory-log-card>
+                  <span class="memory-log-step">Relation</span>
+                  <strong>Trip -> Kyoto</strong>
+                  <p>Preference and route linked</p>
+                </article>
+                <article class="memory-log-card" data-memory-log-card>
+                  <span class="memory-log-step">Trust</span>
+                  <strong>Provenance intact</strong>
+                  <p>Ready for future sessions</p>
+                </article>
+              </div>
+            </aside>
           </div>
         </div>
       </section>
 
       <section id="features" class="features">
         <div class="container">
-          <div class="section-head">
+          <div class="section-head" data-reveal>
             <p class="section-kicker">Features</p>
             <h2 class="section-title">Memory users can finally trust</h2>
             <p class="section-desc">
-              Most memory systems are optimized for the agent. ClawMem is optimized for the user:
-              capture the truth, show the structure, preserve integrity, and keep control in human
-              hands.
+              ClawMem keeps memory visible from capture to edit.
             </p>
           </div>
           <div class="grid">
-            <div class="card">
+            <div class="card" data-reveal>
               <div class="card-icon">01</div>
-              <h3 class="card-title">Record every important chat</h3>
+              <h3 class="card-title">Capture the source</h3>
               <p class="card-desc">
-                ClawMem captures the user messages that matter inside OpenClaw, so memory starts
-                from real conversations instead of brittle summaries.
+                Save the messages that matter before anything gets summarized.
               </p>
             </div>
-            <div class="card">
+            <div class="card" data-reveal>
               <div class="card-icon">02</div>
-              <h3 class="card-title">Build a memory graph, not a blob</h3>
+              <h3 class="card-title">Build linked memory</h3>
               <p class="card-desc">
-                Turn conversations into linked people, preferences, tasks, facts, and relationships
-                that users can browse and understand.
+                Turn chats into people, preferences, tasks, and relationships you can inspect.
               </p>
             </div>
-            <div class="card">
+            <div class="card" data-reveal>
               <div class="card-icon">03</div>
-              <h3 class="card-title">Prove memory was not tampered with</h3>
+              <h3 class="card-title">Verify provenance</h3>
               <p class="card-desc">
-                Keep source messages and memory provenance connected, so users know where a memory
-                came from and whether it still deserves trust.
+                Keep each memory tied to the original chat that created it.
               </p>
             </div>
-            <div class="card">
+            <div class="card" data-reveal>
               <div class="card-icon">04</div>
-              <h3 class="card-title">Let users inspect and edit memory</h3>
+              <h3 class="card-title">Edit before reuse</h3>
               <p class="card-desc">
-                Open the graph, review what was learned, and fix or delete memory directly when the
-                model gets the story wrong.
+                Merge, fix, or delete memory before it shapes the next answer.
               </p>
             </div>
           </div>
@@ -189,43 +263,38 @@
 
       <section id="platforms" class="agents">
         <div class="container">
-          <div class="section-head">
+          <div class="section-head" data-reveal>
             <p class="section-kicker">Control</p>
-            <h2 class="section-title">Why users get attached to ClawMem</h2>
+            <h2 class="section-title">Keep the graph useful</h2>
             <p class="section-desc">
-              ClawMem does more than help OpenClaw remember. It gives users confidence that memory
-              is visible, reversible, and still theirs.
+              The agent can remember more without taking memory away from the user.
             </p>
           </div>
           <div class="agent-grid">
-            <div class="agent-card">
+            <div class="agent-card" data-reveal>
               <div class="agent-name">For daily OpenClaw users</div>
               <div class="agent-desc">Less repetition</div>
               <div class="agent-detail">
-                Bring forward preferences, past decisions, and ongoing context without re-explaining
-                yourself every session.
+                Carry forward context without re-explaining it every session.
               </div>
             </div>
-            <div class="agent-card">
+            <div class="agent-card" data-reveal>
               <div class="agent-name">For trust-conscious teams</div>
               <div class="agent-desc">More accountability</div>
               <div class="agent-detail">
-                Trace memory back to the original chat history, inspect what changed, and reduce the
-                risk of silent corruption.
+                Audit what changed and where each memory came from.
               </div>
             </div>
-            <div class="agent-card">
+            <div class="agent-card" data-reveal>
               <div class="agent-name">For power users who curate context</div>
               <div class="agent-desc">Full control</div>
               <div class="agent-detail">
-                Shape the memory graph yourself. Merge, revise, and remove memory so the assistant
-                stays aligned with the way you actually work.
+                Shape the graph directly so the assistant stays aligned with your workflow.
               </div>
             </div>
           </div>
-          <p class="agent-note">
-            When users can see memory, verify memory, and edit memory, they trust the agent more
-            and get better answers from it.
+          <p class="agent-note" data-reveal>
+            Visible memory is easier to trust, easier to fix, and easier to keep yours.
           </p>
         </div>
       </section>
