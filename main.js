@@ -102,16 +102,16 @@ copyButtons.forEach((btn) => {
   function getColors() {
     const dark = root.dataset.theme !== "light";
     return {
-      bubbleHuman: dark ? "rgba(255,77,77,0.30)" : "rgba(239,75,88,0.25)",
-      bubbleAI: dark ? "rgba(0,229,204,0.30)" : "rgba(0,143,135,0.25)",
+      bubbleHuman: dark ? "rgba(224,71,90,0.30)" : "rgba(214,56,74,0.25)",
+      bubbleAI: dark ? "rgba(45,212,184,0.30)" : "rgba(13,138,127,0.25)",
       bubbleStroke: dark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.12)",
       bubbleTextLine: dark ? "rgba(255,255,255,0.22)" : "rgba(0,0,0,0.15)",
-      orbCoral: dark ? "rgba(255,77,77,0.6)" : "rgba(239,75,88,0.5)",
-      orbCoralGlow: dark ? "rgba(255,77,77,0.3)" : "rgba(239,75,88,0.25)",
-      orbCyan: dark ? "rgba(0,229,204,0.55)" : "rgba(0,143,135,0.45)",
-      orbGlow: dark ? "rgba(0,229,204,0.3)" : "rgba(0,143,135,0.25)",
+      orbCoral: dark ? "rgba(224,71,90,0.6)" : "rgba(214,56,74,0.5)",
+      orbCoralGlow: dark ? "rgba(224,71,90,0.3)" : "rgba(214,56,74,0.25)",
+      orbCyan: dark ? "rgba(45,212,184,0.55)" : "rgba(13,138,127,0.45)",
+      orbGlow: dark ? "rgba(45,212,184,0.3)" : "rgba(13,138,127,0.25)",
       lineFaint: dark ? "rgba(136,146,176,0.45)" : "rgba(15,23,42,0.30)",
-      lineActive: dark ? "rgba(0,229,204,0.4)" : "rgba(0,143,135,0.35)",
+      lineActive: dark ? "rgba(45,212,184,0.4)" : "rgba(13,138,127,0.35)",
     };
   }
 
@@ -569,9 +569,9 @@ copyButtons.forEach((btn) => {
         const blur = 4 + (1 - falloff) * 14;
         const alpha = Math.min(intensity * 0.7, 0.55);
 
-        const r = isCoral ? (dark ? 255 : 239) : (dark ? 0 : 0);
-        const g = isCoral ? (dark ? 77 : 75) : (dark ? 229 : 143);
-        const b = isCoral ? (dark ? 77 : 88) : (dark ? 204 : 135);
+        const r = isCoral ? (dark ? 224 : 214) : (dark ? 45 : 13);
+        const g = isCoral ? (dark ? 71 : 56) : (dark ? 212 : 138);
+        const b = isCoral ? (dark ? 90 : 74) : (dark ? 184 : 127);
 
         shadows.push(`${ox.toFixed(1)}px ${oy.toFixed(1)}px ${blur.toFixed(1)}px rgba(${r},${g},${b},${alpha.toFixed(2)})`);
       }
