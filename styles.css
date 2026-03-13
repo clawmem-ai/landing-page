@@ -379,6 +379,17 @@ section {
   transform-origin: center;
 }
 
+.lobster-icon .tassel {
+  animation: tassel-swing 3s ease-in-out infinite;
+  transform-origin: 60px -2px;
+}
+
+@keyframes tassel-swing {
+  0%, 100% { transform: rotate(0deg); }
+  30% { transform: rotate(8deg); }
+  70% { transform: rotate(-5deg); }
+}
+
 .lobster-icon .claw-left {
   animation: lobster-claw-snap-left 4s ease-in-out infinite;
 }

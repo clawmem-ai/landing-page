@@ -82,9 +82,35 @@
                   <!-- Arm connecting to body -->
                   <path d="M105 49 Q100 52 105 55 L98 56 L98 48 Z" fill="url(#lobster-gradient)"/>
                 </g>
-                <!-- Antenna -->
-                <path d="M45 15 Q35 5 30 8" stroke="var(--coral-bright)" stroke-width="2" stroke-linecap="round" class="antenna"/>
-                <path d="M75 15 Q85 5 90 8" stroke="var(--coral-bright)" stroke-width="2" stroke-linecap="round" class="antenna"/>
+                <!-- Antenna (behind hat, long enough to be visible above brim) -->
+                <path d="M46 12 Q30 -14 16 -10" stroke="var(--coral-bright)" stroke-width="2" stroke-linecap="round" class="antenna"/>
+                <path d="M74 12 Q94 -20 112 -16" stroke="var(--coral-bright)" stroke-width="2" stroke-linecap="round" class="antenna"/>
+                <!-- Graduation cap (mortarboard) -->
+                <g class="smart-hat" transform="rotate(-8, 60, 10)">
+                  <!-- Cap body (dome extending onto forehead) -->
+                  <path d="M33 20 Q33 2 60 -2 Q87 2 87 20 Z" fill="#1a2235"/>
+                  <!-- Cap body highlight (subtle top sheen) -->
+                  <path d="M40 18 Q40 6 60 2 Q80 6 80 18" fill="rgba(255,255,255,0.04)"/>
+                  <!-- Band / rim at bottom of cap body -->
+                  <path d="M33 17 L33 21 Q33 23 60 24 Q87 23 87 21 L87 17 Q87 19 60 20 Q33 19 33 17 Z" fill="#141c2e"/>
+                  <path d="M33 21 Q33 23 60 24 Q87 23 87 21" fill="none" stroke="url(#hat-stroke-gradient)" stroke-width="1.4" opacity="0.6"/>
+                  <path d="M33 17 Q33 19 60 20 Q87 19 87 17" fill="none" stroke="url(#hat-stroke-gradient)" stroke-width="0.8" opacity="0.35"/>
+                  <!-- Board top surface (raised higher) -->
+                  <polygon points="60,-12 112,1 60,10 8,1" fill="#131a2b"/>
+                  <!-- Board thickness (visible front/bottom edge) -->
+                  <polygon points="8,1 60,10 112,1 112,3.5 60,12.5 8,3.5" fill="#0b1018"/>
+                  <path d="M8,1 L8,3.5 L60,12.5 L112,3.5 L112,1" fill="none" stroke="url(#hat-stroke-gradient)" stroke-width="0.7" opacity="0.35"/>
+                  <!-- Board top stroke -->
+                  <polygon points="60,-12 112,1 60,10 8,1" fill="none" stroke="url(#hat-stroke-gradient)" stroke-width="1.2" opacity="0.55"/>
+                  <!-- Button on top center -->
+                  <circle cx="60" cy="-2" r="3.5" fill="var(--amber, #d4a04a)"/>
+                  <circle cx="60" cy="-2" r="1.5" fill="#c08a30"/>
+                  <!-- Tassel (animated) -->
+                  <g class="tassel">
+                    <path d="M60 -2 Q82 -10 96 12 Q100 24 97 36" stroke="var(--amber, #d4a04a)" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+                    <rect x="94" y="36" width="6" height="12" rx="1.5" fill="var(--amber, #d4a04a)"/>
+                  </g>
+                </g>
                 <!-- Eyes -->
                 <circle cx="45" cy="35" r="6" fill="#050810" class="eye"/>
                 <circle cx="75" cy="35" r="6" fill="#050810" class="eye"/>
@@ -94,6 +120,10 @@
                   <linearGradient id="lobster-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stop-color="var(--logo-gradient-start, #e0475a)"/>
                     <stop offset="100%" stop-color="var(--logo-gradient-end, #991b1b)"/>
+                  </linearGradient>
+                  <linearGradient id="hat-stroke-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="var(--coral-bright, #e0475a)"/>
+                    <stop offset="100%" stop-color="var(--cyan-bright, #2dd4b8)"/>
                   </linearGradient>
                 </defs>
               </svg>
