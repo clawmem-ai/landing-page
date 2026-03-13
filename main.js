@@ -66,12 +66,15 @@ copyButtons.forEach((btn) => {
   const lobsterEl = hero?.querySelector(".lobster-icon");
   const clawLeftEl = lobsterEl?.querySelector(".claw-left");
   const clawRightEl = lobsterEl?.querySelector(".claw-right");
+  const titleEl = hero.querySelector(".hero-title");
   if (!ctx || !hero || !lobsterEl) return;
 
-  let W, H, dpr;
+  let W, H, dpr, resizeReady = false;
   const resize = () => {
     const rect = hero.getBoundingClientRect();
     dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const oldW = W || rect.width;
+    const oldH = H || rect.height;
     W = rect.width;
     H = rect.height;
     canvas.width = W * dpr;
@@ -79,6 +82,18 @@ copyButtons.forEach((btn) => {
     canvas.style.width = W + "px";
     canvas.style.height = H + "px";
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    // scale existing orb/bubble positions proportionally (skipped on first call)
+    if (resizeReady && (oldW !== W || oldH !== H)) {
+      const sx = W / oldW, sy = H / oldH;
+      for (const orb of bgOrbs) { orb.x *= sx; orb.y *= sy; }
+      for (const b of bubbles) {
+        b.x *= sx; b.y *= sy;
+        b.targetX *= sx; b.targetY *= sy;
+        if (b.orbX) b.orbX *= sx;
+        if (b.orbY) b.orbY *= sy;
+      }
+    }
   };
   resize();
   window.addEventListener("resize", resize);
@@ -87,15 +102,16 @@ copyButtons.forEach((btn) => {
   function getColors() {
     const dark = root.dataset.theme !== "light";
     return {
-      bubbleHuman: dark ? "rgba(255,77,77,0.18)" : "rgba(239,75,88,0.15)",
-      bubbleAI: dark ? "rgba(0,229,204,0.18)" : "rgba(0,143,135,0.15)",
-      bubbleStroke: dark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
-      bubbleTextLine: dark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)",
+      bubbleHuman: dark ? "rgba(255,77,77,0.30)" : "rgba(239,75,88,0.25)",
+      bubbleAI: dark ? "rgba(0,229,204,0.30)" : "rgba(0,143,135,0.25)",
+      bubbleStroke: dark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.12)",
+      bubbleTextLine: dark ? "rgba(255,255,255,0.22)" : "rgba(0,0,0,0.15)",
       orbCoral: dark ? "rgba(255,77,77,0.6)" : "rgba(239,75,88,0.5)",
+      orbCoralGlow: dark ? "rgba(255,77,77,0.3)" : "rgba(239,75,88,0.25)",
       orbCyan: dark ? "rgba(0,229,204,0.55)" : "rgba(0,143,135,0.45)",
       orbGlow: dark ? "rgba(0,229,204,0.3)" : "rgba(0,143,135,0.25)",
-      lineFaint: dark ? "rgba(136,146,176,0.08)" : "rgba(15,23,42,0.06)",
-      lineActive: dark ? "rgba(0,229,204,0.25)" : "rgba(0,143,135,0.2)",
+      lineFaint: dark ? "rgba(136,146,176,0.25)" : "rgba(15,23,42,0.18)",
+      lineActive: dark ? "rgba(0,229,204,0.4)" : "rgba(0,143,135,0.35)",
     };
   }
 
@@ -120,7 +136,7 @@ copyButtons.forEach((btn) => {
       bgOrbs.push({
         x: Math.random() * W,
         y: Math.random() * H,
-        r: 2 + Math.random() * 8,
+        r: 4 + Math.random() * 12,
         vx: (Math.random() - 0.5) * 0.15,
         vy: (Math.random() - 0.5) * 0.12,
         coral: Math.random() > 0.5,
@@ -130,9 +146,9 @@ copyButtons.forEach((btn) => {
     }
   }
   initOrbs();
-  window.addEventListener("resize", initOrbs);
 
-  function drawOrbs(t, colors) {
+  function drawOrbs(t, colors, lob) {
+    const exclR = lob.w * 1.2; // exclusion radius around lobster
     for (const orb of bgOrbs) {
       orb.x += orb.vx;
       orb.y += orb.vy;
@@ -140,6 +156,15 @@ copyButtons.forEach((btn) => {
       if (orb.x > W + 20) orb.x = -20;
       if (orb.y < -20) orb.y = H + 20;
       if (orb.y > H + 20) orb.y = -20;
+
+      // repel from lobster center
+      const dx = orb.x - lob.x, dy = orb.y - lob.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < exclR && dist > 0) {
+        const push = (exclR - dist) / exclR * 0.8;
+        orb.x += (dx / dist) * push;
+        orb.y += (dy / dist) * push;
+      }
 
       const pulse = Math.sin(t * 0.001 + orb.pulse) * 0.15 + 1;
       const r = orb.r * pulse;
@@ -166,19 +191,23 @@ copyButtons.forEach((btn) => {
   }
 
   function drawOrbConnections(colors) {
-    const maxDist = 120;
+    const maxDist = 180;
     ctx.strokeStyle = colors.lineFaint;
-    ctx.lineWidth = 0.5;
+    ctx.lineWidth = 1;
     for (let i = 0; i < bgOrbs.length; i++) {
       for (let j = i + 1; j < bgOrbs.length; j++) {
         const a = bgOrbs[i], b = bgOrbs[j];
         const dx = a.x - b.x, dy = a.y - b.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < maxDist) {
-          ctx.globalAlpha = (1 - dist / maxDist) * 0.4;
+        if (dist < maxDist && dist > 0) {
+          // shorten line to start/end at orb edge, not center
+          const nx = dx / dist, ny = dy / dist;
+          const ax = a.x - nx * a.r, ay = a.y - ny * a.r;
+          const bx = b.x + nx * b.r, by = b.y + ny * b.r;
+          ctx.globalAlpha = (1 - dist / maxDist) * 0.8;
           ctx.beginPath();
-          ctx.moveTo(a.x, a.y);
-          ctx.lineTo(b.x, b.y);
+          ctx.moveTo(ax, ay);
+          ctx.lineTo(bx, by);
           ctx.stroke();
         }
       }
@@ -190,26 +219,25 @@ copyButtons.forEach((btn) => {
   const bubbles = [];
   let nextBubbleTime = 0;
   let nextSide = "left"; // alternate
+  resizeReady = true;
 
   function spawnBubble(t) {
     const lob = lobsterCenter();
     const isHuman = nextSide === "left";
     nextSide = isHuman ? "right" : "left";
 
-    // human bubbles: wider, on the left; AI: narrower, on the right
-    const bw = isHuman ? 60 + Math.random() * 40 : 40 + Math.random() * 25;
-    const bh = isHuman ? 24 + Math.random() * 16 : 18 + Math.random() * 12;
+    // human bubbles: wider; AI: narrower
+    const bw = isHuman ? 100 + Math.random() * 50 : 70 + Math.random() * 35;
+    const bh = isHuman ? 28 + Math.random() * 18 : 22 + Math.random() * 14;
     const lines = isHuman ? 2 + Math.floor(Math.random() * 2) : 1 + Math.floor(Math.random() * 2);
-
-    // spawn below the hero area
-    const spawnX = isHuman
-      ? lob.x - 60 - Math.random() * 80
-      : lob.x + 60 + Math.random() * 80;
-    const spawnY = H + 20;
 
     // target: near the claw
     const targetY = lob.y + lob.h * 0.15;
     const targetX = isHuman ? lob.x - lob.w * 0.45 : lob.x + lob.w * 0.45;
+
+    // spawn directly below the target X — no horizontal offset
+    const spawnX = targetX;
+    const spawnY = H + 20;
 
     bubbles.push({
       x: spawnX,
@@ -217,6 +245,7 @@ copyButtons.forEach((btn) => {
       w: bw,
       h: bh,
       lines,
+      lastLineRatio: 0.4 + Math.random() * 0.3,
       isHuman,
       targetX,
       targetY,
@@ -254,7 +283,7 @@ copyButtons.forEach((btn) => {
     const startY = b.y - b.h / 2 + 8;
     ctx.fillStyle = lineColor;
     for (let i = 0; i < b.lines; i++) {
-      const w = i === b.lines - 1 ? lineW * (0.4 + Math.random() * 0.3) : lineW;
+      const w = i === b.lines - 1 ? lineW * b.lastLineRatio : lineW;
       ctx.beginPath();
       ctx.roundRect(b.x - b.w / 2 + 8, startY + i * 7, w, lineH, 1.5);
       ctx.fill();
@@ -274,11 +303,13 @@ copyButtons.forEach((btn) => {
   }
 
   /* ── Glowing orb (after grab) ── */
-  function drawGlowOrb(x, y, alpha, colors) {
+  function drawGlowOrb(x, y, alpha, colors, isHuman) {
     const r = 6;
+    const coreColor = isHuman ? colors.orbCoral : colors.orbCyan;
+    const glowColor = isHuman ? colors.orbCoralGlow : colors.orbGlow;
     const grad = ctx.createRadialGradient(x, y, 0, x, y, r * 4);
-    grad.addColorStop(0, colors.orbCyan);
-    grad.addColorStop(0.5, colors.orbGlow);
+    grad.addColorStop(0, coreColor);
+    grad.addColorStop(0.5, glowColor);
     grad.addColorStop(1, "transparent");
     ctx.globalAlpha = alpha;
     ctx.fillStyle = grad;
@@ -286,7 +317,7 @@ copyButtons.forEach((btn) => {
     ctx.arc(x, y, r * 4, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = colors.orbCyan;
+    ctx.fillStyle = coreColor;
     ctx.beginPath();
     ctx.arc(x, y, r, 0, Math.PI * 2);
     ctx.fill();
@@ -317,7 +348,11 @@ copyButtons.forEach((btn) => {
     const el = side === "left" ? clawLeftEl : clawRightEl;
     if (!el) return;
     el.classList.add("grabbing");
-    setTimeout(() => el.classList.remove("grabbing"), 700);
+  }
+  function triggerRelease(side) {
+    const el = side === "left" ? clawLeftEl : clawRightEl;
+    if (!el) return;
+    el.classList.remove("grabbing");
   }
 
   /* ── Main loop ── */
@@ -332,10 +367,9 @@ copyButtons.forEach((btn) => {
     const colors = getColors();
     const lob = lobsterCenter();
 
-    // background orb connections
+    // background orbs first, then connections on top — but connections behind orb cores
     drawOrbConnections(colors);
-    // background orbs
-    drawOrbs(timestamp, colors);
+    drawOrbs(timestamp, colors, lob);
 
     // spawn bubbles
     if (timestamp > nextBubbleTime) {
@@ -347,83 +381,108 @@ copyButtons.forEach((btn) => {
     for (let i = bubbles.length - 1; i >= 0; i--) {
       const b = bubbles[i];
 
-      if (b.phase === "rising") {
-        // fade in
-        b.alpha = Math.min(b.alpha + dt * 1.5, 0.35);
+      const side = b.isHuman ? "left" : "right";
 
-        // move upward + drift toward target X
+      if (b.phase === "rising") {
+        // fade in — gets brighter as it approaches the claw
+        const progress = 1 - Math.max(0, (b.y - b.targetY) / (H - b.targetY));
+        b.alpha = 0.25 + progress * 0.6;
+
+        // move straight up
         b.y -= b.speed * dt;
-        b.x += (b.targetX - b.x) * 0.008;
 
         // check if reached claw area
         if (b.y <= b.targetY + 10) {
           b.phase = "grabbed";
           b.grabTimer = 0;
-          triggerGrab(b.isHuman ? "left" : "right");
+          triggerGrab(side);
           b.orbX = b.x;
           b.orbY = b.y;
         }
 
         drawBubble(b, colors);
+
       } else if (b.phase === "grabbed") {
-        // bubble compresses and brightens into an orb over 0.7s
+        // claw holds — bubble compresses into orb (0.8s)
         b.grabTimer += dt;
-        const p = Math.min(b.grabTimer / 0.7, 1);
+        const p = Math.min(b.grabTimer / 0.8, 1);
 
         // shrink bubble
-        b.w *= 1 - dt * 2.5;
-        b.h *= 1 - dt * 2.5;
-        b.alpha = 0.35 * (1 - p);
-
+        b.w = Math.max(b.w * (1 - dt * 2.5), 0);
+        b.h = Math.max(b.h * (1 - dt * 2.5), 0);
+        b.alpha = 0.85 * (1 - p);
         if (b.w > 4) drawBubble(b, colors);
 
-        // simultaneously grow orb
+        // grow orb at claw position
         b.orbAlpha = p;
-        drawGlowOrb(b.orbX, b.orbY, b.orbAlpha * 0.8, colors);
+        drawGlowOrb(b.orbX, b.orbY, b.orbAlpha * 0.8, colors, b.isHuman);
 
         if (p >= 1) {
-          b.phase = "orb";
+          b.phase = "lift";
           b.grabTimer = 0;
         }
-      } else if (b.phase === "orb") {
-        // orb ascends to head area over 0.5s
-        b.grabTimer += dt;
-        const p = Math.min(b.grabTimer / 0.5, 1);
-        const headY = lob.y - lob.h * 0.35;
-        const headX = lob.x;
 
-        b.orbX += (headX - b.orbX) * (dt * 4);
-        b.orbY += (headY - b.orbY) * (dt * 4);
-        b.orbAlpha = 1;
-
-        drawGlowOrb(b.orbX, b.orbY, b.orbAlpha, colors);
-
-        if (p >= 1) {
-          b.phase = "merge";
-          b.grabTimer = 0;
-        }
-      } else if (b.phase === "merge") {
-        // merge into background graph over 0.6s
+      } else if (b.phase === "lift") {
+        // claw lifts orb up toward head (0.6s), claw still grabbing
         b.grabTimer += dt;
         const p = Math.min(b.grabTimer / 0.6, 1);
+        const headY = lob.y - lob.h * 0.3;
 
-        b.orbAlpha = 1 - p * 0.5;
-        drawGlowOrb(b.orbX, b.orbY, b.orbAlpha, colors);
-        drawMergeLines(b.orbX, b.orbY, b.orbAlpha, colors);
+        b.orbX += (lob.x - b.orbX) * (dt * 5);
+        b.orbY += (headY - b.orbY) * (dt * 5);
+        b.orbAlpha = 1;
+
+        drawGlowOrb(b.orbX, b.orbY, b.orbAlpha, colors, b.isHuman);
 
         if (p >= 1) {
-          // add as a new background orb
+          b.phase = "release";
+          b.grabTimer = 0;
+          triggerRelease(side);
+          // random direction — spread in all directions, not just up
+          const angle = Math.random() * Math.PI * 2;
+          b.driftTargetVx = Math.cos(angle) * 30;
+          b.driftTargetVy = Math.sin(angle) * 30;
+          b.driftVx = 0;
+          b.driftVy = 0;
+        }
+
+      } else if (b.phase === "release") {
+        // orb gently accelerates away, glow fades smoothly (2.5s)
+        b.grabTimer += dt;
+        const p = Math.min(b.grabTimer / 2.5, 1);
+
+        // ease into drift speed — smooth acceleration
+        const accel = Math.min(b.grabTimer / 0.8, 1); // ramp over 0.8s
+        const ease = accel * accel * (3 - 2 * accel); // smoothstep
+        b.driftVx = b.driftTargetVx * ease;
+        b.driftVy = b.driftTargetVy * ease;
+
+        b.orbX += b.driftVx * dt;
+        b.orbY += b.driftVy * dt;
+
+        // glow: hold strong for first 40%, then smooth cubic fade
+        if (p < 0.4) {
+          b.orbAlpha = 1;
+        } else {
+          const fade = (p - 0.4) / 0.6; // 0→1
+          b.orbAlpha = 1 - fade * fade * fade; // cubic ease-in fade
+        }
+
+        drawGlowOrb(b.orbX, b.orbY, b.orbAlpha, colors, b.isHuman);
+        drawMergeLines(b.orbX, b.orbY, b.orbAlpha * Math.min(p * 1.5, 1), colors);
+
+        if (p >= 1) {
+          // become a background orb at wherever it drifted to
           bgOrbs.push({
             x: b.orbX,
             y: b.orbY,
-            r: 3 + Math.random() * 4,
-            vx: (Math.random() - 0.5) * 0.12,
-            vy: (Math.random() - 0.5) * 0.1,
-            coral: !b.isHuman,
+            r: 5 + Math.random() * 8,
+            vx: b.driftVx * 0.005,
+            vy: b.driftVy * 0.005,
+            coral: b.isHuman,
             alpha: 0.3 + Math.random() * 0.2,
             pulse: Math.random() * Math.PI * 2,
           });
-          // remove old orbs if too many
           if (bgOrbs.length > 35) bgOrbs.shift();
           bubbles.splice(i, 1);
         }
@@ -433,6 +492,61 @@ copyButtons.forEach((btn) => {
     // remove stale bubbles that have been alive too long (safety)
     for (let i = bubbles.length - 1; i >= 0; i--) {
       if (timestamp - bubbles[i].born > 20000) bubbles.splice(i, 1);
+    }
+
+    // ── Reactive text-shadow — nearby objects cast letter-shaped light ──
+    if (titleEl) {
+      const tr = titleEl.getBoundingClientRect();
+      const hr = hero.getBoundingClientRect();
+      const tcx = tr.left - hr.left + tr.width / 2;
+      const tcy = tr.top - hr.top + tr.height / 2;
+      const influenceR = 280;
+      const dark = root.dataset.theme !== "light";
+
+      const shadows = [];
+
+      function addShadow(x, y, strength, isCoral) {
+        const dx = x - tcx, dy = y - tcy;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist >= influenceR || dist < 1) return;
+
+        const falloff = 1 - dist / influenceR;
+        const intensity = falloff * falloff * strength;
+        if (intensity < 0.03) return;
+
+        // offset: light from left → shadow shifts right, etc.
+        const ox = (dx / dist) * falloff * 3;
+        const oy = (dy / dist) * falloff * 2;
+        // closer = tighter blur, further = more spread
+        const blur = 4 + (1 - falloff) * 14;
+        const alpha = Math.min(intensity * 0.7, 0.55);
+
+        const r = isCoral ? (dark ? 255 : 239) : (dark ? 0 : 0);
+        const g = isCoral ? (dark ? 77 : 75) : (dark ? 229 : 143);
+        const b = isCoral ? (dark ? 77 : 88) : (dark ? 204 : 135);
+
+        shadows.push(`${ox.toFixed(1)}px ${oy.toFixed(1)}px ${blur.toFixed(1)}px rgba(${r},${g},${b},${alpha.toFixed(2)})`);
+      }
+
+      for (const orb of bgOrbs) {
+        addShadow(orb.x, orb.y, orb.alpha * (orb.r / 8), orb.coral);
+      }
+      for (const b of bubbles) {
+        // use combined brightness so there's no jump during transitions
+        if (b.phase === "rising") {
+          addShadow(b.x, b.y, b.alpha * 2.5, b.isHuman);
+        } else if (b.phase === "grabbed") {
+          // blend: bubble fading out + orb fading in
+          const combined = Math.max(b.alpha, b.orbAlpha || 0);
+          const mx = b.w > 4 ? (b.x + (b.orbX || b.x)) / 2 : (b.orbX || b.x);
+          const my = b.h > 4 ? (b.y + (b.orbY || b.y)) / 2 : (b.orbY || b.y);
+          addShadow(mx, my, combined * 2.5, b.isHuman);
+        } else {
+          addShadow(b.orbX, b.orbY, (b.orbAlpha || 0) * 2.5, b.isHuman);
+        }
+      }
+
+      titleEl.style.textShadow = shadows.length ? shadows.join(", ") : "none";
     }
 
     requestAnimationFrame(animate);

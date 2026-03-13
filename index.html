@@ -68,10 +68,20 @@
               <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <!-- Body -->
                 <path d="M60 10 C30 10 15 35 15 55 C15 75 30 95 45 100 L45 110 L55 110 L55 100 C55 100 60 102 65 100 L65 110 L75 110 L75 100 C90 95 105 75 105 55 C105 35 90 10 60 10Z" fill="url(#lobster-gradient)" class="claw-body"/>
-                <!-- Left Claw -->
-                <path d="M20 45 C5 40 0 50 5 60 C10 70 20 65 25 55 C28 48 25 45 20 45Z" fill="url(#lobster-gradient)" class="claw-left"/>
-                <!-- Right Claw -->
-                <path d="M100 45 C115 40 120 50 115 60 C110 70 100 65 95 55 C92 48 95 45 100 45Z" fill="url(#lobster-gradient)" class="claw-right"/>
+                <!-- Left Claw (two pincers) -->
+                <g class="claw-left" transform-origin="22 52">
+                  <path d="M22 48 C14 42 4 42 2 48 C0 52 6 54 14 52 Z" fill="url(#lobster-gradient)" class="pincer-upper"/>
+                  <path d="M22 56 C14 62 4 62 2 56 C0 52 6 50 14 52 Z" fill="url(#lobster-gradient)" class="pincer-lower"/>
+                  <!-- Arm connecting to body -->
+                  <path d="M15 49 Q20 52 15 55 L22 56 L22 48 Z" fill="url(#lobster-gradient)"/>
+                </g>
+                <!-- Right Claw (two pincers) -->
+                <g class="claw-right" transform-origin="98 52">
+                  <path d="M98 48 C106 42 116 42 118 48 C120 52 114 54 106 52 Z" fill="url(#lobster-gradient)" class="pincer-upper"/>
+                  <path d="M98 56 C106 62 116 62 118 56 C120 52 114 50 106 52 Z" fill="url(#lobster-gradient)" class="pincer-lower"/>
+                  <!-- Arm connecting to body -->
+                  <path d="M105 49 Q100 52 105 55 L98 56 L98 48 Z" fill="url(#lobster-gradient)"/>
+                </g>
                 <!-- Antenna -->
                 <path d="M45 15 Q35 5 30 8" stroke="var(--coral-bright)" stroke-width="2" stroke-linecap="round" class="antenna"/>
                 <path d="M75 15 Q85 5 90 8" stroke="var(--coral-bright)" stroke-width="2" stroke-linecap="round" class="antenna"/>

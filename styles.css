@@ -359,6 +359,7 @@ section {
 .lobster-icon svg {
   width: 100%;
   height: 100%;
+  overflow: visible;
   filter: drop-shadow(0 0 20px var(--logo-glow));
   transition: filter 0.3s ease;
 }
@@ -377,13 +378,29 @@ section {
 }
 
 .lobster-icon .claw-left {
-  animation: lobster-claw-snap 4s ease-in-out infinite;
-  transform-origin: right center;
+  animation: lobster-claw-snap-left 4s ease-in-out infinite;
 }
 
 .lobster-icon .claw-right {
-  animation: lobster-claw-snap 4s ease-in-out infinite 0.2s;
-  transform-origin: left center;
+  animation: lobster-claw-snap-right 4s ease-in-out infinite 0.2s;
+}
+
+/* Idle pincer micro-snap */
+.lobster-icon .claw-left .pincer-upper {
+  animation: idle-pinch-upper-left 4s ease-in-out infinite;
+  transform-origin: 22px 48px;
+}
+.lobster-icon .claw-left .pincer-lower {
+  animation: idle-pinch-lower-left 4s ease-in-out infinite;
+  transform-origin: 22px 56px;
+}
+.lobster-icon .claw-right .pincer-upper {
+  animation: idle-pinch-upper-right 4s ease-in-out infinite 0.2s;
+  transform-origin: 98px 48px;
+}
+.lobster-icon .claw-right .pincer-lower {
+  animation: idle-pinch-lower-right 4s ease-in-out infinite 0.2s;
+  transform-origin: 98px 56px;
 }
 
 @keyframes lobster-float {
@@ -402,9 +419,35 @@ section {
   75% { transform: rotate(3deg); }
 }
 
-@keyframes lobster-claw-snap {
+@keyframes lobster-claw-snap-left {
+  0%, 85%, 100% { transform: translate(0, 0); }
+  90% { transform: translate(-3px, 0); }
+  95% { transform: translate(0, 0); }
+}
+@keyframes lobster-claw-snap-right {
+  0%, 85%, 100% { transform: translate(0, 0); }
+  90% { transform: translate(3px, 0); }
+  95% { transform: translate(0, 0); }
+}
+
+@keyframes idle-pinch-upper-left {
   0%, 85%, 100% { transform: rotate(0); }
-  90% { transform: rotate(-8deg); }
+  90% { transform: rotate(6deg); }
+  95% { transform: rotate(0); }
+}
+@keyframes idle-pinch-lower-left {
+  0%, 85%, 100% { transform: rotate(0); }
+  90% { transform: rotate(-6deg); }
+  95% { transform: rotate(0); }
+}
+@keyframes idle-pinch-upper-right {
+  0%, 85%, 100% { transform: rotate(0); }
+  90% { transform: rotate(-6deg); }
+  95% { transform: rotate(0); }
+}
+@keyframes idle-pinch-lower-right {
+  0%, 85%, 100% { transform: rotate(0); }
+  90% { transform: rotate(6deg); }
   95% { transform: rotate(0); }
 }
 
@@ -440,27 +483,70 @@ section {
 }
 
 /* ── Claw grab state ── */
+/* Reach out, hold closed while grabbing */
 .lobster-icon .claw-left.grabbing {
-  animation: claw-grab-left 0.7s ease-in-out forwards;
-  transform-origin: right center;
+  animation: claw-reach-left 0.5s ease-out forwards;
 }
 .lobster-icon .claw-right.grabbing {
-  animation: claw-grab-right 0.7s ease-in-out forwards;
-  transform-origin: left center;
+  animation: claw-reach-right 0.5s ease-out forwards;
 }
 
-@keyframes claw-grab-left {
-  0% { transform: rotate(0); }
-  30% { transform: rotate(15deg) scale(1.1); }
-  60% { transform: rotate(-20deg) scale(1.15); }
-  100% { transform: rotate(-12deg) scale(1.05); }
+/* Pincers clamp shut and stay closed */
+.lobster-icon .claw-left.grabbing .pincer-upper {
+  animation: pincer-close-upper-left 0.4s ease-out forwards;
+  transform-origin: 22px 48px;
+}
+.lobster-icon .claw-left.grabbing .pincer-lower {
+  animation: pincer-close-lower-left 0.4s ease-out forwards;
+  transform-origin: 22px 56px;
+}
+.lobster-icon .claw-right.grabbing .pincer-upper {
+  animation: pincer-close-upper-right 0.4s ease-out forwards;
+  transform-origin: 98px 48px;
+}
+.lobster-icon .claw-right.grabbing .pincer-lower {
+  animation: pincer-close-lower-right 0.4s ease-out forwards;
+  transform-origin: 98px 56px;
 }
 
-@keyframes claw-grab-right {
+/* Reach out with rotation — stays extended */
+@keyframes claw-reach-left {
+  0% { transform: translate(0, 0) rotate(0) scale(1); }
+  50% { transform: translate(-14px, -4px) rotate(-22deg) scale(1.18); }
+  100% { transform: translate(-10px, -2px) rotate(-15deg) scale(1.12); }
+}
+@keyframes claw-reach-right {
+  0% { transform: translate(0, 0) rotate(0) scale(1); }
+  50% { transform: translate(14px, -4px) rotate(22deg) scale(1.18); }
+  100% { transform: translate(10px, -2px) rotate(15deg) scale(1.12); }
+}
+
+/* Pincers clamp shut — stays closed (forwards) */
+@keyframes pincer-close-upper-left {
   0% { transform: rotate(0); }
-  30% { transform: rotate(-15deg) scale(1.1); }
-  60% { transform: rotate(20deg) scale(1.15); }
-  100% { transform: rotate(12deg) scale(1.05); }
+  100% { transform: rotate(10deg); }
+}
+@keyframes pincer-close-lower-left {
+  0% { transform: rotate(0); }
+  100% { transform: rotate(-10deg); }
+}
+@keyframes pincer-close-upper-right {
+  0% { transform: rotate(0); }
+  100% { transform: rotate(-10deg); }
+}
+@keyframes pincer-close-lower-right {
+  0% { transform: rotate(0); }
+  100% { transform: rotate(10deg); }
+}
+
+/* When .grabbing is removed, transition back smoothly */
+.lobster-icon .claw-left,
+.lobster-icon .claw-right {
+  transition: transform 0.4s ease-in;
+}
+.lobster-icon .pincer-upper,
+.lobster-icon .pincer-lower {
+  transition: transform 0.3s ease-in;
 }
 
 @keyframes fadeInUp {
