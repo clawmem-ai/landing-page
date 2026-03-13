@@ -67,6 +67,7 @@ copyButtons.forEach((btn) => {
   const clawLeftEl = lobsterEl?.querySelector(".claw-left");
   const clawRightEl = lobsterEl?.querySelector(".claw-right");
   const titleEl = hero.querySelector(".hero-title");
+  const heroInstallEl = hero.querySelector(".hero-install-block");
   if (!ctx || !hero || !lobsterEl) return;
 
   let W, H, dpr, resizeReady = false;
@@ -247,9 +248,14 @@ copyButtons.forEach((btn) => {
     const targetY = lob.y + lob.h * 0.15;
     const targetX = isHuman ? lob.x - lob.w * 0.45 : lob.x + lob.w * 0.45;
 
-    // spawn directly below the target X — no horizontal offset
+    // spawn from behind the hero install block (or bottom of hero if not found)
+    let spawnY = H + 20;
+    if (heroInstallEl) {
+      const ir = heroInstallEl.getBoundingClientRect();
+      const hr = hero.getBoundingClientRect();
+      spawnY = ir.top - hr.top + ir.height / 2;
+    }
     const spawnX = targetX;
-    const spawnY = H + 20;
 
     bubbles.push({
       x: spawnX,
@@ -431,7 +437,7 @@ copyButtons.forEach((btn) => {
           triggerGrab(side);
           b.orbStartX = b.x;
           b.orbStartY = b.y;
-          // just outside the claw mouth: left claw tip SVG ~x=-10, right ~x=130, y=52
+          // just outside the claw mouth
           const clawSvgX = b.isHuman ? -22 : 142;
           const clawSvgY = 52;
           b.clawTipX = (lob.x - lob.w / 2) + (clawSvgX / 120) * lob.w;
@@ -466,27 +472,11 @@ copyButtons.forEach((btn) => {
         drawGlowOrb(b.orbX, b.orbY, b.orbAlpha * 0.8, colors, b.isHuman);
 
         if (p >= 1) {
-          b.phase = "lift";
-          b.grabTimer = 0;
-        }
-
-      } else if (b.phase === "lift") {
-        // claw lifts orb up toward head (0.6s), claw still grabbing
-        b.grabTimer += dt;
-        const p = Math.min(b.grabTimer / 0.6, 1);
-        const headY = lob.y - lob.h * 0.3;
-
-        b.orbX += (lob.x - b.orbX) * (dt * 5);
-        b.orbY += (headY - b.orbY) * (dt * 5);
-        b.orbAlpha = 1;
-
-        drawGlowOrb(b.orbX, b.orbY, b.orbAlpha, colors, b.isHuman);
-
-        if (p >= 1) {
+          // launch directly from claw tip
           b.phase = "release";
           b.grabTimer = 0;
+          b.orbAlpha = 1;
           triggerRelease(side);
-          // random direction — spread in all directions, not just up
           const angle = Math.random() * Math.PI * 2;
           b.driftTargetVx = Math.cos(angle) * 30;
           b.driftTargetVy = Math.sin(angle) * 30;
@@ -580,15 +570,11 @@ copyButtons.forEach((btn) => {
         addShadow(orb.x, orb.y, orb.alpha * (orb.r / 8), orb.coral);
       }
       for (const b of bubbles) {
-        // use combined brightness so there's no jump during transitions
         if (b.phase === "rising") {
           addShadow(b.x, b.y, b.alpha * 2.5, b.isHuman);
         } else if (b.phase === "grabbed") {
-          // blend: bubble fading out + orb fading in
           const combined = Math.max(b.alpha, b.orbAlpha || 0);
-          const mx = b.w > 4 ? (b.x + (b.orbX || b.x)) / 2 : (b.orbX || b.x);
-          const my = b.h > 4 ? (b.y + (b.orbY || b.y)) / 2 : (b.orbY || b.y);
-          addShadow(mx, my, combined * 2.5, b.isHuman);
+          addShadow(b.orbX || b.x, b.orbY || b.y, combined * 2.5, b.isHuman);
         } else {
           addShadow(b.orbX, b.orbY, (b.orbAlpha || 0) * 2.5, b.isHuman);
         }
