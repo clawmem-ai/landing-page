@@ -110,7 +110,7 @@ copyButtons.forEach((btn) => {
       orbCoralGlow: dark ? "rgba(255,77,77,0.3)" : "rgba(239,75,88,0.25)",
       orbCyan: dark ? "rgba(0,229,204,0.55)" : "rgba(0,143,135,0.45)",
       orbGlow: dark ? "rgba(0,229,204,0.3)" : "rgba(0,143,135,0.25)",
-      lineFaint: dark ? "rgba(136,146,176,0.25)" : "rgba(15,23,42,0.18)",
+      lineFaint: dark ? "rgba(136,146,176,0.45)" : "rgba(15,23,42,0.30)",
       lineActive: dark ? "rgba(0,229,204,0.4)" : "rgba(0,143,135,0.35)",
     };
   }
@@ -147,7 +147,7 @@ copyButtons.forEach((btn) => {
   }
   initOrbs();
 
-  const OOB_MARGIN = 80; // orbs can drift this far outside visible area
+  const OOB_MARGIN = 80;
 
   function drawOrbs(t, colors, lob) {
     const exclR = lob.w * 1.2;
@@ -199,21 +199,24 @@ copyButtons.forEach((btn) => {
     ctx.globalAlpha = 1;
   }
 
-  function drawOrbConnections(colors) {
+  function drawOrbConnections(colors, t) {
     const maxDist = 180;
     ctx.strokeStyle = colors.lineFaint;
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 1.5;
     for (let i = 0; i < bgOrbs.length; i++) {
       for (let j = i + 1; j < bgOrbs.length; j++) {
         const a = bgOrbs[i], b = bgOrbs[j];
         const dx = a.x - b.x, dy = a.y - b.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
         if (dist < maxDist && dist > 0) {
-          // shorten line to start/end at orb edge, not center
+          // use pulsed radius + margin so lines never overlap circles
+          const ar = a.r * (Math.sin(t * 0.001 + a.pulse) * 0.15 + 1) + 2;
+          const br = b.r * (Math.sin(t * 0.001 + b.pulse) * 0.15 + 1) + 2;
+          if (dist <= ar + br) continue; // too close, skip
           const nx = dx / dist, ny = dy / dist;
-          const ax = a.x - nx * a.r, ay = a.y - ny * a.r;
-          const bx = b.x + nx * b.r, by = b.y + ny * b.r;
-          ctx.globalAlpha = (1 - dist / maxDist) * 0.8;
+          const ax = a.x - nx * ar, ay = a.y - ny * ar;
+          const bx = b.x + nx * br, by = b.y + ny * br;
+          ctx.globalAlpha = (1 - dist / maxDist);
           ctx.beginPath();
           ctx.moveTo(ax, ay);
           ctx.lineTo(bx, by);
@@ -398,7 +401,7 @@ copyButtons.forEach((btn) => {
     const lob = lobsterCenter();
 
     // background orbs first, then connections on top — but connections behind orb cores
-    drawOrbConnections(colors);
+    drawOrbConnections(colors, timestamp);
     drawOrbs(timestamp, colors, lob);
 
     // spawn bubbles
