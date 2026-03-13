@@ -67,9 +67,9 @@
   --bg-surface: #ffffff;
   --bg-elevated: #f5f9ff;
 
-  --coral-bright: #ef4b58;
-  --coral-mid: #de3f4d;
-  --coral-dark: #c43645;
+  --coral-bright: #f03e4d;
+  --coral-mid: #e63946;
+  --coral-dark: #d42f3e;
   --cyan-bright: #008f87;
   --cyan-mid: #00766e;
   --cyan-glow: rgba(0, 143, 135, 0.24);
@@ -93,8 +93,8 @@
   --shadow-coral-soft: rgba(239, 75, 88, 0.19);
   --shadow-coral-mid: rgba(239, 75, 88, 0.27);
 
-  --hero-title-start: #c93342;
-  --hero-title-end: #f04d5a;
+  --hero-title-start: #e8233a;
+  --hero-title-end: #ff3d52;
 
   --logo-gradient-start: #ff7079;
   --logo-gradient-end: #ea4c59;

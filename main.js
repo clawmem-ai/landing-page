@@ -147,15 +147,21 @@ copyButtons.forEach((btn) => {
   }
   initOrbs();
 
+  const OOB_MARGIN = 80; // orbs can drift this far outside visible area
+
   function drawOrbs(t, colors, lob) {
-    const exclR = lob.w * 1.2; // exclusion radius around lobster
-    for (const orb of bgOrbs) {
+    const exclR = lob.w * 1.2;
+    for (let i = bgOrbs.length - 1; i >= 0; i--) {
+      const orb = bgOrbs[i];
       orb.x += orb.vx;
       orb.y += orb.vy;
-      if (orb.x < -20) orb.x = W + 20;
-      if (orb.x > W + 20) orb.x = -20;
-      if (orb.y < -20) orb.y = H + 20;
-      if (orb.y > H + 20) orb.y = -20;
+
+      // remove orbs that drifted far out of bounds
+      if (orb.x < -OOB_MARGIN || orb.x > W + OOB_MARGIN ||
+          orb.y < -OOB_MARGIN || orb.y > H + OOB_MARGIN) {
+        bgOrbs.splice(i, 1);
+        continue;
+      }
 
       // repel from lobster center
       const dx = orb.x - lob.x, dy = orb.y - lob.y;
@@ -165,6 +171,9 @@ copyButtons.forEach((btn) => {
         orb.x += (dx / dist) * push;
         orb.y += (dy / dist) * push;
       }
+
+      // only draw if within visible area (with some margin for glow)
+      if (orb.x < -30 || orb.x > W + 30 || orb.y < -30 || orb.y > H + 30) continue;
 
       const pulse = Math.sin(t * 0.001 + orb.pulse) * 0.15 + 1;
       const r = orb.r * pulse;
@@ -267,37 +276,58 @@ copyButtons.forEach((btn) => {
 
     ctx.globalAlpha = b.alpha;
 
-    // rounded rect
-    const r = 8;
+    // bubble body with integrated curved tail
+    const r = Math.min(b.h / 2, 12);
+    const left = b.x - b.w / 2;
+    const right = b.x + b.w / 2;
+    const top = b.y - b.h / 2;
+    const bot = b.y + b.h / 2;
+    const tailDir = b.isHuman ? -1 : 1;
+    // tail anchor on bottom edge
+    const tailBaseX = b.x + tailDir * (b.w * 0.3);
+    const tailTipX = tailBaseX + tailDir * 8;
+    const tailTipY = bot + 6;
+
     ctx.fillStyle = fill;
     ctx.strokeStyle = stroke;
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 0.8;
     ctx.beginPath();
-    ctx.roundRect(b.x - b.w / 2, b.y - b.h / 2, b.w, b.h, r);
+    ctx.moveTo(left + r, top);
+    ctx.lineTo(right - r, top);
+    ctx.quadraticCurveTo(right, top, right, top + r);
+    ctx.lineTo(right, bot - r);
+    ctx.quadraticCurveTo(right, bot, right - r, bot);
+    // bottom edge with curved tail
+    if (tailDir > 0) {
+      // tail on right side
+      ctx.lineTo(tailBaseX + 5, bot);
+      ctx.quadraticCurveTo(tailBaseX + 3, bot + 2, tailTipX, tailTipY);
+      ctx.quadraticCurveTo(tailBaseX - 2, bot + 1, tailBaseX - 3, bot);
+    } else {
+      // tail on left side
+      ctx.lineTo(tailBaseX + 3, bot);
+      ctx.quadraticCurveTo(tailBaseX + 2, bot + 1, tailTipX, tailTipY);
+      ctx.quadraticCurveTo(tailBaseX - 3, bot + 2, tailBaseX - 5, bot);
+    }
+    ctx.lineTo(left + r, bot);
+    ctx.quadraticCurveTo(left, bot, left, bot - r);
+    ctx.lineTo(left, top + r);
+    ctx.quadraticCurveTo(left, top, left + r, top);
+    ctx.closePath();
     ctx.fill();
     ctx.stroke();
 
     // fake text lines
-    const lineW = b.w - 16;
-    const lineH = 3;
-    const startY = b.y - b.h / 2 + 8;
+    const lineW = b.w - 14;
+    const lineH = 2.5;
+    const startY = top + 7;
     ctx.fillStyle = lineColor;
     for (let i = 0; i < b.lines; i++) {
       const w = i === b.lines - 1 ? lineW * b.lastLineRatio : lineW;
       ctx.beginPath();
-      ctx.roundRect(b.x - b.w / 2 + 8, startY + i * 7, w, lineH, 1.5);
+      ctx.roundRect(left + 7, startY + i * 6.5, w, lineH, 1.2);
       ctx.fill();
     }
-
-    // small triangle tail
-    const tailDir = b.isHuman ? -1 : 1;
-    ctx.fillStyle = fill;
-    ctx.beginPath();
-    ctx.moveTo(b.x + tailDir * (b.w / 2 - 6), b.y + b.h / 2 - 2);
-    ctx.lineTo(b.x + tailDir * (b.w / 2 + 4), b.y + b.h / 2 + 4);
-    ctx.lineTo(b.x + tailDir * (b.w / 2 - 6), b.y + b.h / 2 + 2);
-    ctx.closePath();
-    ctx.fill();
 
     ctx.globalAlpha = 1;
   }
@@ -396,25 +426,40 @@ copyButtons.forEach((btn) => {
           b.phase = "grabbed";
           b.grabTimer = 0;
           triggerGrab(side);
+          b.orbStartX = b.x;
+          b.orbStartY = b.y;
+          // just outside the claw mouth: left claw tip SVG ~x=-10, right ~x=130, y=52
+          const clawSvgX = b.isHuman ? -22 : 142;
+          const clawSvgY = 52;
+          b.clawTipX = (lob.x - lob.w / 2) + (clawSvgX / 120) * lob.w;
+          b.clawTipY = (lob.y - lob.h / 2) + (clawSvgY / 120) * lob.h;
           b.orbX = b.x;
           b.orbY = b.y;
+          b.origW = b.w;
+          b.origH = b.h;
         }
 
         drawBubble(b, colors);
 
       } else if (b.phase === "grabbed") {
-        // claw holds — bubble compresses into orb (0.8s)
+        // bubble shrinks and slides toward claw tip, becoming an orb (0.8s)
         b.grabTimer += dt;
         const p = Math.min(b.grabTimer / 0.8, 1);
+        const ease = p * p * (3 - 2 * p); // smoothstep
 
         // shrink bubble
-        b.w = Math.max(b.w * (1 - dt * 2.5), 0);
-        b.h = Math.max(b.h * (1 - dt * 2.5), 0);
-        b.alpha = 0.85 * (1 - p);
+        b.w = b.origW * (1 - ease);
+        b.h = b.origH * (1 - ease);
+        b.alpha = 0.85 * (1 - ease);
+        // slide bubble toward claw tip
+        b.x = b.orbStartX + (b.clawTipX - b.orbStartX) * ease;
+        b.y = b.orbStartY + (b.clawTipY - b.orbStartY) * ease;
         if (b.w > 4) drawBubble(b, colors);
 
-        // grow orb at claw position
-        b.orbAlpha = p;
+        // orb grows at the converging position
+        b.orbX = b.x;
+        b.orbY = b.y;
+        b.orbAlpha = ease;
         drawGlowOrb(b.orbX, b.orbY, b.orbAlpha * 0.8, colors, b.isHuman);
 
         if (p >= 1) {
@@ -483,7 +528,7 @@ copyButtons.forEach((btn) => {
             alpha: 0.3 + Math.random() * 0.2,
             pulse: Math.random() * Math.PI * 2,
           });
-          if (bgOrbs.length > 35) bgOrbs.shift();
+          // culling happens naturally in drawOrbs when orbs drift out of bounds
           bubbles.splice(i, 1);
         }
       }
