@@ -10,6 +10,9 @@ RUN npm run build
 
 FROM nginxinc/nginx-unprivileged:1.29-alpine
 
+USER root
+RUN sed -i '/}/i\    text/markdown md;' /etc/nginx/mime.types
+USER 101
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist /usr/share/nginx/html
 
