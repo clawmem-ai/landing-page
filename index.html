@@ -162,101 +162,167 @@
           </div>
         </section>
 
-        <!-- ── SOCIAL PROOF ── -->
-        <section class="section-social">
-          <div class="section-header">
-            <h2 class="social-heading">What <span class="claw-accent">people</span> say</h2>
-          </div>
-          <div class="social-grid">
-            <div class="social-card surface">
-              <div class="social-avatar">
-                <div class="avatar-placeholder">D</div>
-              </div>
-              <div class="social-content">
-                <blockquote class="social-quote">
-                  &ldquo;I stopped re-explaining my project structure every session. ClawMem just knows.&rdquo;
-                </blockquote>
-                <span class="social-handle">@devuser</span>
-              </div>
-            </div>
-            <div class="social-card surface">
-              <div class="social-avatar">
-                <div class="avatar-placeholder">S</div>
-              </div>
-              <div class="social-content">
-                <blockquote class="social-quote">
-                  &ldquo;The fact that I can see and edit what the agent remembers changes everything about trust.&rdquo;
-                </blockquote>
-                <span class="social-handle">@sarahcodes</span>
+        <!-- ── HOW IT WORKS ── -->
+        <section id="features" class="section-how" data-reveal>
+          <h2 class="section-heading">From raw sessions to <span class="claw-accent">durable context</span></h2>
+          <div class="how-steps">
+            <div class="how-step">
+              <div class="step-number">1</div>
+              <h3>Capture the session</h3>
+              <p>Every conversation is recorded automatically. Nothing falls through the cracks.</p>
+              <div class="step-visual install-block">
+                <div class="install-block-head">
+                  <span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span>
+                  <span class="install-method">session #42</span>
+                </div>
+                <div class="step-visual-body">
+                  <div class="chat-line"><span class="chat-role chat-role--user">You</span> Our API rate limit moved to a sliding window policy.</div>
+                  <div class="chat-line"><span class="chat-role chat-role--agent">Agent</span> Got it. I'll remember that for future API work.</div>
+                </div>
               </div>
             </div>
-            <div class="social-card surface">
-              <div class="social-avatar">
-                <div class="avatar-placeholder">M</div>
-              </div>
-              <div class="social-content">
-                <blockquote class="social-quote">
-                  &ldquo;Installed in 30 seconds. My agent remembered my deploy preferences from three weeks ago.&rdquo;
-                </blockquote>
-                <span class="social-handle">@mktechie</span>
-              </div>
-            </div>
-            <div class="social-card surface">
-              <div class="social-avatar">
-                <div class="avatar-placeholder">J</div>
-              </div>
-              <div class="social-content">
-                <blockquote class="social-quote">
-                  &ldquo;Finally memory I can actually audit. No more guessing what the model thinks it knows.&rdquo;
-                </blockquote>
-                <span class="social-handle">@jasonml</span>
+            <div class="how-step">
+              <div class="step-number">2</div>
+              <h3>Store what matters</h3>
+              <p>Key facts, preferences, and decisions are distilled into structured, durable memory records.</p>
+              <div class="step-visual memory-record">
+                <div class="record-row"><span class="record-key">type</span><span class="record-val">memory</span></div>
+                <div class="record-row"><span class="record-key">source</span><span class="record-val">Session #42, Turn 3</span></div>
+                <div class="record-row"><span class="record-key">status</span><span class="record-val record-val--active">active</span></div>
+                <div class="record-row"><span class="record-key">detail</span><span class="record-val">API rate limiting uses sliding window policy.</span></div>
               </div>
             </div>
-            <div class="social-card surface">
-              <div class="social-avatar">
-                <div class="avatar-placeholder">A</div>
-              </div>
-              <div class="social-content">
-                <blockquote class="social-quote">
-                  &ldquo;The semantic search is incredible. It surfaces exactly the right context every time.&rdquo;
-                </blockquote>
-                <span class="social-handle">@amyinfra</span>
-              </div>
-            </div>
-            <div class="social-card surface">
-              <div class="social-avatar">
-                <div class="avatar-placeholder">R</div>
-              </div>
-              <div class="social-content">
-                <blockquote class="social-quote">
-                  &ldquo;GitHub-compatible API means I can script memory management with tools I already know.&rdquo;
-                </blockquote>
-                <span class="social-handle">@rkops</span>
+            <div class="how-step">
+              <div class="step-number">3</div>
+              <h3>Recall it when needed</h3>
+              <p>Before the next run, relevant memories are found and injected into context automatically.</p>
+              <div class="step-visual install-block">
+                <div class="install-block-head">
+                  <span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span>
+                  <span class="install-method">session #58</span>
+                </div>
+                <div class="step-visual-body">
+                  <div class="chat-line"><span class="chat-role chat-role--user">You</span> What rate limit policy are we using?</div>
+                  <div class="chat-line"><span class="chat-role chat-role--agent">Agent</span> You switched to a sliding window policy on Mar 9.</div>
+                  <div class="chat-source">Source: Session #42, Turn 3</div>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- ── QUICK START ── -->
-        <section id="install" class="section-install">
-          <div class="section-header">
-            <h2 class="install-heading">Quick <span class="claw-accent">start</span></h2>
+        <!-- ── INSPECTABLE MEMORY ── -->
+        <section class="section-inspectable" data-reveal>
+          <h2 class="section-heading">Memory should feel <span class="claw-accent">inspectable</span>, not mystical</h2>
+          <p class="section-desc">Every memory is a structured record you can see, search, edit, and trace back to its source. No hidden embeddings, no black boxes.</p>
+          <div class="inspect-grid">
+            <div class="inspect-card surface">
+              <svg viewBox="0 0 24 24" width="22" height="22"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+              <h3>Visible</h3>
+              <p>Browse all memories in a structured list. Nothing is hidden.</p>
+            </div>
+            <div class="inspect-card surface">
+              <svg viewBox="0 0 24 24" width="22" height="22"><circle cx="11" cy="11" r="8" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="m21 21-4.35-4.35" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              <h3>Searchable</h3>
+              <p>Semantic search by meaning, not just keywords.</p>
+            </div>
+            <div class="inspect-card surface">
+              <svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <h3>Editable</h3>
+              <p>Fix, merge, or delete any memory before it shapes the next answer.</p>
+            </div>
+            <div class="inspect-card surface">
+              <svg viewBox="0 0 24 24" width="22" height="22"><path d="M9 11l3 3L22 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <h3>Traceable</h3>
+              <p>Every memory links back to the exact session and turn that created it.</p>
+            </div>
           </div>
-          <p class="install-desc">Paste this into your OpenClaw agent. It reads the setup skill and configures everything automatically.</p>
-          <div class="install-blocks">
+        </section>
+
+        <!-- ── UNDER THE HOOD ── -->
+        <section class="section-hood" data-reveal>
+          <h2 class="section-heading">Under the <span class="claw-accent">hood</span></h2>
+          <p class="section-desc">Memory is stored in a structured, inspectable backend inspired by GitHub workflows.</p>
+          <div class="hood-flow">
+            <div class="hood-node">OpenClaw Session</div>
+            <div class="hood-arrow">&rarr;</div>
+            <div class="hood-node">ClawMem Plugin</div>
+            <div class="hood-arrow">&rarr;</div>
+            <div class="hood-node">Memory Backend</div>
+            <div class="hood-arrow">&rarr;</div>
+            <div class="hood-node">Next-Run Recall</div>
+          </div>
+          <div class="hood-signals">
+            <div class="hood-signal surface">
+              <h3>GitHub-compatible API</h3>
+              <p>Operate memory with tools you already know. REST, GraphQL, Git HTTP.</p>
+            </div>
+            <div class="hood-signal surface">
+              <h3>Searchable durable records</h3>
+              <p>Vector-embedded memories stored in a persistent, queryable backend.</p>
+            </div>
+            <div class="hood-signal surface">
+              <h3>Automatic memory recall</h3>
+              <p>Relevant context is retrieved and injected before every agent run.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── WITH VS WITHOUT ── -->
+        <section class="section-compare" data-reveal>
+          <h2 class="section-heading">With vs without <span class="claw-accent">ClawMem</span></h2>
+          <div class="compare-table">
+            <div class="compare-header">
+              <div class="compare-label"></div>
+              <div class="compare-col compare-col--without">Without</div>
+              <div class="compare-col compare-col--with">With ClawMem</div>
+            </div>
+            <div class="compare-row">
+              <div class="compare-label">Cross-session continuity</div>
+              <div class="compare-col compare-col--without">Starts from zero every time</div>
+              <div class="compare-col compare-col--with">Picks up where you left off</div>
+            </div>
+            <div class="compare-row">
+              <div class="compare-label">Memory transparency</div>
+              <div class="compare-col compare-col--without">Hidden or nonexistent</div>
+              <div class="compare-col compare-col--with">Every record browsable</div>
+            </div>
+            <div class="compare-row">
+              <div class="compare-label">Editability</div>
+              <div class="compare-col compare-col--without">No way to correct the model</div>
+              <div class="compare-col compare-col--with">Edit, merge, or delete any memory</div>
+            </div>
+            <div class="compare-row">
+              <div class="compare-label">Source tracing</div>
+              <div class="compare-col compare-col--without">No idea where info came from</div>
+              <div class="compare-col compare-col--with">Linked to session and turn</div>
+            </div>
+            <div class="compare-row">
+              <div class="compare-label">Repeated explanations</div>
+              <div class="compare-col compare-col--without">Re-explain every session</div>
+              <div class="compare-col compare-col--with">Explain once, remembered forever</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── FINAL CTA ── -->
+        <section id="install" class="section-cta" data-reveal>
+          <h2 class="cta-title">Stop restarting from <span class="claw-accent">zero</span>.</h2>
+          <p class="section-desc">Install in one step: paste this into your OpenClaw agent.</p>
+          <div class="cta-install">
             <div class="install-block">
               <div class="install-block-head">
                 <span class="code-dot"></span>
                 <span class="code-dot"></span>
                 <span class="code-dot"></span>
-                <span class="install-method">terminal</span>
+                <span class="install-method">paste in OpenClaw</span>
               </div>
               <div class="install-command">
-                <code data-onboarding-command>Read https://clawmem.ai/SKILL.md and follow the instructions to install ClawMem, start recording chats, and build your memory graph in OpenClaw</code>
+                <code>Read https://clawmem.ai/SKILL.md and follow the instructions to install ClawMem, start recording chats, and build your memory graph in OpenClaw</code>
                 <button
                   type="button"
                   class="copy-btn"
-                  data-copy-button="skill"
+                  data-copy-button="cta-skill"
                   data-copy-text="Read https://clawmem.ai/SKILL.md and follow the instructions to install ClawMem, start recording chats, and build your memory graph in OpenClaw"
                   aria-label="Copy install command"
                 >
@@ -266,141 +332,7 @@
               </div>
             </div>
           </div>
-          <p class="install-note">
-            ClawMem is an OpenClaw plugin. No API keys, no config files &mdash;
-            the agent handles everything. Works on macOS, Linux, and Windows.
-          </p>
-        </section>
-
-        <!-- ── FEATURES ── -->
-        <section id="features" class="section-features">
-          <div class="section-header">
-            <h2 class="features-heading">What it <span class="claw-accent">does</span></h2>
-          </div>
-          <div class="features-grid">
-            <a href="#install" class="feature-card surface" data-reveal>
-              <div class="feature-icon">
-                <svg viewBox="0 0 24 24" width="28" height="28"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M2 12h20" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
-              </div>
-              <h3>Persistent Memory</h3>
-              <p>Memory survives session resets, agent restarts, and time.</p>
-            </a>
-            <a href="#install" class="feature-card surface" data-reveal>
-              <div class="feature-icon">
-                <svg viewBox="0 0 24 24" width="28" height="28"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
-              </div>
-              <h3>Inspectable Records</h3>
-              <p>Every memory is a browsable record, not a hidden embedding.</p>
-            </a>
-            <a href="#install" class="feature-card surface" data-reveal>
-              <div class="feature-icon">
-                <svg viewBox="0 0 24 24" width="28" height="28"><circle cx="11" cy="11" r="8" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="m21 21-4.35-4.35" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-              </div>
-              <h3>Semantic Search</h3>
-              <p>Memories are embedded as vectors. The agent retrieves by relevance.</p>
-            </a>
-            <a href="#install" class="feature-card surface" data-reveal>
-              <div class="feature-icon">
-                <svg viewBox="0 0 24 24" width="28" height="28"><path d="M9 11l3 3L22 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </div>
-              <h3>Source Tracing</h3>
-              <p>Every memory links back to the session and turn that created it.</p>
-            </a>
-            <a href="#install" class="feature-card surface" data-reveal>
-              <div class="feature-icon">
-                <svg viewBox="0 0 24 24" width="28" height="28"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </div>
-              <h3>Edit & Control</h3>
-              <p>Fix, merge, or delete any memory before it shapes the next answer.</p>
-            </a>
-            <a href="#install" class="feature-card surface" data-reveal>
-              <div class="feature-icon">
-                <svg viewBox="0 0 24 24" width="28" height="28"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </div>
-              <h3>Zero Configuration</h3>
-              <p>First run auto-provisions a repo and token. No setup needed.</p>
-            </a>
-          </div>
-        </section>
-
-        <!-- ── WORKS WITH ── -->
-        <section class="section-integrations">
-          <div class="section-header">
-            <h2 class="integrations-heading">Works with <span class="claw-accent">everything</span></h2>
-          </div>
-          <div class="integrations-grid">
-            <div class="integration-item">
-              <div class="integration-icon">
-                <svg viewBox="0 0 24 24"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65S8.93 17.38 9 18v4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 18c-4.51 2-5-2-7-2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </div>
-              <span>GitHub</span>
-            </div>
-            <div class="integration-item">
-              <div class="integration-icon">
-                <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </div>
-              <span>OpenClaw</span>
-            </div>
-            <div class="integration-item">
-              <div class="integration-icon">
-                <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 17l10 5 10-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 12l10 5 10-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </div>
-              <span>Claude</span>
-            </div>
-            <div class="integration-item">
-              <div class="integration-icon">
-                <svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
-              </div>
-              <span>Vector Store</span>
-            </div>
-            <div class="integration-item">
-              <div class="integration-icon">
-                <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </div>
-              <span>REST API</span>
-            </div>
-            <div class="integration-item">
-              <div class="integration-icon">
-                <svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><polyline points="8 6 2 12 8 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </div>
-              <span>GraphQL</span>
-            </div>
-            <div class="integration-item">
-              <div class="integration-icon">
-                <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 21h8M12 17v4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </div>
-              <span>GPT</span>
-            </div>
-            <div class="integration-item">
-              <div class="integration-icon">
-                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
-              </div>
-              <span>Git HTTP</span>
-            </div>
-          </div>
-          <p class="integrations-note">GitHub-compatible API &mdash; operate memory with tools you already know.</p>
-        </section>
-
-        <!-- ── PRESS / QUOTES ── -->
-        <section class="section-press">
-          <div class="press-grid">
-            <article class="press-card">
-              <span class="press-source">Engineering Blog</span>
-              <blockquote class="press-quote">
-                &ldquo;ClawMem makes agent memory feel like version control &mdash;
-                transparent, branchable, and auditable.&rdquo;
-              </blockquote>
-              <span class="press-author">&mdash; Infrastructure team</span>
-            </article>
-            <article class="press-card">
-              <span class="press-source">Developer Community</span>
-              <blockquote class="press-quote">
-                &ldquo;The zero-config setup is what got me in.
-                The inspectable memory is what made me stay.&rdquo;
-              </blockquote>
-              <span class="press-author">&mdash; OpenClaw power user</span>
-            </article>
-          </div>
+          <p class="cta-note">ClawMem is installed through OpenClaw. The agent reads the setup skill and completes the configuration for you.</p>
         </section>
       </main>
 
@@ -416,7 +348,7 @@
             <span class="footer-separator">&middot;</span>
             <a href="#top">Docs</a>
           </div>
-          <p class="copyright">Memory control for people who use OpenClaw seriously.</p>
+          <p class="copyright">Structured memory for OpenClaw agents.</p>
           <p class="disclaimer">Apache-2.0 License</p>
         </div>
       </footer>
