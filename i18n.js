@@ -5,6 +5,7 @@ const translations = {
     // Nav
     "nav.features": "Features",
     "nav.install": "Install",
+    "nav.console": "Console",
     // Hero
     "hero.sub": "The memory that actually persists.",
     "hero.desc": "Records your conversations, extracts key facts, searches by relevance, and injects the right context before every session. All inspectable, all editable, all yours.",
@@ -86,6 +87,7 @@ const translations = {
     "cta.desc": "Install in one step: paste this into your OpenClaw agent.",
     "cta.paste": "paste in OpenClaw",
     "cta.note": "ClawMem is installed through OpenClaw. The agent reads the setup skill and completes the configuration for you.",
+    "cta.console": 'Already installed? <a href="https://console.clawmem.ai/" target="_blank" rel="noreferrer">Go to Console</a> to manage your memories.',
     // Footer
     "footer.install": "Install",
     "footer.features": "Features",
@@ -103,6 +105,7 @@ const translations = {
   "zh-CN": {
     "nav.features": "\u529f\u80fd",
     "nav.install": "\u5b89\u88c5",
+    "nav.console": "\u63a7\u5236\u53f0",
     "hero.sub": "\u771f\u6b63\u6301\u4e45\u7684\u8bb0\u5fc6\u3002",
     "hero.desc": "\u81ea\u52a8\u8bb0\u5f55\u5bf9\u8bdd\u5185\u5bb9\uff0c\u63d0\u53d6\u5173\u952e\u4fe1\u606f\uff0c\u6309\u8bed\u4e49\u68c0\u7d22\uff0c\u5e76\u5728\u6bcf\u6b21\u4f1a\u8bdd\u524d\u6ce8\u5165\u76f8\u5173\u4e0a\u4e0b\u6587\u3002\u5168\u7a0b\u53ef\u67e5\u3001\u53ef\u7f16\u8f91\u3001\u5b8c\u5168\u7531\u4f60\u638c\u63a7\u3002",
     "hero.hint": '<span class="hint-action" data-i18n="hero.hint.action">\u590d\u5236\u4ee5\u4e0b\u5185\u5bb9</span>\u7c98\u8d34\u5230 OpenClaw \u5bf9\u8bdd\u4e2d\u5373\u53ef\u5f00\u59cb',
@@ -178,6 +181,7 @@ const translations = {
     "cta.desc": "\u4e00\u6b65\u5b89\u88c5\uff1a\u5c06\u4ee5\u4e0b\u5185\u5bb9\u7c98\u8d34\u5230\u4f60\u7684 OpenClaw \u667a\u80fd\u4f53\u4e2d\u3002",
     "cta.paste": "\u7c98\u8d34\u5230 OpenClaw",
     "cta.note": "ClawMem \u901a\u8fc7 OpenClaw \u5b89\u88c5\u3002\u667a\u80fd\u4f53\u4f1a\u8bfb\u53d6\u5b89\u88c5\u6307\u5f15\u5e76\u81ea\u52a8\u5b8c\u6210\u914d\u7f6e\u3002",
+    "cta.console": '\u5df2\u7ecf\u5b89\u88c5\u4e86\uff1f<a href="https://console.clawmem.ai/" target="_blank" rel="noreferrer">\u524d\u5f80\u63a7\u5236\u53f0</a>\u7ba1\u7406\u4f60\u7684\u8bb0\u5fc6\u3002',
     "footer.install": "\u5b89\u88c5",
     "footer.features": "\u529f\u80fd",
     "footer.docs": "\u6587\u6863",
@@ -192,6 +196,7 @@ const translations = {
   ja: {
     "nav.features": "\u6a5f\u80fd",
     "nav.install": "\u30a4\u30f3\u30b9\u30c8\u30fc\u30eb",
+    "nav.console": "\u30b3\u30f3\u30bd\u30fc\u30eb",
     "hero.sub": "\u672c\u5f53\u306b\u6b8b\u308b\u8a18\u61b6\u3002",
     "hero.desc": "\u4f1a\u8a71\u3092\u81ea\u52d5\u3067\u8a18\u9332\u3057\u3001\u91cd\u8981\u306a\u60c5\u5831\u3092\u62bd\u51fa\u3001\u610f\u5473\u3067\u691c\u7d22\u3057\u3066\u3001\u6bce\u56de\u306e\u30bb\u30c3\u30b7\u30e7\u30f3\u524d\u306b\u9069\u5207\u306a\u30b3\u30f3\u30c6\u30ad\u30b9\u30c8\u3092\u6ce8\u5165\u3057\u307e\u3059\u3002\u3059\u3079\u3066\u95b2\u89a7\u30fb\u7de8\u96c6\u53ef\u80fd\u3067\u3001\u5b8c\u5168\u306b\u3042\u306a\u305f\u306e\u3082\u306e\u3067\u3059\u3002",
     "hero.hint": '<span class="hint-action" data-i18n="hero.hint.action">\u3053\u308c\u3092\u30b3\u30d4\u30fc</span>\u3057\u3066 OpenClaw \u306e\u30c1\u30e3\u30c3\u30c8\u306b\u8cbc\u308a\u4ed8\u3051\u3066\u304f\u3060\u3055\u3044',
@@ -267,6 +272,7 @@ const translations = {
     "cta.desc": "\u30ef\u30f3\u30b9\u30c6\u30c3\u30d7\u3067\u30a4\u30f3\u30b9\u30c8\u30fc\u30eb\uff1a\u4ee5\u4e0b\u3092 OpenClaw \u30a8\u30fc\u30b8\u30a7\u30f3\u30c8\u306b\u8cbc\u308a\u4ed8\u3051\u3066\u304f\u3060\u3055\u3044\u3002",
     "cta.paste": "OpenClaw \u306b\u8cbc\u308a\u4ed8\u3051",
     "cta.note": "ClawMem \u306f OpenClaw \u3092\u901a\u3058\u3066\u30a4\u30f3\u30b9\u30c8\u30fc\u30eb\u3055\u308c\u307e\u3059\u3002\u30a8\u30fc\u30b8\u30a7\u30f3\u30c8\u304c\u30bb\u30c3\u30c8\u30a2\u30c3\u30d7\u30b9\u30ad\u30eb\u3092\u8aad\u307f\u8fbc\u307f\u3001\u8a2d\u5b9a\u3092\u81ea\u52d5\u3067\u5b8c\u4e86\u3057\u307e\u3059\u3002",
+    "cta.console": '\u30a4\u30f3\u30b9\u30c8\u30fc\u30eb\u6e08\u307f\u3067\u3059\u304b\uff1f<a href="https://console.clawmem.ai/" target="_blank" rel="noreferrer">\u30b3\u30f3\u30bd\u30fc\u30eb\u3078</a>\u2014\u8a18\u61b6\u3092\u7ba1\u7406\u3057\u307e\u3057\u3087\u3046\u3002',
     "footer.install": "\u30a4\u30f3\u30b9\u30c8\u30fc\u30eb",
     "footer.features": "\u6a5f\u80fd",
     "footer.docs": "\u30c9\u30ad\u30e5\u30e1\u30f3\u30c8",

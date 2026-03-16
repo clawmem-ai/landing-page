@@ -1057,6 +1057,21 @@ section {
   line-height: 1.6;
 }
 
+.cta-console {
+  margin-top: 1.25rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+.cta-console a {
+  color: var(--coral-bright);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.cta-console a:hover {
+  color: var(--cyan-bright);
+}
+
 /* ── Install block (shared) ── */
 
 .install-block {

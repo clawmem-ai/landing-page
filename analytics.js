@@ -46,22 +46,30 @@ document.querySelectorAll("[data-lang-option]").forEach((btn) => {
   });
 });
 
+/* ── Link click helper ── */
+function linkTarget(a) {
+  const href = a.getAttribute("href") || "";
+  if (href.includes("console.clawmem.ai")) return "console";
+  return href.replace("#", "") || a.textContent.trim();
+}
+
 /* ── Nav link clicks ── */
 document.querySelectorAll(".nav-links a").forEach((a) => {
   a.addEventListener("click", () => {
-    ph("nav_clicked", {
-      target: a.getAttribute("href")?.replace("#", "") || a.textContent.trim(),
-    });
+    ph("nav_clicked", { target: linkTarget(a) });
   });
 });
 
 /* ── Footer link clicks ── */
 document.querySelectorAll(".footer-nav a").forEach((a) => {
   a.addEventListener("click", () => {
-    ph("footer_clicked", {
-      target: a.getAttribute("href")?.replace("#", "") || a.textContent.trim(),
-    });
+    ph("footer_clicked", { target: linkTarget(a) });
   });
+});
+
+/* ── CTA console link ── */
+document.querySelector(".cta-console a")?.addEventListener("click", () => {
+  ph("console_clicked", { location: "cta" });
 });
 
 /* ── Section viewed (scroll tracking) ── */
