@@ -46,7 +46,7 @@ openclaw gateway status
 2) Install the plugin:
 
 ```bash
-openclaw plugins install @wd0517/clawmem
+openclaw plugins install @clawmem-ai/clawmem
 ```
 
 3) Enable the plugin:
