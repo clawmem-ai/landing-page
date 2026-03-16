@@ -343,6 +343,86 @@ section {
 [data-theme="dark"] .theme-icon-light { display: none; }
 [data-theme="light"] .theme-icon-dark { display: none; }
 
+/* ── Language Switcher ── */
+.lang-switch {
+  position: relative;
+}
+
+.lang-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-card);
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: all 0.2s ease;
+}
+.lang-btn:hover {
+  border-color: var(--border-accent);
+  color: var(--text-primary);
+}
+
+.lang-chevron {
+  transition: transform 0.2s ease;
+}
+.lang-switch.is-open .lang-chevron {
+  transform: rotate(180deg);
+}
+
+.lang-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 120px;
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-card-strong);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition: all 0.15s ease;
+  z-index: 30;
+}
+.lang-switch.is-open .lang-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.lang-menu button {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.lang-menu button:hover {
+  background: var(--surface-interactive-hover);
+  color: var(--text-primary);
+}
+.lang-menu button.is-active {
+  color: var(--coral-bright);
+  font-weight: 600;
+}
+
 /* ── Lobster Icon ── */
 .lobster-icon {
   width: 140px;
@@ -1203,6 +1283,22 @@ body.has-motion [data-reveal].is-visible {
     font-weight: 600;
     font-size: 0.8rem;
     text-transform: uppercase;
+  }
+  [data-lang="zh-CN"] .compare-col--without::before {
+    content: "\6CA1\6709\FF1A";
+    text-transform: none;
+  }
+  [data-lang="zh-CN"] .compare-col--with::before {
+    content: "\4F7F\7528 ClawMem\FF1A";
+    text-transform: none;
+  }
+  [data-lang="ja"] .compare-col--without::before {
+    content: "\306A\3057\FF1A";
+    text-transform: none;
+  }
+  [data-lang="ja"] .compare-col--with::before {
+    content: "ClawMem \3042\308A\FF1A";
+    text-transform: none;
   }
   .compare-label {
     padding-bottom: 4px;

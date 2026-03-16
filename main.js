@@ -44,9 +44,10 @@ copyButtons.forEach((btn) => {
     const copied = await copyText(text);
     btn.classList.add("is-copied");
     if (copyFeedback) {
+      const i18n = window.__i18n;
       copyFeedback.textContent = copied
-        ? "Install command copied."
-        : "Copy failed. Please copy manually.";
+        ? (i18n ? i18n.t("copy.success") : "Install command copied.")
+        : (i18n ? i18n.t("copy.fail") : "Copy failed. Please copy manually.");
     }
     setTimeout(() => {
       btn.classList.remove("is-copied");
