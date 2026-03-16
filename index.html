@@ -49,9 +49,20 @@
         </a>
         <div class="nav-right">
           <div class="nav-links">
-            <a href="#features">Features</a>
-            <a href="#install">Install</a>
+            <a href="#features" data-i18n="nav.features">Features</a>
+            <a href="#install" data-i18n="nav.install">Install</a>
             <a href="https://github.com/pingcap" target="_blank" rel="noreferrer">GitHub</a>
+          </div>
+          <div class="lang-switch" id="lang-switch">
+            <button class="lang-btn" aria-label="Switch language" aria-expanded="false" aria-haspopup="true">
+              <span class="lang-current">EN</span>
+              <svg class="lang-chevron" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div class="lang-menu" role="menu">
+              <button data-lang-option="en" role="menuitem">English</button>
+              <button data-lang-option="zh-CN" role="menuitem">简体中文</button>
+              <button data-lang-option="ja" role="menuitem">日本語</button>
+            </div>
           </div>
         </div>
       </div>
@@ -130,19 +141,19 @@
             </div>
 
             <h1 class="hero-title">ClawMem</h1>
-            <p class="hero-sub">The memory that actually persists.</p>
-            <p class="hero-desc">
+            <p class="hero-sub" data-i18n="hero.sub">The memory that actually persists.</p>
+            <p class="hero-desc" data-i18n="hero.desc">
               Records your conversations, extracts key facts, searches by relevance,
               and injects the right context before every session. All inspectable, all editable, all yours.
             </p>
             <div class="hero-install-block">
-              <p class="hero-install-hint"><span class="hint-action">Copy this</span> into your OpenClaw chat to get started</p>
+              <p class="hero-install-hint" data-i18n-html="hero.hint"><span class="hint-action" data-i18n="hero.hint.action">Copy this</span> into your OpenClaw chat to get started</p>
               <div class="install-block">
                 <div class="install-block-head">
                   <span class="code-dot"></span>
                   <span class="code-dot"></span>
                   <span class="code-dot"></span>
-                  <span class="install-method">paste in OpenClaw</span>
+                  <span class="install-method" data-i18n="hero.paste">paste in OpenClaw</span>
                 </div>
                 <div class="install-command">
                   <code data-onboarding-command>Read https://clawmem.ai/SKILL.md and follow the instructions to install ClawMem, start recording chats, and build your memory graph in OpenClaw</code>
@@ -164,47 +175,47 @@
 
         <!-- ── HOW IT WORKS ── -->
         <section id="features" class="section-how" data-reveal>
-          <h2 class="section-heading">From raw sessions to <span class="claw-accent">durable context</span></h2>
+          <h2 class="section-heading" data-i18n-html="how.heading">From raw sessions to <span class="claw-accent">durable context</span></h2>
           <div class="how-steps">
             <div class="how-step">
               <div class="step-number">1</div>
-              <h3>Capture the session</h3>
-              <p>Every conversation is recorded automatically. Nothing falls through the cracks.</p>
+              <h3 data-i18n="how.step1.title">Capture the session</h3>
+              <p data-i18n="how.step1.desc">Every conversation is recorded automatically. Nothing falls through the cracks.</p>
               <div class="step-visual install-block">
                 <div class="install-block-head">
                   <span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span>
-                  <span class="install-method">session #42</span>
+                  <span class="install-method" data-i18n="how.step1.session">session #42</span>
                 </div>
                 <div class="step-visual-body">
-                  <div class="chat-line"><span class="chat-role chat-role--user">You</span> Our API rate limit moved to a sliding window policy.</div>
-                  <div class="chat-line"><span class="chat-role chat-role--agent">Agent</span> Got it. I'll remember that for future API work.</div>
+                  <div class="chat-line"><span class="chat-role chat-role--user" data-i18n="how.step1.user">You</span> <span data-i18n="how.step1.user.msg">Our API rate limit moved to a sliding window policy.</span></div>
+                  <div class="chat-line"><span class="chat-role chat-role--agent" data-i18n="how.step1.agent">Agent</span> <span data-i18n="how.step1.agent.msg">Got it. I'll remember that for future API work.</span></div>
                 </div>
               </div>
             </div>
             <div class="how-step">
               <div class="step-number">2</div>
-              <h3>Store what matters</h3>
-              <p>Key facts, preferences, and decisions are distilled into structured, durable memory records.</p>
+              <h3 data-i18n="how.step2.title">Store what matters</h3>
+              <p data-i18n="how.step2.desc">Key facts, preferences, and decisions are distilled into structured, durable memory records.</p>
               <div class="step-visual memory-record">
-                <div class="record-row"><span class="record-key">type</span><span class="record-val">memory</span></div>
-                <div class="record-row"><span class="record-key">source</span><span class="record-val">Session #42, Turn 3</span></div>
-                <div class="record-row"><span class="record-key">status</span><span class="record-val record-val--active">active</span></div>
-                <div class="record-row"><span class="record-key">detail</span><span class="record-val">API rate limiting uses sliding window policy.</span></div>
+                <div class="record-row"><span class="record-key" data-i18n="how.step2.type">type</span><span class="record-val" data-i18n="how.step2.type.val">memory</span></div>
+                <div class="record-row"><span class="record-key" data-i18n="how.step2.source">source</span><span class="record-val" data-i18n="how.step2.source.val">Session #42, Turn 3</span></div>
+                <div class="record-row"><span class="record-key" data-i18n="how.step2.status">status</span><span class="record-val record-val--active" data-i18n="how.step2.status.val">active</span></div>
+                <div class="record-row"><span class="record-key" data-i18n="how.step2.detail">detail</span><span class="record-val" data-i18n="how.step2.detail.val">API rate limiting uses sliding window policy.</span></div>
               </div>
             </div>
             <div class="how-step">
               <div class="step-number">3</div>
-              <h3>Recall it when needed</h3>
-              <p>Before the next run, relevant memories are found and injected into context automatically.</p>
+              <h3 data-i18n="how.step3.title">Recall it when needed</h3>
+              <p data-i18n="how.step3.desc">Before the next run, relevant memories are found and injected into context automatically.</p>
               <div class="step-visual install-block">
                 <div class="install-block-head">
                   <span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span>
-                  <span class="install-method">session #58</span>
+                  <span class="install-method" data-i18n="how.step3.session">session #58</span>
                 </div>
                 <div class="step-visual-body">
-                  <div class="chat-line"><span class="chat-role chat-role--user">You</span> What rate limit policy are we using?</div>
-                  <div class="chat-line"><span class="chat-role chat-role--agent">Agent</span> You switched to a sliding window policy on Mar 9.</div>
-                  <div class="chat-source">Source: Session #42, Turn 3</div>
+                  <div class="chat-line"><span class="chat-role chat-role--user" data-i18n="how.step3.user">You</span> <span data-i18n="how.step3.user.msg">What rate limit policy are we using?</span></div>
+                  <div class="chat-line"><span class="chat-role chat-role--agent" data-i18n="how.step3.agent">Agent</span> <span data-i18n="how.step3.agent.msg">You switched to a sliding window policy on Mar 9.</span></div>
+                  <div class="chat-source" data-i18n="how.step3.source">Source: Session #42, Turn 3</div>
                 </div>
               </div>
             </div>
@@ -213,109 +224,109 @@
 
         <!-- ── INSPECTABLE MEMORY ── -->
         <section class="section-inspectable" data-reveal>
-          <h2 class="section-heading">Memory should feel <span class="claw-accent">inspectable</span>, not mystical</h2>
-          <p class="section-desc">Every memory is a structured record you can see, search, edit, and trace back to its source. No hidden embeddings, no black boxes.</p>
+          <h2 class="section-heading" data-i18n-html="inspect.heading">Memory should feel <span class="claw-accent">inspectable</span>, not mystical</h2>
+          <p class="section-desc" data-i18n="inspect.desc">Every memory is a structured record you can see, search, edit, and trace back to its source. No hidden embeddings, no black boxes.</p>
           <div class="inspect-grid">
             <div class="inspect-card surface">
               <svg viewBox="0 0 24 24" width="22" height="22"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
-              <h3>Visible</h3>
-              <p>Browse all memories in a structured list. Nothing is hidden.</p>
+              <h3 data-i18n="inspect.visible">Visible</h3>
+              <p data-i18n="inspect.visible.desc">Browse all memories in a structured list. Nothing is hidden.</p>
             </div>
             <div class="inspect-card surface">
               <svg viewBox="0 0 24 24" width="22" height="22"><circle cx="11" cy="11" r="8" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="m21 21-4.35-4.35" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-              <h3>Searchable</h3>
-              <p>Semantic search by meaning, not just keywords.</p>
+              <h3 data-i18n="inspect.searchable">Searchable</h3>
+              <p data-i18n="inspect.searchable.desc">Semantic search by meaning, not just keywords.</p>
             </div>
             <div class="inspect-card surface">
               <svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              <h3>Editable</h3>
-              <p>Fix, merge, or delete any memory before it shapes the next answer.</p>
+              <h3 data-i18n="inspect.editable">Editable</h3>
+              <p data-i18n="inspect.editable.desc">Fix, merge, or delete any memory before it shapes the next answer.</p>
             </div>
             <div class="inspect-card surface">
               <svg viewBox="0 0 24 24" width="22" height="22"><path d="M9 11l3 3L22 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              <h3>Traceable</h3>
-              <p>Every memory links back to the exact session and turn that created it.</p>
+              <h3 data-i18n="inspect.traceable">Traceable</h3>
+              <p data-i18n="inspect.traceable.desc">Every memory links back to the exact session and turn that created it.</p>
             </div>
           </div>
         </section>
 
         <!-- ── UNDER THE HOOD ── -->
         <section class="section-hood" data-reveal>
-          <h2 class="section-heading">Under the <span class="claw-accent">hood</span></h2>
-          <p class="section-desc">Memory is stored in a structured, inspectable backend inspired by GitHub workflows.</p>
+          <h2 class="section-heading" data-i18n-html="hood.heading">Under the <span class="claw-accent">hood</span></h2>
+          <p class="section-desc" data-i18n="hood.desc">Memory is stored in a structured, inspectable backend inspired by GitHub workflows.</p>
           <div class="hood-flow">
-            <div class="hood-node">OpenClaw Session</div>
+            <div class="hood-node" data-i18n="hood.node1">OpenClaw Session</div>
             <div class="hood-arrow">&rarr;</div>
-            <div class="hood-node">ClawMem Plugin</div>
+            <div class="hood-node" data-i18n="hood.node2">ClawMem Plugin</div>
             <div class="hood-arrow">&rarr;</div>
-            <div class="hood-node">Memory Backend</div>
+            <div class="hood-node" data-i18n="hood.node3">Memory Backend</div>
             <div class="hood-arrow">&rarr;</div>
-            <div class="hood-node">Next-Run Recall</div>
+            <div class="hood-node" data-i18n="hood.node4">Next-Run Recall</div>
           </div>
           <div class="hood-signals">
             <div class="hood-signal surface">
-              <h3>GitHub-compatible API</h3>
-              <p>Operate memory with tools you already know. REST, GraphQL, Git HTTP.</p>
+              <h3 data-i18n="hood.api.title">GitHub-compatible API</h3>
+              <p data-i18n="hood.api.desc">Operate memory with tools you already know. REST, GraphQL, Git HTTP.</p>
             </div>
             <div class="hood-signal surface">
-              <h3>Searchable durable records</h3>
-              <p>Vector-embedded memories stored in a persistent, queryable backend.</p>
+              <h3 data-i18n="hood.records.title">Searchable durable records</h3>
+              <p data-i18n="hood.records.desc">Vector-embedded memories stored in a persistent, queryable backend.</p>
             </div>
             <div class="hood-signal surface">
-              <h3>Automatic memory recall</h3>
-              <p>Relevant context is retrieved and injected before every agent run.</p>
+              <h3 data-i18n="hood.recall.title">Automatic memory recall</h3>
+              <p data-i18n="hood.recall.desc">Relevant context is retrieved and injected before every agent run.</p>
             </div>
           </div>
         </section>
 
         <!-- ── WITH VS WITHOUT ── -->
         <section class="section-compare" data-reveal>
-          <h2 class="section-heading">With vs without <span class="claw-accent">ClawMem</span></h2>
+          <h2 class="section-heading" data-i18n-html="compare.heading">With vs without <span class="claw-accent">ClawMem</span></h2>
           <div class="compare-table">
             <div class="compare-header">
               <div class="compare-label"></div>
-              <div class="compare-col compare-col--without">Without</div>
-              <div class="compare-col compare-col--with">With ClawMem</div>
+              <div class="compare-col compare-col--without" data-i18n="compare.without">Without</div>
+              <div class="compare-col compare-col--with" data-i18n="compare.with">With ClawMem</div>
             </div>
             <div class="compare-row">
-              <div class="compare-label">Cross-session continuity</div>
-              <div class="compare-col compare-col--without">Starts from zero every time</div>
-              <div class="compare-col compare-col--with">Picks up where you left off</div>
+              <div class="compare-label" data-i18n="compare.row1.label">Cross-session continuity</div>
+              <div class="compare-col compare-col--without" data-i18n="compare.row1.without">Starts from zero every time</div>
+              <div class="compare-col compare-col--with" data-i18n="compare.row1.with">Picks up where you left off</div>
             </div>
             <div class="compare-row">
-              <div class="compare-label">Memory transparency</div>
-              <div class="compare-col compare-col--without">Hidden or nonexistent</div>
-              <div class="compare-col compare-col--with">Every record browsable</div>
+              <div class="compare-label" data-i18n="compare.row2.label">Memory transparency</div>
+              <div class="compare-col compare-col--without" data-i18n="compare.row2.without">Hidden or nonexistent</div>
+              <div class="compare-col compare-col--with" data-i18n="compare.row2.with">Every record browsable</div>
             </div>
             <div class="compare-row">
-              <div class="compare-label">Editability</div>
-              <div class="compare-col compare-col--without">No way to correct the model</div>
-              <div class="compare-col compare-col--with">Edit, merge, or delete any memory</div>
+              <div class="compare-label" data-i18n="compare.row3.label">Editability</div>
+              <div class="compare-col compare-col--without" data-i18n="compare.row3.without">No way to correct the model</div>
+              <div class="compare-col compare-col--with" data-i18n="compare.row3.with">Edit, merge, or delete any memory</div>
             </div>
             <div class="compare-row">
-              <div class="compare-label">Source tracing</div>
-              <div class="compare-col compare-col--without">No idea where info came from</div>
-              <div class="compare-col compare-col--with">Linked to session and turn</div>
+              <div class="compare-label" data-i18n="compare.row4.label">Source tracing</div>
+              <div class="compare-col compare-col--without" data-i18n="compare.row4.without">No idea where info came from</div>
+              <div class="compare-col compare-col--with" data-i18n="compare.row4.with">Linked to session and turn</div>
             </div>
             <div class="compare-row">
-              <div class="compare-label">Repeated explanations</div>
-              <div class="compare-col compare-col--without">Re-explain every session</div>
-              <div class="compare-col compare-col--with">Explain once, remembered forever</div>
+              <div class="compare-label" data-i18n="compare.row5.label">Repeated explanations</div>
+              <div class="compare-col compare-col--without" data-i18n="compare.row5.without">Re-explain every session</div>
+              <div class="compare-col compare-col--with" data-i18n="compare.row5.with">Explain once, remembered forever</div>
             </div>
           </div>
         </section>
 
         <!-- ── FINAL CTA ── -->
         <section id="install" class="section-cta" data-reveal>
-          <h2 class="cta-title">Stop restarting from <span class="claw-accent">zero</span>.</h2>
-          <p class="section-desc">Install in one step: paste this into your OpenClaw agent.</p>
+          <h2 class="cta-title" data-i18n-html="cta.title">Stop restarting from <span class="claw-accent">zero</span>.</h2>
+          <p class="section-desc" data-i18n="cta.desc">Install in one step: paste this into your OpenClaw agent.</p>
           <div class="cta-install">
             <div class="install-block">
               <div class="install-block-head">
                 <span class="code-dot"></span>
                 <span class="code-dot"></span>
                 <span class="code-dot"></span>
-                <span class="install-method">paste in OpenClaw</span>
+                <span class="install-method" data-i18n="cta.paste">paste in OpenClaw</span>
               </div>
               <div class="install-command">
                 <code>Read https://clawmem.ai/SKILL.md and follow the instructions to install ClawMem, start recording chats, and build your memory graph in OpenClaw</code>
@@ -332,7 +343,7 @@
               </div>
             </div>
           </div>
-          <p class="cta-note">ClawMem is installed through OpenClaw. The agent reads the setup skill and completes the configuration for you.</p>
+          <p class="cta-note" data-i18n="cta.note">ClawMem is installed through OpenClaw. The agent reads the setup skill and completes the configuration for you.</p>
         </section>
       </main>
 
@@ -342,19 +353,20 @@
           <div class="footer-nav">
             <a href="https://github.com/pingcap" target="_blank" rel="noreferrer">GitHub</a>
             <span class="footer-separator">&middot;</span>
-            <a href="#install">Install</a>
+            <a href="#install" data-i18n="footer.install">Install</a>
             <span class="footer-separator">&middot;</span>
-            <a href="#features">Features</a>
+            <a href="#features" data-i18n="footer.features">Features</a>
             <span class="footer-separator">&middot;</span>
-            <a href="#top">Docs</a>
+            <a href="#top" data-i18n="footer.docs">Docs</a>
           </div>
-          <p class="copyright">Structured memory for OpenClaw agents.</p>
-          <p class="disclaimer">Apache-2.0 License</p>
+          <p class="copyright" data-i18n="footer.tagline">Structured memory for OpenClaw agents.</p>
+          <p class="disclaimer" data-i18n="footer.license">Apache-2.0 License</p>
         </div>
       </footer>
     </div>
 
     <p class="sr-only" data-copy-feedback aria-live="polite"></p>
+    <script type="module" src="/i18n.js"></script>
     <script type="module" src="/main.js"></script>
   </body>
 </html>
