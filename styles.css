@@ -765,6 +765,31 @@ section {
   gap: 10px;
 }
 
+.how-step .step-visual {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Make chat-demo and memory-issue fill their step-visual space */
+.how-step .step-visual > .chat-demo,
+.how-step .step-visual > .memory-issue {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.how-step .chat-demo-messages {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.how-step .memory-issue-tags {
+  margin-top: auto;
+}
+
 .step-number {
   width: 32px;
   height: 32px;
@@ -791,71 +816,267 @@ section {
   margin-bottom: 6px;
 }
 
-.step-visual {
-  margin-top: auto;
+/* ── Chat demo (bubble style) ── */
+.chat-demo {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  overflow: hidden;
 }
 
-.step-visual-body {
-  padding: 14px 16px;
+.chat-demo-session {
+  padding: 8px 14px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-align: center;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface-overlay);
+}
+
+.chat-demo-messages {
+  padding: 12px 12px 10px;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.chat-line {
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  line-height: 1.6;
-  color: var(--text-secondary);
-}
-
-.chat-role {
-  font-weight: 600;
-  margin-right: 6px;
-}
-.chat-role--user { color: var(--coral-bright); }
-.chat-role--agent { color: var(--cyan-bright); }
-
-.chat-source {
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  margin-top: 2px;
-  padding-left: 2px;
-}
-
-/* memory record card */
-.memory-record {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-subtle);
-  border-radius: 12px;
-  padding: 14px 16px;
+.chat-bubble {
+  max-width: 88%;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 3px;
 }
 
-.record-row {
-  display: flex;
-  gap: 10px;
-  font-family: var(--font-mono);
+.chat-bubble-name {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0 4px;
+}
+
+.chat-bubble-text {
+  padding: 8px 12px;
+  border-radius: 14px;
   font-size: 0.8rem;
   line-height: 1.5;
 }
 
-.record-key {
-  color: var(--text-muted);
-  min-width: 52px;
-  flex-shrink: 0;
+/* User bubble — right-aligned, coral */
+.chat-bubble--user {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+.chat-bubble--user .chat-bubble-name {
+  color: var(--coral-bright);
+}
+.chat-bubble--user .chat-bubble-text {
+  background: var(--surface-coral-soft);
+  color: var(--text-primary);
+  border-bottom-right-radius: 4px;
 }
 
-.record-val {
+/* Agent bubble — left-aligned, cyan */
+.chat-bubble--agent {
+  align-self: flex-start;
+  align-items: flex-start;
+}
+.chat-bubble--agent .chat-bubble-name {
+  color: var(--cyan-bright);
+}
+.chat-bubble--agent .chat-bubble-text {
+  background: var(--surface-cyan-soft);
+  color: var(--text-primary);
+  border-bottom-left-radius: 4px;
+}
+
+/* Collaborator bubble — right-aligned, amber */
+.chat-bubble--collab {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+.chat-bubble--collab .chat-bubble-name {
+  color: var(--amber);
+}
+.chat-bubble--collab .chat-bubble-text {
+  background: rgba(212, 160, 74, 0.14);
+  color: var(--text-primary);
+  border-bottom-right-radius: 4px;
+}
+
+.chat-demo-source {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-align: center;
+  padding-top: 2px;
+}
+
+/* ── Memory issue card (git-style) ── */
+.memory-issue {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 14px 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.memory-issue-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.memory-issue-id {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
   color: var(--text-secondary);
 }
 
-.record-val--active {
-  color: var(--cyan-bright);
+.memory-issue-status {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 0.7rem;
   font-weight: 600;
+  background: rgba(45, 212, 184, 0.18);
+  color: var(--cyan-bright);
+}
+
+.memory-issue-type {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: var(--surface-coral-soft);
+  color: var(--coral-bright);
+}
+
+.memory-issue-title {
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.memory-issue-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.mtag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 500;
+  background: var(--surface-interactive);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.mtag--active {
+  background: rgba(45, 212, 184, 0.14);
+  color: var(--cyan-bright);
+}
+
+.mtag--topic {
+  background: rgba(212, 160, 74, 0.14);
+  color: var(--amber);
+}
+
+.mtag--source {
+  background: var(--surface-overlay);
+  color: var(--text-secondary);
+}
+
+/* ── Scenario Tabs ── */
+.scenario-tabs {
+  margin-top: 2rem;
+}
+
+.scenario-tab-bar {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--surface-overlay);
+  border: 1px solid var(--border-subtle);
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.scenario-tab {
+  flex: 1;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  z-index: 1;
+  white-space: nowrap;
+}
+
+.scenario-tab:hover {
+  color: var(--text-secondary);
+}
+
+.scenario-tab.is-active {
+  background: var(--surface-card-strong);
+  color: var(--coral-bright);
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.scenario-tab-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: var(--coral-bright);
+  border-radius: 0 0 12px 12px;
+  transition: left 0.3s ease, width 0.3s ease;
+  z-index: 0;
+}
+
+.scenario-tab-progress .progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--cyan-bright);
+  border-radius: 1px;
+  transition: none;
+}
+
+.scenario-tab-progress.is-running .progress-fill {
+  transition: width linear;
+}
+
+.scenario-panel {
+  display: none;
+  animation: scenarioFadeIn 0.3s ease;
+}
+
+.scenario-panel.is-active {
+  display: block;
+}
+
+@keyframes scenarioFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* ── Inspectable Memory ── */
@@ -1318,6 +1539,15 @@ body.has-motion [data-reveal].is-visible {
   .compare-label {
     padding-bottom: 4px;
     border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .scenario-tab-bar {
+    flex-wrap: wrap;
+  }
+  .scenario-tab {
+    flex: 1 1 calc(50% - 4px);
+    font-size: 0.75rem;
+    padding: 8px 8px;
   }
 
   .hero-title {

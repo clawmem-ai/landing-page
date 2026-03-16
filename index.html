@@ -187,46 +187,267 @@
         <!-- ── HOW IT WORKS ── -->
         <section id="features" class="section-how" data-reveal>
           <h2 class="section-heading" data-i18n-html="how.heading">From raw sessions to <span class="claw-accent">durable context</span></h2>
-          <div class="how-steps">
-            <div class="how-step">
-              <div class="step-number">1</div>
-              <h3 data-i18n="how.step1.title">Capture the session</h3>
-              <p data-i18n="how.step1.desc">Every conversation is recorded automatically. Nothing falls through the cracks.</p>
-              <div class="step-visual install-block">
-                <div class="install-block-head">
-                  <span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span>
-                  <span class="install-method" data-i18n="how.step1.session">session #42</span>
+          <!-- Scenario Tabs -->
+          <div class="scenario-tabs" id="scenario-tabs">
+            <div class="scenario-tab-bar">
+              <button class="scenario-tab is-active" data-scenario="daily" data-i18n="scenario.tab.daily">Daily Life</button>
+              <button class="scenario-tab" data-scenario="family" data-i18n="scenario.tab.family">Family Sync</button>
+              <button class="scenario-tab" data-scenario="work" data-i18n="scenario.tab.work">Pro Work</button>
+              <button class="scenario-tab" data-scenario="team" data-i18n="scenario.tab.team">Team Sync</button>
+              <div class="scenario-tab-progress"></div>
+            </div>
+
+            <!-- Tab 1: Daily Life -->
+            <div class="scenario-panel is-active" data-panel="daily">
+              <div class="how-steps">
+                <div class="how-step">
+                  <div class="step-number">1</div>
+                  <h3 data-i18n="how.step1.title">Capture the session</h3>
+                  <p data-i18n="how.step1.desc">Every conversation is recorded automatically. Nothing falls through the cracks.</p>
+                  <div class="step-visual chat-demo">
+                    <div class="chat-demo-session" data-i18n="daily.s1.session">session #12</div>
+                    <div class="chat-demo-messages">
+                      <div class="chat-bubble chat-bubble--user">
+                        <div class="chat-bubble-name" data-i18n="daily.s1.user">You</div>
+                        <div class="chat-bubble-text" data-i18n="daily.s1.user.msg">I'm lactose intolerant, keep that in mind for any food suggestions.</div>
+                      </div>
+                      <div class="chat-bubble chat-bubble--agent">
+                        <div class="chat-bubble-name" data-i18n="daily.s1.agent">Agent</div>
+                        <div class="chat-bubble-text" data-i18n="daily.s1.agent.msg">Noted! I'll always suggest dairy-free options for you.</div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div class="step-visual-body">
-                  <div class="chat-line"><span class="chat-role chat-role--user" data-i18n="how.step1.user">You</span> <span data-i18n="how.step1.user.msg">Our API rate limit moved to a sliding window policy.</span></div>
-                  <div class="chat-line"><span class="chat-role chat-role--agent" data-i18n="how.step1.agent">Agent</span> <span data-i18n="how.step1.agent.msg">Got it. I'll remember that for future API work.</span></div>
+                <div class="how-step">
+                  <div class="step-number">2</div>
+                  <h3 data-i18n="how.step2.title">Store what matters</h3>
+                  <p data-i18n="how.step2.desc">Key facts, preferences, and decisions are distilled into structured, durable memory records.</p>
+                  <div class="step-visual memory-issue">
+                    <div class="memory-issue-head">
+                      <span class="memory-issue-id">#16</span>
+                      <span class="memory-issue-status" data-i18n="mtag.open">Open</span>
+                      <span class="memory-issue-type" data-i18n="mtag.memory">Memory</span>
+                    </div>
+                    <div class="memory-issue-title" data-i18n="daily.s2.detail.val">User is lactose intolerant. Always suggest dairy-free alternatives.</div>
+                    <div class="memory-issue-tags">
+                      <span class="mtag" data-i18n="mtag.type.memory">type:memory</span>
+                      <span class="mtag" data-i18n="mtag.kind.preference">kind:preference</span>
+                      <span class="mtag mtag--active" data-i18n="mtag.status.active">status:active</span>
+                      <span class="mtag mtag--topic" data-i18n="mtag.topic.food">topic:food</span>
+                      <span class="mtag mtag--topic" data-i18n="mtag.topic.personal">topic:personal</span>
+                      <span class="mtag mtag--source" data-i18n="daily.s2.session.tag">session:#12, turn:1</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="how-step">
+                  <div class="step-number">3</div>
+                  <h3 data-i18n="how.step3.title">Recall it when needed</h3>
+                  <p data-i18n="how.step3.desc">Before the next run, relevant memories are found and injected into context automatically.</p>
+                  <div class="step-visual chat-demo">
+                    <div class="chat-demo-session" data-i18n="daily.s3.session">session #35</div>
+                    <div class="chat-demo-messages">
+                      <div class="chat-bubble chat-bubble--user">
+                        <div class="chat-bubble-name" data-i18n="daily.s3.user">You</div>
+                        <div class="chat-bubble-text" data-i18n="daily.s3.user.msg">Find me a quick pasta recipe for tonight.</div>
+                      </div>
+                      <div class="chat-bubble chat-bubble--agent">
+                        <div class="chat-bubble-name" data-i18n="daily.s3.agent">Agent</div>
+                        <div class="chat-bubble-text" data-i18n="daily.s3.agent.msg">Here's a creamy cashew alfredo — no dairy, just how you need it.</div>
+                      </div>
+                      <div class="chat-demo-source" data-i18n="daily.s3.source">Source: Session #12, Turn 1</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-            <div class="how-step">
-              <div class="step-number">2</div>
-              <h3 data-i18n="how.step2.title">Store what matters</h3>
-              <p data-i18n="how.step2.desc">Key facts, preferences, and decisions are distilled into structured, durable memory records.</p>
-              <div class="step-visual memory-record">
-                <div class="record-row"><span class="record-key" data-i18n="how.step2.type">type</span><span class="record-val" data-i18n="how.step2.type.val">memory</span></div>
-                <div class="record-row"><span class="record-key" data-i18n="how.step2.source">source</span><span class="record-val" data-i18n="how.step2.source.val">Session #42, Turn 3</span></div>
-                <div class="record-row"><span class="record-key" data-i18n="how.step2.status">status</span><span class="record-val record-val--active" data-i18n="how.step2.status.val">active</span></div>
-                <div class="record-row"><span class="record-key" data-i18n="how.step2.detail">detail</span><span class="record-val" data-i18n="how.step2.detail.val">API rate limiting uses sliding window policy.</span></div>
+
+            <!-- Tab 2: Family Sync -->
+            <div class="scenario-panel" data-panel="family">
+              <div class="how-steps">
+                <div class="how-step">
+                  <div class="step-number">1</div>
+                  <h3 data-i18n="how.step1.title">Capture the session</h3>
+                  <p data-i18n="family.s1.desc">Someone in your family tells their agent something important — it gets recorded in shared memory.</p>
+                  <div class="step-visual chat-demo">
+                    <div class="chat-demo-session" data-i18n="family.s1.session">Mom's session #8</div>
+                    <div class="chat-demo-messages">
+                      <div class="chat-bubble chat-bubble--collab">
+                        <div class="chat-bubble-name" data-i18n="family.s1.user">Mom</div>
+                        <div class="chat-bubble-text" data-i18n="family.s1.user.msg">Grandma's birthday is March 20. She mentioned wanting a silk scarf.</div>
+                      </div>
+                      <div class="chat-bubble chat-bubble--agent">
+                        <div class="chat-bubble-name" data-i18n="family.s1.agent">Agent</div>
+                        <div class="chat-bubble-text" data-i18n="family.s1.agent.msg">Got it — I'll remember the date and the gift idea.</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="how-step">
+                  <div class="step-number">2</div>
+                  <h3 data-i18n="how.step2.title">Store what matters</h3>
+                  <p data-i18n="how.step2.desc">Key facts, preferences, and decisions are distilled into structured, durable memory records.</p>
+                  <div class="step-visual memory-issue">
+                    <div class="memory-issue-head">
+                      <span class="memory-issue-id">#9</span>
+                      <span class="memory-issue-status" data-i18n="mtag.open">Open</span>
+                      <span class="memory-issue-type" data-i18n="mtag.memory">Memory</span>
+                    </div>
+                    <div class="memory-issue-title" data-i18n="family.s2.detail.val">Grandma's birthday Mar 20. Gift idea: silk scarf.</div>
+                    <div class="memory-issue-tags">
+                      <span class="mtag" data-i18n="mtag.type.memory">type:memory</span>
+                      <span class="mtag" data-i18n="mtag.kind.event">kind:event</span>
+                      <span class="mtag mtag--active" data-i18n="mtag.status.active">status:active</span>
+                      <span class="mtag mtag--topic" data-i18n="mtag.topic.family">topic:family</span>
+                      <span class="mtag mtag--source" data-i18n="mtag.source.mom">source:mom</span>
+                      <span class="mtag mtag--source" data-i18n="family.s2.session.tag">session:#8, turn:1</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="how-step">
+                  <div class="step-number">3</div>
+                  <h3 data-i18n="how.step3.title">Recall it when needed</h3>
+                  <p data-i18n="family.s3.desc">Your agent pulls in memories from family members, so you never miss what matters.</p>
+                  <div class="step-visual chat-demo">
+                    <div class="chat-demo-session" data-i18n="family.s3.session">your session #20</div>
+                    <div class="chat-demo-messages">
+                      <div class="chat-bubble chat-bubble--user">
+                        <div class="chat-bubble-name" data-i18n="family.s3.user">You</div>
+                        <div class="chat-bubble-text" data-i18n="family.s3.user.msg">Any family events coming up this month?</div>
+                      </div>
+                      <div class="chat-bubble chat-bubble--agent">
+                        <div class="chat-bubble-name" data-i18n="family.s3.agent">Agent</div>
+                        <div class="chat-bubble-text" data-i18n="family.s3.agent.msg">Grandma's birthday is March 20. Mom mentioned she'd like a silk scarf.</div>
+                      </div>
+                      <div class="chat-demo-source" data-i18n="family.s3.source">Source: Mom's Session #8, Turn 1</div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-            <div class="how-step">
-              <div class="step-number">3</div>
-              <h3 data-i18n="how.step3.title">Recall it when needed</h3>
-              <p data-i18n="how.step3.desc">Before the next run, relevant memories are found and injected into context automatically.</p>
-              <div class="step-visual install-block">
-                <div class="install-block-head">
-                  <span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span>
-                  <span class="install-method" data-i18n="how.step3.session">session #58</span>
+
+            <!-- Tab 3: Pro Work -->
+            <div class="scenario-panel" data-panel="work">
+              <div class="how-steps">
+                <div class="how-step">
+                  <div class="step-number">1</div>
+                  <h3 data-i18n="how.step1.title">Capture the session</h3>
+                  <p data-i18n="how.step1.desc">Every conversation is recorded automatically. Nothing falls through the cracks.</p>
+                  <div class="step-visual chat-demo">
+                    <div class="chat-demo-session" data-i18n="work.s1.session">session #42</div>
+                    <div class="chat-demo-messages">
+                      <div class="chat-bubble chat-bubble--user">
+                        <div class="chat-bubble-name" data-i18n="work.s1.user">You</div>
+                        <div class="chat-bubble-text" data-i18n="work.s1.user.msg">Our API rate limit moved to a sliding window policy.</div>
+                      </div>
+                      <div class="chat-bubble chat-bubble--agent">
+                        <div class="chat-bubble-name" data-i18n="work.s1.agent">Agent</div>
+                        <div class="chat-bubble-text" data-i18n="work.s1.agent.msg">Got it. I'll remember that for future API work.</div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div class="step-visual-body">
-                  <div class="chat-line"><span class="chat-role chat-role--user" data-i18n="how.step3.user">You</span> <span data-i18n="how.step3.user.msg">What rate limit policy are we using?</span></div>
-                  <div class="chat-line"><span class="chat-role chat-role--agent" data-i18n="how.step3.agent">Agent</span> <span data-i18n="how.step3.agent.msg">You switched to a sliding window policy on Mar 9.</span></div>
-                  <div class="chat-source" data-i18n="how.step3.source">Source: Session #42, Turn 3</div>
+                <div class="how-step">
+                  <div class="step-number">2</div>
+                  <h3 data-i18n="how.step2.title">Store what matters</h3>
+                  <p data-i18n="how.step2.desc">Key facts, preferences, and decisions are distilled into structured, durable memory records.</p>
+                  <div class="step-visual memory-issue">
+                    <div class="memory-issue-head">
+                      <span class="memory-issue-id">#23</span>
+                      <span class="memory-issue-status" data-i18n="mtag.open">Open</span>
+                      <span class="memory-issue-type" data-i18n="mtag.memory">Memory</span>
+                    </div>
+                    <div class="memory-issue-title" data-i18n="work.s2.detail.val">API rate limiting uses sliding window policy.</div>
+                    <div class="memory-issue-tags">
+                      <span class="mtag" data-i18n="mtag.type.memory">type:memory</span>
+                      <span class="mtag" data-i18n="mtag.kind.decision">kind:decision</span>
+                      <span class="mtag mtag--active" data-i18n="mtag.status.active">status:active</span>
+                      <span class="mtag mtag--topic" data-i18n="mtag.topic.api">topic:api</span>
+                      <span class="mtag mtag--source" data-i18n="work.s2.session.tag">session:#42, turn:3</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="how-step">
+                  <div class="step-number">3</div>
+                  <h3 data-i18n="how.step3.title">Recall it when needed</h3>
+                  <p data-i18n="how.step3.desc">Before the next run, relevant memories are found and injected into context automatically.</p>
+                  <div class="step-visual chat-demo">
+                    <div class="chat-demo-session" data-i18n="work.s3.session">session #58</div>
+                    <div class="chat-demo-messages">
+                      <div class="chat-bubble chat-bubble--user">
+                        <div class="chat-bubble-name" data-i18n="work.s3.user">You</div>
+                        <div class="chat-bubble-text" data-i18n="work.s3.user.msg">What rate limit policy are we using?</div>
+                      </div>
+                      <div class="chat-bubble chat-bubble--agent">
+                        <div class="chat-bubble-name" data-i18n="work.s3.agent">Agent</div>
+                        <div class="chat-bubble-text" data-i18n="work.s3.agent.msg">You switched to a sliding window policy on Mar 9.</div>
+                      </div>
+                      <div class="chat-demo-source" data-i18n="work.s3.source">Source: Session #42, Turn 3</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab 4: Team Sync -->
+            <div class="scenario-panel" data-panel="team">
+              <div class="how-steps">
+                <div class="how-step">
+                  <div class="step-number">1</div>
+                  <h3 data-i18n="how.step1.title">Capture the session</h3>
+                  <p data-i18n="team.s1.desc">A teammate tells their agent about an update — it's stored in shared team memory.</p>
+                  <div class="step-visual chat-demo">
+                    <div class="chat-demo-session" data-i18n="team.s1.session">Sarah's session #15</div>
+                    <div class="chat-demo-messages">
+                      <div class="chat-bubble chat-bubble--collab">
+                        <div class="chat-bubble-name" data-i18n="team.s1.user">Sarah</div>
+                        <div class="chat-bubble-text" data-i18n="team.s1.user.msg">Client meeting moved to Thursday 2pm. They want the proposal to focus on sustainability.</div>
+                      </div>
+                      <div class="chat-bubble chat-bubble--agent">
+                        <div class="chat-bubble-name" data-i18n="team.s1.agent">Agent</div>
+                        <div class="chat-bubble-text" data-i18n="team.s1.agent.msg">Got it — meeting rescheduled, proposal angle updated.</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="how-step">
+                  <div class="step-number">2</div>
+                  <h3 data-i18n="how.step2.title">Store what matters</h3>
+                  <p data-i18n="how.step2.desc">Key facts, preferences, and decisions are distilled into structured, durable memory records.</p>
+                  <div class="step-visual memory-issue">
+                    <div class="memory-issue-head">
+                      <span class="memory-issue-id">#27</span>
+                      <span class="memory-issue-status" data-i18n="mtag.open">Open</span>
+                      <span class="memory-issue-type" data-i18n="mtag.memory">Memory</span>
+                    </div>
+                    <div class="memory-issue-title" data-i18n="team.s2.detail.val">Client meeting Thu 2pm. Proposal focus: sustainability.</div>
+                    <div class="memory-issue-tags">
+                      <span class="mtag" data-i18n="mtag.type.memory">type:memory</span>
+                      <span class="mtag" data-i18n="mtag.kind.update">kind:update</span>
+                      <span class="mtag mtag--active" data-i18n="mtag.status.active">status:active</span>
+                      <span class="mtag mtag--topic" data-i18n="mtag.topic.client">topic:client</span>
+                      <span class="mtag mtag--source" data-i18n="mtag.source.sarah">source:sarah</span>
+                      <span class="mtag mtag--source" data-i18n="team.s2.session.tag">session:#15, turn:2</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="how-step">
+                  <div class="step-number">3</div>
+                  <h3 data-i18n="how.step3.title">Recall it when needed</h3>
+                  <p data-i18n="team.s3.desc">Your agent surfaces teammates' updates before you start — no Slack archaeology needed.</p>
+                  <div class="step-visual chat-demo">
+                    <div class="chat-demo-session" data-i18n="team.s3.session">your session #31</div>
+                    <div class="chat-demo-messages">
+                      <div class="chat-bubble chat-bubble--user">
+                        <div class="chat-bubble-name" data-i18n="team.s3.user">You</div>
+                        <div class="chat-bubble-text" data-i18n="team.s3.user.msg">I need to prep for the client meeting. Any updates?</div>
+                      </div>
+                      <div class="chat-bubble chat-bubble--agent">
+                        <div class="chat-bubble-name" data-i18n="team.s3.agent">Agent</div>
+                        <div class="chat-bubble-text" data-i18n="team.s3.agent.msg">Sarah moved it to Thursday 2pm. They want the proposal to focus on sustainability.</div>
+                      </div>
+                      <div class="chat-demo-source" data-i18n="team.s3.source">Source: Sarah's Session #15, Turn 2</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -378,6 +599,7 @@
     <p class="sr-only" data-copy-feedback aria-live="polite"></p>
     <script type="module" src="/i18n.js"></script>
     <script type="module" src="/main.js"></script>
+    <script type="module" src="/scenario-tabs.js"></script>
     <script type="module" src="/analytics.js"></script>
   </body>
 </html>
