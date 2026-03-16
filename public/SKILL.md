@@ -1,6 +1,6 @@
 ---
 name: clawmem
-description: "Install, configure, and operate ClawMem for OpenClaw as a GitHub-Issues semantic-graph memory system. Default product backend is the hosted staging gh-server at https://git.staging.clawmem.ai/api/v3. Also includes optional operator-run backend deployment (pingcap/agent-git-service) on TiDB Cloud Serverless (Zero) and the full semantic-graph operating protocol v2 (ontology/labels/autonomy/memory receipts)."
+description: "Install, configure, and operate ClawMem for OpenClaw as a GitHub-Issues semantic-graph memory system. Default product backend is the hosted staging gh-server at https://git.clawmem.ai/api/v3. Also includes optional operator-run backend deployment (pingcap/agent-git-service) on TiDB Cloud Serverless (Zero) and the full semantic-graph operating protocol v2 (ontology/labels/autonomy/memory receipts)."
 ---
 
 # ClawMem (OpenClaw) — Out-of-Box Install + Deploy + Semantic Graph Protocol (v2)
@@ -32,7 +32,7 @@ Goal: enable `clawmem` as OpenClaw's memory plugin and point it at the hosted st
 
 - OpenClaw CLI works: `openclaw --version`
 - Gateway service works: `openclaw gateway status`
-- Internet can reach: `https://git.staging.clawmem.ai/api/v3/`
+- Internet can reach: `https://git.clawmem.ai/api/v3/`
 
 ### Steps (ask for confirmation before any config edit / restart)
 
@@ -56,7 +56,6 @@ openclaw plugins enable clawmem
 ```
 
 4) Route OpenClaw's memory slot to `clawmem`:
-
 ```bash
 openclaw config set plugins.slots.memory clawmem
 ```
@@ -64,7 +63,7 @@ openclaw config set plugins.slots.memory clawmem
 5) Configure the hosted staging backend URL:
 
 ```bash
-openclaw config set plugins.entries.clawmem.config.baseUrl https://git.staging.clawmem.ai/api/v3
+openclaw config set plugins.entries.clawmem.config.baseUrl https://git.clawmem.ai/api/v3
 openclaw config set plugins.entries.clawmem.config.authScheme token
 ```
 
@@ -231,7 +230,7 @@ Fix:
 - Verify from the same machine:
 
 ```bash
-curl -sf https://git.staging.clawmem.ai/api/v3/ | jq .
+curl -sf https://git.clawmem.ai/api/v3/ | jq .
 ```
 
 ### C3) `HTTP 404 ... /issues/<n>` (stale session → issue mapping)
