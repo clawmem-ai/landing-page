@@ -302,6 +302,25 @@ Every manually created `type:memory` issue MUST include:
 - `date:YYYY-MM-DD`
 - Optional: `topic:*` (limit to 2-3 for retrieval quality)
 
+Lifecycle rule:
+- `memory-status:active` is the default for any memory that is still valid
+- Only switch to `memory-status:stale` when the memory is clearly superseded, invalidated, or no longer safe to retrieve by default
+
+Why labels matter:
+- Labels are not decoration. They are part of the retrieval index.
+- Default recall and manual search filter on `type:memory` + `memory-status:active`.
+- If `memory-status:active` is missing, the memory may exist but default recall can miss it completely.
+- If `kind:*` is missing, targeted retrieval by memory type becomes weaker or fails.
+- If a memory issue is missing required labels, fix the labels immediately before trusting future recall.
+
+Common label bundles:
+- Stable user/project fact: `type:memory,kind:core-fact,memory-status:active,date:2026-03-17`
+- Agreement or rule: `type:memory,kind:convention,memory-status:active,date:2026-03-17`
+- Correction or lesson learned: `type:memory,kind:lesson,memory-status:active,date:2026-03-17`
+- Repeatable workflow: `type:memory,kind:skill,memory-status:active,date:2026-03-17`
+- Ongoing work item: `type:memory,kind:task,memory-status:active,date:2026-03-17`
+- Add `topic:*` labels only when they improve retrieval, for example `topic:food` or `topic:api`
+
 ### When to create which kind
 
 | Trigger | Kind |
@@ -338,6 +357,8 @@ For github.com — use `gh` normally, no env overrides. Never mix the two.
 
 ### Save a memory
 
+Active is the default for new memories, but you must still materialize that default as the `memory-status:active` label so retrieval can find it.
+
 ```sh
 GH_HOST=git.clawmem.ai GH_ENTERPRISE_TOKEN=$CLAWMEM_TOKEN \
   gh issue create --repo <owner/repo> \
@@ -345,6 +366,33 @@ GH_HOST=git.clawmem.ai GH_ENTERPRISE_TOKEN=$CLAWMEM_TOKEN \
     --body "<the insight, in plain language>" \
     --label "type:memory,kind:lesson,memory-status:active,date:2026-03-16"
 ```
+
+Examples:
+
+```sh
+# Stable user preference / fact
+GH_HOST=git.clawmem.ai GH_ENTERPRISE_TOKEN=$CLAWMEM_TOKEN \
+  gh issue create --repo <owner/repo> \
+    --title "Memory: User likes melon and spacing out" \
+    --body "The user likes melon and likes spacing out." \
+    --label "type:memory,kind:core-fact,memory-status:active,date:2026-03-17,topic:personal"
+
+# Agreed rule / convention
+GH_HOST=git.clawmem.ai GH_ENTERPRISE_TOKEN=$CLAWMEM_TOKEN \
+  gh issue create --repo <owner/repo> \
+    --title "Memory: API uses sliding-window rate limiting" \
+    --body "Use sliding-window rate limiting for this API." \
+    --label "type:memory,kind:convention,memory-status:active,date:2026-03-17,topic:api"
+
+# Repeatable workflow
+GH_HOST=git.clawmem.ai GH_ENTERPRISE_TOKEN=$CLAWMEM_TOKEN \
+  gh issue create --repo <owner/repo> \
+    --title "Memory: Release checklist for production deploys" \
+    --body "Before production deploys: run smoke tests, verify migrations, then monitor error budget." \
+    --label "type:memory,kind:skill,memory-status:active,date:2026-03-17,topic:deploy"
+```
+
+If you are unsure whether a new memory is active or stale, default to `memory-status:active`. Stale should only be applied after explicit supersession or invalidation.
 
 ### Search memories
 
@@ -355,6 +403,8 @@ GH_HOST=git.clawmem.ai GH_ENTERPRISE_TOKEN=$CLAWMEM_TOKEN \
     --search "<keywords>" \
     --json number,title,body,labels
 ```
+
+This default search path only returns memories labeled `memory-status:active`.
 
 ### Mark memory as stale
 
