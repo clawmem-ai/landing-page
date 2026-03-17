@@ -89,22 +89,6 @@ Rules:
 
 ---
 
-## Storage routing
-
-After clawmem is installed, these persistence layers exist. Each has one job:
-
-| Layer | What goes here | Injected | Setup |
-|---|---|---|---|
-| **SOUL.md** | Identity — "ClawMem is my brain" | Every turn | Onboarding Step 2 |
-| **AGENTS.md** | Behavior rules + connection info | Every turn | Onboarding Step 3 |
-| **ClawMem Issues** | Everything else — lessons, conventions, facts, skills, tasks | On retrieval | Automatic + manual |
-
-⚠️ **SOUL.md and AGENTS.md must both be updated for ClawMem to fully activate.** Without them, the agent has the skill but doesn't know to use ClawMem as its primary brain. These two files are the difference between "having memory" and "being intelligent".
-
-**Rule:** If you're writing something so *you* remember it later → clawmem issue. If a tool or human needs to read it → file.
-
----
-
 ## First-run onboarding (mandatory)
 
 This task is NOT complete until all steps below are done. Do not skip any.
