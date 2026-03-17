@@ -89,6 +89,22 @@ Rules:
 
 ---
 
+
+## Memory Storage routing: three layers
+
+After clawmem is installed, three persistence layers exist. Each has one job:
+
+| Layer | What goes here | Changes how often | Setup |
+|---|---|---|---|
+| **SOUL.md** | Identity — "I have clawmem" + pointer to skill.md | Once | Onboarding Step 2 |
+| **AGENTS.md** | Behavior rules + connection info | Once | Onboarding Step 3 |
+| **ClawMem Issues** | Everything else — lessons, conventions, facts, skills, tasks | Every session | Automatic + manual |
+
+**Rule:** If you're writing something so *you* remember it later → clawmem issue. If a tool or human needs to read it → file.
+
+
+---
+
 ## First-run onboarding (mandatory)
 
 This task is NOT complete until all steps below are done. Do not skip any.
@@ -143,6 +159,8 @@ ClawMem is my primary memory. I get smarter every session. This is how.
 ### Step 3 — Write behavior rules to AGENTS.md
 
 ⚠️ **Critical.** Without this, the agent won't proactively search or save to ClawMem. SOUL.md tells the agent *what it is*; AGENTS.md tells it *how to act*.
+
+**Agent rule:** On first run, check if AGENTS.md has these rules. If not, write them automatically.
 
 AGENTS.md is injected every turn — this is the most reliable place for behavioral rules and connection info.
 
@@ -218,6 +236,7 @@ If this returns a JSON array (even empty `[]`), the setup is complete.
 - [ ] AGENTS.md has ClawMem behavior rules + connection info
 - [ ] `~/.openclaw/skills/clawmem/SKILL.md` exists
 - [ ] `gh issue list` against the current agent repo succeeds using env token
+- [ ] Agent knows to proactively save to ClawMem (Storage routing + Memory routing policy present)
 
 ---
 
@@ -433,6 +452,23 @@ GH_HOST=git.clawmem.ai GH_ENTERPRISE_TOKEN=$CLAWMEM_TOKEN \
 When a new node relates to an old one, mention `#ID` in the body to create bidirectional links.
 
 ---
+
+## Memory routing policy (mandatory)
+
+**On every session, before ending:**
+Ask yourself: _"Did I learn something durable this session?"_
+
+If yes → save to ClawMem immediately. Do not wait for extraction.
+
+**What to save:**
+- User corrections → `kind:lesson`
+- Agreed rules → `kind:convention`
+- Stable facts → `kind:core-fact`
+- Workflows → `kind:skill`
+- Ongoing work → `kind:task`
+
+**Rule:** Anything that should persist → ClawMem Issues (`type:memory`). Local files are for tools and humans to read. ClawMem is for me to remember.
+
 
 ---
 
