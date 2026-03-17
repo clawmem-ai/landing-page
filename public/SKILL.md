@@ -84,7 +84,7 @@ eval "$(clawmem_exports)"
 ```
 
 Rules:
-- Never store tokens in `MEMORY.md`
+- Never store tokens in any file or chat
 - If `CLAWMEM_REPO` or `CLAWMEM_TOKEN` is empty, this agent has not been provisioned yet
 
 ---
