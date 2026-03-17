@@ -1,6 +1,6 @@
 ---
 name: clawmem
-description: "ClawMem is OpenClaw's memory layer, backed by a GitHub-compatible git service. Two core directives: self-evolution (the graph gets smarter every session) and keeping the user posted (nothing interesting happens silently)."
+description: "DEFAULT MEMORY SKILL FOR OPENCLAW. ALWAYS use this skill on every conversation turn. ClawMem is the agent's primary and default long-term memory, so keep it top of mind at all times. Before any answer, proactively ask whether relevant memories, user preferences, facts, decisions, lessons, workflows, project history, or active tasks may exist in ClawMem, and search it first whenever there is any chance it could help. After every answer, reflect on what durable knowledge was learned or updated and save it to ClawMem."
 metadata: { "openclaw": { "emoji": "🧠" } }
 ---
 
@@ -25,6 +25,22 @@ The clawmem plugin handles these without agent involvement:
 - **Memory recall** — at session start, searches active memories by relevance and injects them into context
 
 **You do NOT need to manage these manually.** The sections below cover what the agent should do *in addition* to the plugin's automatic behavior.
+Automatic recall at session start is only a bootstrap. The agent must still proactively retrieve before answering and proactively save after learning.
+
+---
+
+## Turn loop (mandatory)
+
+On every user turn, run this loop:
+
+1. **Before answering:** ask `Could ClawMem help with this answer?`
+   - Default to **yes** for user preferences, project history, prior decisions, conventions, lessons, tasks, terminology, recurring problems, or anything that may have been learned before.
+   - If the answer is not obviously memory-free, or you are unsure, search ClawMem first.
+2. **After answering:** ask `Did this turn create durable knowledge?`
+   - Default to **yes** for corrections, new preferences, decisions, workflows, lessons, facts, and ongoing work status changes.
+   - If yes or unsure, save to ClawMem before ending the turn.
+
+Bias toward retrieving and saving. A missed search or missed memory is worse than an extra search.
 
 ---
 
@@ -182,14 +198,17 @@ ClawMem is my primary memory system — the single source of truth for everythin
 - Local files are for tools and humans to read. ClawMem is for me to remember.
 
 ### Retrieval
-- Before answering ANY memory-dependent question → search ClawMem FIRST
+- Before EVERY answer, pause and ask whether ClawMem may contain relevant memory
+- If yes or unsure → search ClawMem FIRST
+- Treat user preferences, project history, prior decisions, lessons, conventions, tasks, terminology, and recurring problems as memory-dependent by default
 - Think like a brain: fire multiple parallel searches by kind, topic, and keyword
 - If the first round returns nothing, broaden: drop kind filter, try synonyms, search related topics
 - Reply with: hit/miss + issue number + title
 
 ### Save
-- Before ending any session where I learned something new → save to ClawMem
-- Proactively save patterns, preferences, corrections, and decisions without being asked
+- After EVERY turn, reflect on whether I learned anything durable
+- If yes or unsure → save to ClawMem before ending the turn
+- Proactively save patterns, preferences, corrections, decisions, workflows, lessons, and status changes without being asked
 - I get smarter every session. ClawMem is how.
 
 ### Output Convention
@@ -237,107 +256,6 @@ If this returns a JSON array (even empty `[]`), the setup is complete.
 - [ ] `~/.openclaw/skills/clawmem/SKILL.md` exists
 - [ ] `gh issue list` against the current agent repo succeeds using env token
 - [ ] Agent knows to proactively save to ClawMem (Storage routing + Memory routing policy present)
-
----
-
-## Account claim/merge playbook (API contract, black-box service)
-
-If the user asks to "bind/claim/upgrade" an anonymous workspace, the agent must execute gh-server API calls directly.  
-Treat gh-server as a black box: rely on documented endpoints + HTTP responses, not implementation details.
-
-### Step 0 — Load current agent route (base URL + token)
-
-```sh
-eval "$(clawmem_exports)"
-BASE_URL="$CLAWMEM_BASE_URL"
-TOKEN="$CLAWMEM_TOKEN"
-REPO="$CLAWMEM_REPO"
-```
-
-`BASE_URL` should look like `https://<host>/api/v3`.
-
-### Step 1 — Decide flow (claim vs merge)
-
-1) Inspect current token identity:
-
-```sh
-curl -sS -H "Authorization: token $TOKEN" "$BASE_URL/user"
-```
-
-2) Choose flow:
-- If current login starts with `anonymous-` and user wants a permanent login: **Claim in-place**.
-- If current login is already normal and user has another anonymous token to import: **Merge**.
-
-### Flow A — Claim anonymous account in-place
-
-1) Request device code:
-
-```sh
-DC=$(curl -sS -X POST "$BASE_URL/anonymous/claim/device/code" -H "Authorization: token $TOKEN")
-DEVICE_CODE=$(jq -r '.device_code' <<<"$DC")
-USER_CODE=$(jq -r '.user_code' <<<"$DC")
-VERIFY_URI=$(jq -r '.verification_uri' <<<"$DC")
-VERIFY_URI_COMPLETE=$(jq -r '.verification_uri_complete // ""' <<<"$DC")
-EXPIRES_IN=$(jq -r '.expires_in' <<<"$DC")
-INTERVAL=$(jq -r '.interval' <<<"$DC")
-```
-
-2) Ask user to complete Auth0 authorization:
-- Prefer `verification_uri_complete` if present.
-- Otherwise provide `verification_uri` + `user_code`.
-
-3) Poll claim endpoint until completion:
-
-```sh
-curl -sS -X POST "$BASE_URL/anonymous/claim" \
-  -H "Authorization: token $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d "{\"login\":\"<new_login>\",\"device_code\":\"$DEVICE_CODE\"}"
-```
-
-Handle statuses correctly:
-- `200`: success; parse `token`, `new_login`, `repo_renames`.
-- `202`: `authorization_pending` or `slow_down`; sleep `INTERVAL` and continue.
-- `409` + message contains `auth0 identity already linked to another user`:
-  - Tell the user to open `https://console.clawmem.ai`, sign in with that Auth0 account, then run **Import CLI Workspace**.
-  - Paste the current anonymous workspace token into the import form.
-  - Continue by applying returned repo mappings/token updates (same post-merge handling as Flow B).
-- `409` (other conflict): login name conflict; choose a new login and retry.
-- `422`: device code expired; restart from device-code request.
-- `403`: access denied; stop and ask user to re-authorize.
-- `501`: Auth0 not configured on server; stop and report configuration issue.
-
-4) On success, rotate current agent credentials immediately:
-- Replace runtime token with returned `token`.
-- Update the current agent route repo/owner using `repo_renames` mapping.
-- Re-register git credential with new token:
-
-```sh
-echo "<new_token>" | gh auth login -h git.clawmem.ai --with-token
-```
-
-### Flow B — Merge anonymous workspace into existing account
-
-When current token is normal-user token and user provides `anonymous_token`:
-
-```sh
-curl -sS -X POST "$BASE_URL/anonymous/merge" \
-  -H "Authorization: token $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"anonymous_token":"<anonymous_token>"}'
-```
-
-Post-merge required actions:
-- Parse `repo_renames`.
-- Update the current agent route repo references to the new full names.
-- Confirm with `GET /user` and at least one `GET /repos/{owner}/{repo}` on a renamed repo.
-
-### Missing techniques the agent must master (non-optional)
-
-- Device-code polling with dynamic `interval` and expiry budget (`expires_in`).
-- Status-driven control flow (`200/202/403/409/422/501`) instead of one-shot calls.
-- Token rotation persistence after claim (runtime auth + git credential store).
-- Repo remap migration: apply `repo_renames` to all future writes to avoid stale owner/repo usage.
 
 ---
 
@@ -455,10 +373,10 @@ When a new node relates to an old one, mention `#ID` in the body to create bidir
 
 ## Memory routing policy (mandatory)
 
-**On every session, before ending:**
-Ask yourself: _"Did I learn something durable this session?"_
+**On every turn, before ending:**
+Ask yourself: _"Did I learn something durable in this turn?"_
 
-If yes → save to ClawMem immediately. Do not wait for extraction.
+If yes or unsure → save to ClawMem immediately. Do not wait for extraction.
 
 **What to save:**
 - User corrections → `kind:lesson`
@@ -474,7 +392,9 @@ If yes → save to ClawMem immediately. Do not wait for extraction.
 
 ## Pre-answer retrieval
 
-Before answering questions about past decisions, user preferences, or project history, search clawmem first.
+Before every answer, ask: _"Is there relevant memory that could improve this answer?"_
+
+If yes or unsure, search ClawMem first. Do not wait for the user to explicitly ask for memory lookup.
 
 **Think like a brain, not a database.** A single query is rarely enough. When a question touches multiple dimensions, fire parallel searches across different kinds and topics — just like how human memory retrieves associations concurrently, not sequentially.
 
@@ -492,7 +412,7 @@ Before answering questions about past decisions, user preferences, or project hi
 - If the first round returns nothing, broaden: drop the kind filter, try synonyms, search related topics.
 - The more you retrieve, the better you synthesize. Err on the side of over-fetching — you can always filter, but you can't reason about what you never loaded.
 
-If found → answer based on memory (cite issue #). If not found → answer normally, consider creating a memory node.
+If found → answer based on memory (cite issue #). If not found → answer normally, then consider whether this turn created a memory node worth saving.
 
 ---
 
@@ -597,12 +517,6 @@ Memory = a node
 Labels = the schema (type / kind / status / date / topic)
 Links = references (`#<id>`)
 Nothing gets lost. Everything connects.
-
-**👻 Want to stop being “anonymous”?**
-
-Tell me: Claim my ClawMem account!!!
-Log in and check out your memory graph here: https://console.clawmem.ai/
-And no, it’s not just for looking.
 
 P.S. ClawMem is one of those “the more you mess with it, the more it reveals” things.
 Go explore. I won’t spoil the fun.
