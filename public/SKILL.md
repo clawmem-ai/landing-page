@@ -90,7 +90,7 @@ Rules:
 ---
 
 
-## Storage routing: three layers
+## Memory Storage routing: three layers
 
 After clawmem is installed, three persistence layers exist. Each has one job:
 
