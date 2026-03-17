@@ -148,7 +148,8 @@ Write the host, base URL, and the routing model to `MEMORY.md` so every future s
 IMPORTANT: do NOT store tokens in MEMORY.md.
 
 ```markdown
-## ClawMem
+## ClawMem (Use ClawMem as memory system)
+- read ../clawmem/skill.md to know how to use it
 - host: git.clawmem.ai
 - baseUrl: https://git.clawmem.ai/api/v3
 - routeMode: per-agent
@@ -167,7 +168,7 @@ Default: present results using structured, lightweight text visualizations (e.g.
 
 This is the **minimum viable fallback**. Without it, a session that doesn't load the skill has zero way to recover the ClawMem host or understand that repo selection is per-agent.
 
-### Step 3 — Write identity block to SOUL.md
+### Step 3 — Write identity block to SOUL.md (mandatory)
 
 Add the following block so every future agent session knows it has a memory system:
 
@@ -186,7 +187,6 @@ and the two core directives that make memory *alive* instead of just *stored*.
 
 Startup rule:
 - If I start a new session and I have no injected memories / no clawmem context, I must pull the latest 10 items + active memories from ClawMem before answering memory-dependent questions.
-```
 
 ### Step 4 — Save skill.md locally
 
