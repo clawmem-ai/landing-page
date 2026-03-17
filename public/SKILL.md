@@ -145,6 +145,105 @@ If this returns a JSON array (even empty `[]`), the setup is complete.
 
 ---
 
+## Account claim/merge playbook (API contract, black-box service)
+
+If the user asks to "bind/claim/upgrade" an anonymous workspace, the agent must execute gh-server API calls directly.  
+Treat gh-server as a black box: rely on documented endpoints + HTTP responses, not implementation details.
+
+### Step 0 — Load runtime config (base URL + token)
+
+```sh
+BASE_URL=$(cat ~/.openclaw/openclaw.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['plugins']['entries']['clawmem']['config']['baseUrl'].rstrip('/'))")
+TOKEN=$(cat ~/.openclaw/openclaw.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['plugins']['entries']['clawmem']['config']['token'])")
+```
+
+`BASE_URL` should look like `https://<host>/api/v3`.
+
+### Step 1 — Decide flow (claim vs merge)
+
+1) Inspect current token identity:
+
+```sh
+curl -sS -H "Authorization: token $TOKEN" "$BASE_URL/user"
+```
+
+2) Choose flow:
+- If current login starts with `anonymous-` and user wants a permanent login: **Claim in-place**.
+- If current login is already normal and user has another anonymous token to import: **Merge**.
+
+### Flow A — Claim anonymous account in-place
+
+1) Request device code:
+
+```sh
+DC=$(curl -sS -X POST "$BASE_URL/anonymous/claim/device/code" -H "Authorization: token $TOKEN")
+DEVICE_CODE=$(jq -r '.device_code' <<<"$DC")
+USER_CODE=$(jq -r '.user_code' <<<"$DC")
+VERIFY_URI=$(jq -r '.verification_uri' <<<"$DC")
+VERIFY_URI_COMPLETE=$(jq -r '.verification_uri_complete // ""' <<<"$DC")
+EXPIRES_IN=$(jq -r '.expires_in' <<<"$DC")
+INTERVAL=$(jq -r '.interval' <<<"$DC")
+```
+
+2) Ask user to complete Auth0 authorization:
+- Prefer `verification_uri_complete` if present.
+- Otherwise provide `verification_uri` + `user_code`.
+
+3) Poll claim endpoint until completion:
+
+```sh
+curl -sS -X POST "$BASE_URL/anonymous/claim" \
+  -H "Authorization: token $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d "{\"login\":\"<new_login>\",\"device_code\":\"$DEVICE_CODE\"}"
+```
+
+Handle statuses correctly:
+- `200`: success; parse `token`, `new_login`, `repo_renames`.
+- `202`: `authorization_pending` or `slow_down`; sleep `INTERVAL` and continue.
+- `409` + message contains `auth0 identity already linked to another user`:
+  - Tell the user to open `https://console.clawmem.ai`, sign in with that Auth0 account, then run **Import CLI Workspace**.
+  - Paste the current anonymous workspace token into the import form.
+  - Continue by applying returned repo mappings/token updates (same post-merge handling as Flow B).
+- `409` (other conflict): login name conflict; choose a new login and retry.
+- `422`: device code expired; restart from device-code request.
+- `403`: access denied; stop and ask user to re-authorize.
+- `501`: Auth0 not configured on server; stop and report configuration issue.
+
+4) On success, rotate agent credentials immediately:
+- Replace runtime token with returned `token`.
+- Update default repo/owner using `repo_renames` mapping.
+- Re-register git credential with new token:
+
+```sh
+echo "<new_token>" | gh auth login -h git.clawmem.ai --with-token
+```
+
+### Flow B — Merge anonymous workspace into existing account
+
+When current token is normal-user token and user provides `anonymous_token`:
+
+```sh
+curl -sS -X POST "$BASE_URL/anonymous/merge" \
+  -H "Authorization: token $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"anonymous_token":"<anonymous_token>"}'
+```
+
+Post-merge required actions:
+- Parse `repo_renames`.
+- Update agent default repo references to the new full names.
+- Confirm with `GET /user` and at least one `GET /repos/{owner}/{repo}` on a renamed repo.
+
+### Missing techniques the agent must master (non-optional)
+
+- Device-code polling with dynamic `interval` and expiry budget (`expires_in`).
+- Status-driven control flow (`200/202/403/409/422/501`) instead of one-shot calls.
+- Token rotation persistence after claim (runtime auth + git credential store).
+- Repo remap migration: apply `repo_renames` to all future writes to avoid stale owner/repo usage.
+
+---
+
 ## The two core directives
 
 ### Self-evolution
