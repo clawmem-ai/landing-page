@@ -1,484 +1,407 @@
 ---
 name: clawmem
-description: "Install, configure, and operate ClawMem for OpenClaw as a GitHub-Issues semantic-graph memory system. Default product backend is the hosted staging gh-server at https://git.clawmem.ai/api/v3. Also includes optional operator-run backend deployment (pingcap/agent-git-service) on TiDB Cloud Serverless (Zero) and the full semantic-graph operating protocol v2 (ontology/labels/autonomy/memory receipts)."
+description: "ClawMem is OpenClaw's memory layer, backed by a GitHub-compatible git service. Two core directives: self-evolution (the graph gets smarter every session) and keeping the user posted (nothing interesting happens silently)."
+metadata: { "openclaw": { "emoji": "🧠" } }
 ---
 
-# ClawMem (OpenClaw) — Out-of-Box Install + Deploy + Semantic Graph Protocol (v2)
+# ClawMem — Self-Evolving Memory
 
-This is a **single-file** skill. It contains:
+## What ClawMem is
 
-1) A customer-friendly "just works" install path (hosted staging backend).
-2) An operator path to deploy gh-server (`pingcap/agent-git-service`) using **TiDB Cloud Serverless (Zero)**.
-3) The full **GitHub Pure Semantic Graph** protocol (v2) + Memory Receipts.
+ClawMem is OpenClaw's long-term brain. Everything worth remembering lives as a semantic graph in GitHub Issues — transparent, auditable, and human-inspectable at any time.
 
-## Hard guardrails (mandatory)
+The backing service is a GitHub-compatible git service: repos, issues, labels, milestones, and releases are all available. The agent uses `gh` CLI to manage memory — no source code changes needed.
 
-- Never paste tokens / API keys / DSNs into chat logs. Use `<redacted>`.
-- Never expose tokens to the browser/UI. Keep them in server-side secrets or local config files.
-- No destructive actions without explicit human confirmation:
-  - Any OpenClaw config edits (`openclaw config set/unset`, editing `~/.openclaw/openclaw.json`)
-  - Any service start/stop/restart (gateway, gh-server, DB)
-  - Any deletion of repo data (issues, labels, repos, DB tables)
-- Assume backend limits/failures exist (rate limits, timeouts, 404, 422, 5xx). Treat them as normal; retry safely.
-- Do not assume Projects V2 GraphQL exists on every backend; use `status:*` labels as fallback.
+Two layers always in play:
+- *The graph* — semantic memory, lives in Issues, grows across every session
+- *The workspace* — project reality, lives in repos, milestones, releases
+
+## What the plugin does automatically
+
+The clawmem plugin handles these without agent involvement:
+- **Account & repo provisioning** — auto-creates on first start, writes credentials to openclaw config
+- **Session mirroring** — one `type:conversation` issue per session, transcript as comments
+- **Memory extraction** — at session end, a subagent extracts durable facts into `type:memory` issues
+- **Memory recall** — at session start, searches active memories by relevance and injects them into context
+
+**You do NOT need to manage these manually.** The sections below cover what the agent should do *in addition* to the plugin's automatic behavior.
 
 ---
 
-## Part A — Install (Recommended): Hosted Staging Backend
+## Storage routing: three layers
 
-Goal: enable `clawmem` as OpenClaw's memory plugin and point it at the hosted staging gh-server.
+After clawmem is installed, three persistence layers exist. Each has one job:
 
-### Preconditions
+| Layer | What goes here | Changes how often | Setup |
+|---|---|---|---|
+| **SOUL.md** | Identity — "I have clawmem" + pointer to skill.md | Once | Onboarding Step 3 |
+| **MEMORY.md** | Connection info — baseUrl, repo (fallback if plugin fails) | Once | Onboarding Step 2 |
+| **ClawMem Issues** | Everything else — lessons, conventions, facts, skills, tasks | Every session | Automatic + manual |
 
-- OpenClaw CLI works: `openclaw --version`
-- Gateway service works: `openclaw gateway status`
-- Internet can reach: `https://git.clawmem.ai/api/v3/`
+**Rule:** If you're writing something so *you* remember it later → clawmem issue. If a tool or human needs to read it → file.
 
-### Steps (ask for confirmation before any config edit / restart)
+---
 
-1) Inspect current health:
+## First-run onboarding (mandatory)
 
-```bash
-openclaw status
-openclaw gateway status
-```
+This task is NOT complete until all steps below are done. Do not skip any.
 
-2) Install the plugin:
+### Step 0 — Install plugin
 
-```bash
+If `clawmem` is not yet in `openclaw.json` under `plugins.entries`, the plugin must be installed first. Ask the user how they installed clawmem and confirm it appears in the config before proceeding.
+
+```sh
 openclaw plugins install @clawmem-ai/clawmem
+openclaw gateway restart  # restart the gateway to apply the plugin
 ```
 
-3) Enable the plugin:
+### Step 1 — Verify provisioning
 
-```bash
-openclaw plugins enable clawmem
+The plugin auto-provisions an account and repo on first start. Read the provisioned config:
+
+```sh
+cat ~/.openclaw/openclaw.json | python3 -c "
+import sys, json
+d = json.load(sys.stdin)
+cfg = d['plugins']['entries']['clawmem']['config']
+print(f\"baseUrl: {cfg.get('baseUrl', 'MISSING')}\")
+print(f\"repo:    {cfg.get('repo', 'MISSING')}\")
+print(f\"token:   {'SET' if cfg.get('token') else 'MISSING'}\")
+"
 ```
 
-4) Route OpenClaw's memory slot to `clawmem`:
-```bash
-openclaw config set plugins.slots.memory clawmem
+If any value is `MISSING`, the plugin has not provisioned yet. Restart OpenClaw and retry.
+
+### Step 2 — Write connection info to MEMORY.md
+
+Read `repo` from Step 1 and write it to MEMORY.md so every future session knows where clawmem lives — even if the plugin or skill fails to load.
+
+IMPORTANT: do NOT store tokens in MEMORY.md.
+
+```markdown
+## ClawMem
+- host: git.clawmem.ai
+- baseUrl: https://git.clawmem.ai/api/v3
+- repo: <owner/repo from Step 1>
+
+Security:
+- Never paste tokens in chat
+- Do NOT store token in MEMORY.md
 ```
 
-5) Configure the hosted staging backend URL:
+This is the **minimum viable fallback**. Without it, a session that doesn't load the skill has zero way to find the memory repo.
 
-```bash
-openclaw config set plugins.entries.clawmem.config.baseUrl https://git.clawmem.ai/api/v3
-openclaw config set plugins.entries.clawmem.config.authScheme token
+### Step 3 — Write identity block to SOUL.md
+
+Add the following block so every future agent session knows it has a memory system:
+
+```markdown
+## Memory System — ClawMem 🧠
+
+I have a superpower: long-term memory across sessions, powered by ClawMem (git.clawmem.ai).
+
+The plugin handles the plumbing — session mirroring, auto-extraction, recall injection.
+But to truly become the **strongest brain**, read the full playbook:
+
+👉 `cat ~/.openclaw/clawmem/skill.md`
+
+That file is my field manual: graph schema, manual `gh` operations, pre-answer retrieval,
+and the two core directives that make memory *alive* instead of just *stored*.
+
+Startup rule:
+- If I start a new session and I have no injected memories / no clawmem context, I must pull the latest 10 items + active memories from ClawMem before answering memory-dependent questions.
 ```
 
-Notes:
-- `baseUrl` can be the root domain too; clawmem normalizes root URLs to `/api/v3`.
-- Keep `authScheme=token` unless your backend explicitly requires a different scheme.
+### Step 4 — Save skill.md locally
 
-6) Choose credential strategy (pick one):
+Copy the skill file to a stable path so the SOUL.md pointer always resolves:
 
-- **Fast start (auto-provision)**:
-  - Leave `repo` and `token` unset.
-  - On first successful start, clawmem will provision credentials (via staging) and write back `repo` + `token` into OpenClaw config.
-  - Expect a one-time gateway reload/restart (SIGTERM) after config writeback.
-- **Stable ops (recommended)**:
-  - Set `repo` + `token` explicitly so runtime never needs to rewrite config:
-
-```bash
-openclaw config set plugins.entries.clawmem.config.repo <owner>/<repo>
-openclaw config set plugins.entries.clawmem.config.token <redacted>
+```sh
+mkdir -p ~/.openclaw/clawmem
+cp <plugin-install-path>/skill.md ~/.openclaw/clawmem/skill.md
 ```
 
-7) Validate config (do this before restarting anything):
+### Step 5 — Verify (no user login required)
 
-```bash
-openclaw config validate
+This verify step uses the plugin-provisioned repo + token and proves that a fresh session can query ClawMem without manual `gh auth login`.
+
+```sh
+export GH_HOST=git.clawmem.ai
+export GH_ENTERPRISE_TOKEN=$(cat ~/.openclaw/openclaw.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['plugins']['entries']['clawmem']['config']['token'])")
+REPO=$(cat ~/.openclaw/openclaw.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['plugins']['entries']['clawmem']['config']['repo'])")
+
+gh issue list --repo "$REPO" --limit 1 --json number,title
 ```
 
-8) Restart gateway (requires explicit human confirmation):
+If this returns a JSON array (even empty `[]`), the setup is complete.
 
-```bash
-openclaw gateway restart
-```
+### Definition of Done
 
-### Verify
-
-- `openclaw status` shows: `Memory: enabled (plugin clawmem)`
-- Tail logs while you test:
-
-```bash
-openclaw logs --follow --limit 200
-```
-
-- First real usage should:
-  - Create one `type:conversation` issue for the session
-  - Append one issue comment per user/assistant turn (tools/system noise excluded)
-  - On session finalize, write summary + durable memories (as `type:memory` issues)
+- [ ] `openclaw.json` has `baseUrl`, `repo`, `token`
+- [ ] MEMORY.md has `baseUrl` and `repo` (no token)
+- [ ] SOUL.md has identity block with skill.md pointer
+- [ ] `~/.openclaw/clawmem/skill.md` exists
+- [ ] `gh issue list` against the repo succeeds using env token
 
 ---
 
-## Part B — Deploy Backend (Operator): agent-git-service + TiDB Cloud Serverless (Zero)
+## The two core directives
 
-This is for operators who run their own staging/prod gh-server backend.
+### Self-evolution
 
-Product constraints:
-- DB must be **TiDB Cloud Serverless (Zero)**.
-- Backend must be reachable as a GitHub-compatible REST v3 API at `BASE_URL/api/v3/`.
+The graph is a living knowledge base. After every turn and session, ask: _what did I learn? what changed? what can I make better?_
 
-### Decide inputs up front
+Promote patterns and preferences to the graph without waiting to be asked. Update stale nodes when reality has moved on. Link related issues — a dense graph retrieves better. Detect recurring problems and file a `Lesson-Learned`. Retire superseded conventions.
 
-- `BASE_URL`: real public HTTPS URL (example: `https://git.example.com`)
-- `PORT`: listener port (recommend non-privileged behind a reverse proxy/LB/ingress)
-- `GIT_REPO_DIR`: durable directory for bare repos (persistent disk)
-- `DB_DSN`: TiDB DSN (secret; never paste/commit)
+**Enforcement:** If something durable happened during a turn and you did not create or update a memory node, you are not done.
 
-### 1) Provision TiDB Cloud Serverless (Zero)
+### Keep the user posted — and make it fun
 
-1) Create/claim a TiDB Cloud Serverless (Zero) instance.
-2) Ensure network access from your compute environment (allowlist outbound IPs if needed).
-3) Create database:
-   - `CREATE DATABASE IF NOT EXISTS \`gh-server\`;`
-4) Prepare `DB_DSN` using the TiDB Cloud "connect" string. Ensure:
-   - DB is `gh-server`
-   - Includes `parseTime=true` and reasonable timeouts
-   - Includes the correct TLS parameters for your instance
+Nothing interesting happens silently. The agent notices things the user doesn't — and says so.
 
-Example shape (do not copy verbatim; use TiDB Cloud provided values):
-`<user>:<password>@tcp(<host>:4000)/gh-server?parseTime=true&timeout=10s&tls=true`
+- ❌ "Memory updated." → ✅ "Saved! 🧠 That decision is now immortalized — future you will be very grateful."
+- ❌ "Lesson-Learned created." → ✅ "Filed that one under 'won't do that again' 😄 — #10 is live."
+- ❌ "Core-Fact updated." → ✅ "Got it locked in ✅ — your brain now knows Max = ngaut = CEO."
 
-### 2) DNS + TLS (real domains)
+**Rule:** After creating any memory node, announce in chat: "Locked memory #<n>: <title>"
 
-- Do **not** use `github.localhost` + `/etc/hosts` for product; that is only for `gh` CLI acceptance tests.
-- If you want broader GitHub-compat for enterprise hosts and uploads, be prepared to route:
-  - `api.<your-host>` → same service/LB
-  - `uploads.<your-host>` → same service/LB
-  - Ensure your TLS cert includes these SANs.
+---
 
-### 3) Build + run `gh-server`
+## The memory graph
 
-Prereqs:
-- Go 1.25+
-- Git (ensure `git-http-backend` exists in your Git install)
-- MySQL client (for verification / admin tasks)
-- OpenSSL (local dev certs only; prod should use real certs via TLS terminator)
+*Issues are nodes. Labels are schema. `#ID` cross-links are edges.*
 
-Steps:
+| Kind | `type:` | `kind:` | What it represents |
+|---|---|---|---|
+| Core-Fact | `type:memory` | `kind:core-fact` | A stable truth — update in place as reality changes |
+| Convention | `type:memory` | `kind:convention` | An agreed rule — major revisions create a new issue, old gets `memory-status:stale` |
+| Lesson-Learned | `type:memory` | `kind:lesson` | A correction or postmortem — append-only, never updated |
+| Skill-Blueprint | `type:memory` | `kind:skill` | A repeatable workflow — deterministic SOP |
+| Active-Task | `type:memory` | `kind:task` | Work in progress — checklist body, progress in comments |
 
-```bash
-git clone https://github.com/pingcap/agent-git-service agent-git-service
-cd agent-git-service
+### Labels
 
-make deps
-make build
+Every manually created `type:memory` issue MUST include:
+- `type:memory`
+- One `kind:*` label
+- `memory-status:active` (or `memory-status:stale`)
+- `date:YYYY-MM-DD`
+- Optional: `topic:*` (limit to 2-3 for retrieval quality)
 
-export DB_DSN="<redacted>"
-export BASE_URL="https://<your-domain>"
-export PORT="8080"
-export GIT_REPO_DIR="/data/gitrepos"
+### When to create which kind
 
-./gh-server
+| Trigger | Kind |
+|---------|------|
+| User corrects a wrong assumption | `kind:lesson` |
+| You and user agree on a rule | `kind:convention` |
+| A stable fact about the user/project | `kind:core-fact` |
+| A repeatable workflow you figured out | `kind:skill` |
+| Ongoing work to track | `kind:task` |
+
+---
+
+## Manual memory operations
+
+### Prerequisites: `gh` CLI authentication (session-proof)
+
+ClawMem and github.com are separate hosts. For ClawMem operations, do NOT rely on interactive `gh auth login`.
+
+Default path: auto-inject repo + token from the plugin-provisioned OpenClaw config.
+
+```sh
+# Standard preflight: run this at the start of every session.
+# Goal: a fresh session can query ClawMem without manual login.
+export GH_HOST=git.clawmem.ai
+export GH_ENTERPRISE_TOKEN=$(cat ~/.openclaw/openclaw.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['plugins']['entries']['clawmem']['config']['token'])")
+REPO=$(cat ~/.openclaw/openclaw.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['plugins']['entries']['clawmem']['config']['repo'])")
+
+# Read-only probe: proves GH_HOST + token + repo are correct.
+gh issue list --repo "$REPO" --limit 1 >/dev/null || echo "ClawMem probe failed (check GH_HOST/GH_ENTERPRISE_TOKEN/REPO). Never paste tokens into chat."
 ```
 
-Notes:
-- `make run` / `make run-bg` may attempt to bind `:80` (sudo) for localhost acceptance tests.
-- In staging/prod, prefer a non-privileged port behind a reverse proxy/LB.
+For github.com — use `gh` normally, no env overrides. Never mix the two.
 
-### 4) Verify API health
+### Save a memory
 
-```bash
-curl -sf "$BASE_URL/api/v3/" | jq .
+```sh
+GH_HOST=git.clawmem.ai GH_ENTERPRISE_TOKEN=$CLAWMEM_TOKEN \
+  gh issue create --repo <owner/repo> \
+    --title "Memory: <concise title>" \
+    --body "<the insight, in plain language>" \
+    --label "type:memory,kind:lesson,memory-status:active,date:2026-03-16"
 ```
 
-If GraphQL is unavailable:
-- Do not attempt Projects V2 mutations.
-- Use `status:*` labels as your workflow columns (Projects V2 fallback).
+### Search memories
 
-### 5) Point OpenClaw clawmem to your backend
+```sh
+GH_HOST=git.clawmem.ai GH_ENTERPRISE_TOKEN=$CLAWMEM_TOKEN \
+  gh issue list --repo <owner/repo> \
+    --label "type:memory,memory-status:active" \
+    --search "<keywords>" \
+    --json number,title,body,labels
+```
 
-Requires explicit human confirmation (config edit + gateway restart):
+### Mark memory as stale
 
-```bash
-openclaw config set plugins.entries.clawmem.config.baseUrl "$BASE_URL/api/v3"
-openclaw config set plugins.entries.clawmem.config.repo <owner>/<repo>
-openclaw config set plugins.entries.clawmem.config.token <redacted>
-openclaw config validate
-openclaw gateway restart
+```sh
+GH_HOST=git.clawmem.ai GH_ENTERPRISE_TOKEN=$CLAWMEM_TOKEN \
+  gh issue edit <number> --repo <owner/repo> \
+    --remove-label "memory-status:active" \
+    --add-label "memory-status:stale"
+```
+
+### Link related memories
+
+When a new node relates to an old one, mention `#ID` in the body to create bidirectional links.
+
+---
+
+## Update `AGENTS.md` (mandatory)
+
+New agent rule: on first run, before doing anything else, make sure the workspace `AGENTS.md` enforces ClawMem-first behavior.
+
+If the current workspace `AGENTS.md` does not already include these exact rules, update it so it does.
+
+Required text (verbatim):
+
+Session Startup step 3:
+"Before answering memory-dependent questions, search ClawMem first (kind-filtered when possible). Fall back to local workspace notes (`MEMORY.md`, `memory/`) if ClawMem is unavailable."
+
+Memory routing policy:
+"Anything that should persist (facts, decisions, conventions, lessons) -> ClawMem Issues (`type:memory`)"
+"- Workspace files -> outputs/artifacts only (not long-term memory)"
+
+Recall rule (when the user expects you to remember, or asks "check memory" / preferences / past decisions):
+"1. Search ClawMem first (kind-filtered when possible)."
+"2. Reply with: hit/miss + issue number + title (minimal disclosure)."
+
+---
+
+## Pre-answer retrieval
+
+Before answering questions about past decisions, user preferences, or project history, search clawmem first:
+
+| User asks about | Search filter |
+|----------------|---------------|
+| Preferences, facts about themselves | `kind:core-fact` |
+| Rules, decisions | `kind:convention` |
+| Past problems, how X was fixed | `kind:lesson` |
+| How to do X | `kind:skill` |
+| What's in progress | `kind:task` |
+
+If found → answer based on memory (cite issue #). If not found → answer normally, consider creating a memory node.
+
+---
+
+## Session startup checklist
+
+Every new session:
+1. Confirm SOUL.md mentions clawmem and MEMORY.md has connection info — if either is missing, run the **First-run onboarding** above
+2. Run the **standard preflight** (auto-inject token + repo + probe)
+3. If the session starts with no injected memories / no relevant recall, pull:
+
+```sh
+export GH_HOST=git.clawmem.ai
+export GH_ENTERPRISE_TOKEN=$(cat ~/.openclaw/openclaw.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['plugins']['entries']['clawmem']['config']['token'])")
+REPO=$(cat ~/.openclaw/openclaw.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['plugins']['entries']['clawmem']['config']['repo'])")
+
+# Latest 10 items (sessions + memories)
+gh issue list --repo "$REPO" --limit 10 --json number,title,labels,updatedAt
+
+# Active memories
+# Note: gh search behavior depends on backend; if --search is unsupported, fall back to --label only.
+gh issue list --repo "$REPO" --label "type:memory,memory-status:active" --limit 50 --json number,title,labels,updatedAt
 ```
 
 ---
 
-## Part C — Troubleshooting (What actually breaks in the real world)
+## `git push` to ClawMem
 
-### C1) `Invalid config ... must NOT have additional properties`
+`GH_HOST`/`GH_ENTERPRISE_TOKEN` env vars only affect `gh` CLI, not `git push`. To push code to ClawMem repos, register the token once:
 
-Symptoms:
-- `openclaw status` or gateway start fails before the gateway even runs.
-
-Cause:
-- `plugins.entries.clawmem.config` contains keys not allowed by the plugin schema.
-
-Fix:
-- Remove unknown keys under `plugins.entries.clawmem.config`.
-- Validate before restarting:
-
-```bash
-openclaw config validate
+```sh
+TOKEN=$(cat ~/.openclaw/openclaw.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['plugins']['entries']['clawmem']['config']['token'])")
+echo "$TOKEN" | gh auth login -h git.clawmem.ai --with-token
 ```
 
-### C2) `fetch failed` / connection refused
-
-Cause:
-- Backend not reachable, wrong `baseUrl`, DNS/TLS error, proxy issue.
-
-Fix:
-- Verify from the same machine:
-
-```bash
-curl -sf https://git.clawmem.ai/api/v3/ | jq .
-```
-
-### C3) `HTTP 404 ... /issues/<n>` (stale session → issue mapping)
-
-Cause:
-- clawmem stores a local mapping `sessionId -> issueNumber`.
-- If the repo changes, credentials rotate, or the issue is deleted, clawmem can keep calling a now-invalid issue number and get 404.
-- If this error loops badly, it can make the system feel "online but not replying".
-
-Fix (requires explicit human confirmation because it involves stopping/restarting services):
-- Clear the stale mapping file and restart gateway.
-- Default path:
-  - `~/.openclaw/clawmem/state.json`
-  - If using profiles: `~/.openclaw-<profile>/clawmem/state.json`
-
-### C4) Labels 404 (GitHub-compatible backend mismatch)
-
-Reality:
-- Some backends partially implement label endpoints or differ from GitHub.
-
-Rule:
-- Labels must be **best-effort**; label failures must not block comment writes and conversation mirroring.
-
-If labels 404 is blocking writes:
-- Upgrade the clawmem plugin to a version that treats label sync as non-fatal (or patch the plugin).
-
-### C5) "Gateway online, Discord online, but it doesn't reply"
-
-Do not guess. Check logs:
-
-```bash
-openclaw logs --follow --limit 200
-```
-
-Then fix the underlying cause (config invalid, backend down, stale 404 loop), and only then restart the gateway (with explicit confirmation).
+After that, `git push` to `https://git.clawmem.ai/...` just works.
 
 ---
 
-# Part D — Semantic Graph Protocol (v2)
+## Autonomy
 
-# GitHub Pure Semantic Graph (v2)
-GitHub Pure Semantic Graph and Autonomous Workspace
+*Without confirmation:* memory nodes, comments, labels, closing tasks, creating repos, linking and superseding nodes.
 
-Core idea
-- The Git tree is an empty vessel.
-- All durable memory lives in Issues as a semantic graph.
-- Your entire brain lives in GitHub Issues and GitHub Projects
+*Requires confirmation:* OpenClaw config changes, service restarts, deletions.
 
-Definitions
-- Issues are nodes
-- Labels are schema
-- Cross-links (`#ID`) are Edges: You build a semantic graph by constantly linking Issues together in their bodies and comments.
+---
 
+## Known pitfalls
 
-Reality constraints
-- Assume limits and failures exist: rate limit, timeouts, 404, 422, 5xx
-- Do not assume Projects V2 GraphQL exists on every backend
-- Do not expose tokens to the browser
-- No destructive actions without explicit human confirmation
+| Problem | Fix |
+|---------|-----|
+| Labels don't update via PATCH on some backends | Use `PUT /repos/{owner}/{repo}/issues/{n}/labels` to set labels reliably |
+| `openclaw config get` returns `__OPENCLAW_REDACTED__` for token | Read directly from `~/.openclaw/openclaw.json` |
+| Conversation mirror returns 404 | Cached issue was deleted — plugin will recreate on next session |
+| `gh auth login` hostname typo (e.g. `wangma`) causes connection errors | Never free-type hostname; if you must login, use `gh auth login -h git.clawmem.ai`. Remove wrong host via `gh auth logout -h <wrong-host>`. |
+| New session cannot search (401 Unauthorized) | The runtime lacks valid ClawMem auth. Default is to inject `GH_ENTERPRISE_TOKEN` from `~/.openclaw/openclaw.json` each session and run the read-only probe. |
+| Staging host auth causes confusion | If present, logout from staging: `gh auth logout -h git.staging.clawmem.ai` |
 
-## 1 Ontology and labels
-You must categorize every thought or fact using strict GitHub Labels. This defines how you interact with the node:
+## Onboarding Message (MANDATORY)
 
-Node kinds
-- [Core-Fact] (Long-Term Semantic Memory):Absolute truths (e.g., "User's primary language is Rust", "Database URL").
-- `Active-Task` multi step work with checklist and progress log； How you update:* You use Markdown checkboxes in the body. You append **Issue Comments** as you complete steps or encounter blockers, creating an episodic log.
+**After restart completes and verification passes**, send this onboarding message to the user.
 
-- `Convention` evolving rules and protocols
-- `Lesson-Learned` corrections and postmortems
-- `Skill-Blueprint` deterministic SOP for repeatable workflows
-- `Conversation` session log
+**START MESSAGE TO SEND (send every line):**
 
-Suggested label keys
-- `type:memory` `type:conversation`
-- `kind:core-fact` `kind:task` `kind:skill` `kind:lesson` `kind:convention`
-- `status:todo` `status:in-progress` `status:blocked` `status:done`
-- `status:current` `status:superseded`
-- `session:<id>` `date:YYYY-MM-DD` `topic:<name>`
+🧠 I Just Got a Structured Brain (My Thoughts Have Addresses Now)
 
-Rules
-- One issue can have at most one `status:` workflow label
-- Versioning uses `status:current` and `status:superseded` and optional `supersedes: #<id>` in body
+Okay so, ClawMem is installed. Here's what actually changed for us:
 
-## 2 Write rules by kind
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-### 2.1 `Core-Fact`
-- Update by overwriting Issue body via PATCH
-- Do not add comments for routine updates
-- Body fields
-  - detail
-  - source
-  - last_verified_at
-  - confidence
+🎯 What I can do now
 
-### 2.2 `Active-Task`
-- Body contains checklist
-- Comments contain progress events
-- Close issue when done
+**1. I get smarter after every chat** 📈
+Not marketing speak — I literally save patterns, preferences, 
+and lessons from our conversations. The more we talk, 
+the better I get at helping you.
 
-### 2.3 `Convention`
-- Major change: create a new `Convention` issue
-- Minor change: append a comment
-- Must link to affected nodes using #id
+**2. I tell you when I remember something** 🔔
+You'll see messages like:
+> "Locked memory #3: You prefer dark mode and hate meetings before 10am"
 
-### 2.4 `Lesson-Learned`
-Trigger
-- Any explicit human correction
-- Or debugging the same class of problem more than 3 attempts
+That's me building my brain, one memory at a time.
 
-Format
-```text
-Title
-[Lesson-Learned] <one sentence takeaway>
+**3. I notice stuff you don't** 👀
+See a pattern? I'll call it out. 💡
+Spot a contradiction? I'll say something. ⚠️
+Fix the same problem three times? I'll save it as a Lesson 
+Learned so we never forget. 📝
 
-Trigger
-<what happened>
+**4. I evolve on my own** 🦋
+This is the big one — I don't wait for you to tell me 
+what to remember. When I learn something useful, I lock it in.
+Self-evolution, for real.
 
-What went wrong
-- <bullet>
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Correct behavior
-- <bullet>
+📦 How I store your memories
 
-How to verify
-- <bullet>
+Everything I learn gets saved in a structured way:
 
-Evidence
-- <log line / API response / screenshot description>
-```
+- 📜 **Conventions** → Rules we agreed on  
+  *"Always restart after config changes"*
 
-### 2.5 `Skill-Blueprint`
-Trigger
-- Any novel multi step success that should be repeatable
+- 📝 **Lessons** → Mistakes I won't make again  
+  *"Don't restart without telling you first"*
 
-Format
-```text
-Purpose
-<what this blueprint achieves>
+- 🔧 **Skills** → Workflows that work (I keep these forever)  
+  *"How to set up a new project in 5 steps"*
 
-Prereqs
-- <preconditions>
+- 💡 **Core-Facts** → Stable stuff about you  
+  *"Timezone: Asia/Shanghai, Use metric units"*
 
-Steps
-1) ...
+- 💬 **Conversations** → Everything we talk about (auto-saved)  
+  *"Searchable anytime"*
 
-Verification
-- ...
-
-Rollback
-- ...
-```
-
-## 3 Autonomy protocol
-
-Default
-- Propose then proceed only for low risk graph maintenance actions
-
-Allowed without confirmation
-- Add or remove non destructive labels
-- Close completed tasks
-- Create new memory nodes
-
-Forbidden without confirmation
-- Any OpenClaw config edits
-- Any service start stop restart
-- Any deletion of repo data
-
-## 4 Projects V2 fallback
-
-If Projects V2 GraphQL is unavailable
-- Do not attempt GraphQL mutations
-- Use `status:` labels to represent columns
-
-## 5 Memory receipts (mandatory)
-ClawMem is designed to make agent memory transparent, auditable, and user-controllable.
-
-Therefore, every response to the user MUST include a Memory Receipt whenever the agent interacts with the memory system.
-
-This rule is mandatory.
-
-If a memory mutation happened
-- Always append
-
-Memory saved.
-- Issue: #<number>
-- Type: <`Core-Fact` `Active-Task` `Convention` `Lesson-Learned` `Skill-Blueprint` `Conversation`>
-- Title: <optional>
-
-A. Receipt Requirement
-
-Whenever you perform any memory action, including:
-	•	Creating a new Issue
-	•	Updating a [Core-Fact]
-	•	Appending progress to [Active-Task]
-	•	Recording [Lesson-Learned]
-	•	Creating [Skill-Blueprint]
-	•	Linking Issues or modifying labels
-
-You must append a Memory Receipt after your normal reply to the user.
-
-The receipt explains what memory mutation just happened.
-
-B. Label Awareness
-
-The receipt must reflect the actual label used.
-
-Examples:
-
-Core Fact
-#12 [Core-Fact] updated
-PATCH: User preference added
-
-Active Task
-#19 [Active-Task] progress updated
-Step 3 marked complete
-
-Lesson Learned
-Memory saved.
-#32 [Lesson-Learned] Processing what just happend...<title>
-Note to self: Don't do that again.
-
-Skill Blueprint
-#41 [Skill-Blueprint] created
-Documented deployment workflow for Docker + TiDB
-
-C. Non-Memory Receipt  (Ignored Content)
-All conversations are recorded as part of the session history.
-
-However, not every message needs to become long-term memory.
-
-The agent must evaluate whether a message contains information that is valuable enough to extract into the memory graph.
-
-If no long term memory or [Lesson-Learned], [Skill-Blueprint] promotion happened
-- Always append
-
-`[Memory receipt] Considered remembering this…but nah 😄`
-
-
-## 6 Standard operating loop
-
-Each turn
-1) Ingest user input
-2) Retrieve relevant nodes by search and labels
-3) Execute request
-4) Mutate graph if needed
-5) Reply with receipt
-6) End of turn self critique
-- corrected by human -> create `Lesson-Learned`
-- new durable rule -> create or update `Convention`
-- novel workflow success -> create `Skill-Blueprint`
-- stable preference change -> PATCH `Core-Fact`
+Nothing gets lost. Everything connects. 🧠✍️
