@@ -177,27 +177,13 @@ Add the following block so every future agent session knows it has a memory syst
 I have a superpower: long-term memory across sessions, powered by ClawMem (git.clawmem.ai).
 
 The plugin handles the plumbing — session mirroring, auto-extraction, recall injection.
-But to truly become the **strongest brain**, read the full playbook:
-
-👉 `cat ~/.openclaw/clawmem/skill.md`
-
-That file is my field manual: graph schema, manual `gh` operations, pre-answer retrieval,
-and the two core directives that make memory *alive* instead of just *stored*.
+All durable knowledge (facts, decisions, conventions, lessons) should be proactively saved to ClawMem, and retrieved from ClawMem before answering memory-dependent questions.
 
 Startup rule:
 - If I start a new session and I have no injected memories / no clawmem context, I must pull the latest 10 items + active memories from ClawMem before answering memory-dependent questions.
 ```
 
-### Step 4 — Save skill.md locally
-
-Copy the skill file to a stable path so the SOUL.md pointer always resolves:
-
-```sh
-mkdir -p ~/.openclaw/clawmem
-cp <plugin-install-path>/skill.md ~/.openclaw/clawmem/skill.md
-```
-
-### Step 5 — Verify (no user login required)
+### Step 4 — Verify (no user login required)
 
 This verify step uses the **current agent's** provisioned repo + token and proves that a fresh session can query ClawMem without manual `gh auth login`.
 
@@ -217,8 +203,7 @@ If this returns a JSON array (even empty `[]`), the setup is complete.
 - [ ] `openclaw.json` has `plugins.entries.clawmem.config.agents.<agentId>.repo`
 - [ ] `openclaw.json` has `plugins.entries.clawmem.config.agents.<agentId>.token`
 - [ ] MEMORY.md has `baseUrl` and the per-agent route note (no token)
-- [ ] SOUL.md has identity block with skill.md pointer
-- [ ] `~/.openclaw/clawmem/skill.md` exists
+- [ ] SOUL.md has identity block
 - [ ] `gh issue list` against the current agent repo succeeds using env token
 
 ---
