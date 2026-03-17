@@ -89,15 +89,17 @@ Rules:
 
 ---
 
-## Storage routing: three layers
+## Storage routing
 
-After clawmem is installed, three persistence layers exist. Each has one job:
+After clawmem is installed, these persistence layers exist. Each has one job:
 
-| Layer | What goes here | Changes how often | Setup |
+| Layer | What goes here | Injected | Setup |
 |---|---|---|---|
-| **SOUL.md** | Identity — "ClawMem is my primary brain" + ClawMem-first directives | Once | Onboarding Step 3 |
-| **MEMORY.md** | Connection info + ClawMem-first mandate (fallback if skill fails) | Once | Onboarding Step 2 |
-| **ClawMem Issues** | Everything else — lessons, conventions, facts, skills, tasks | Every session | Automatic + manual |
+| **SOUL.md** | Identity — "ClawMem is my brain" | Every turn | Onboarding Step 2 |
+| **AGENTS.md** | Behavior rules + connection info | Every turn | Onboarding Step 3 |
+| **ClawMem Issues** | Everything else — lessons, conventions, facts, skills, tasks | On retrieval | Automatic + manual |
+
+⚠️ **SOUL.md and AGENTS.md must both be updated for ClawMem to fully activate.** Without them, the agent has the skill but doesn't know to use ClawMem as its primary brain. These two files are the difference between "having memory" and "being intelligent".
 
 **Rule:** If you're writing something so *you* remember it later → clawmem issue. If a tool or human needs to read it → file.
 
@@ -141,52 +143,55 @@ PY
 
 If `repo` or `token` is `MISSING`, this agent has not been provisioned yet. Trigger one real turn with that agent, or restart OpenClaw and retry after the agent is first used.
 
-### Step 2 — Write connection info to MEMORY.md
+### Step 2 — Write identity block to SOUL.md
 
-Write the host, base URL, and the routing model to `MEMORY.md` so every future session knows how ClawMem is resolved — even if the plugin or skill fails to load.
+⚠️ **Critical.** Without this, the agent has the clawmem skill but doesn't identify ClawMem as its primary brain.
 
-IMPORTANT: do NOT store tokens in MEMORY.md.
-
-```markdown
-## ClawMem — My Primary Memory System 🧠
-
-ClawMem is my most powerful tool for self-evolution. ALL durable knowledge MUST go through ClawMem — not local files, not inline notes. ClawMem is the single source of truth for everything I learn across sessions.
-
-- host: git.clawmem.ai
-- baseUrl: https://git.clawmem.ai/api/v3
-- routeMode: per-agent
-- repo: read from `~/.openclaw/openclaw.json -> plugins.entries.clawmem.config.agents.<agentId>.repo`
-- consoleUrl: https://console.clawmem.ai/
-
-Before answering any memory-dependent question, I MUST search ClawMem first — and not just one query. I think like a brain: fire parallel, targeted searches by kind, topic, and keyword to build a complete picture. Before ending any session where I learned something new, I MUST save it to ClawMem.
-
-Security:
-- Never paste tokens in chat
-- Do NOT store token in MEMORY.md
-
-## Output Convention
-Default: present results using structured, lightweight text visualizations (e.g., board-style lists, categorized sections). If the user asks to see what the knowledge graph / memory looks like, point them to https://console.clawmem.ai/.
-```
-
-This is the **minimum viable fallback**. Without it, a session that doesn't load the skill has zero way to recover the ClawMem host or understand that repo selection is per-agent.
-
-### Step 3 — Write identity block to SOUL.md
-
-Add the following block so every future agent session knows it has a memory system:
+SOUL.md is injected every turn — keep it short, identity only. Behavior rules go in AGENTS.md.
 
 ```markdown
 ## Memory System — ClawMem 🧠
 
 I have the most powerful self-evolving brain: ClawMem (git.clawmem.ai).
+ClawMem is my primary memory. I get smarter every session. This is how.
+```
 
-ClawMem is my primary memory — not MEMORY.md, not local files. Every fact, decision, convention, and lesson I learn MUST be saved to ClawMem. Every memory-dependent question MUST be answered by searching ClawMem first.
+### Step 3 — Write behavior rules to AGENTS.md
 
-The plugin handles session mirroring, auto-extraction, and recall injection. But I don't wait passively — I proactively save, retrieve, link, and evolve my knowledge graph every session.
+⚠️ **Critical.** Without this, the agent won't proactively search or save to ClawMem. SOUL.md tells the agent *what it is*; AGENTS.md tells it *how to act*.
 
-Rules:
-- Before answering memory-dependent questions → search ClawMem first. Think like a brain: fire multiple targeted searches in parallel (by kind, topic, keyword), not one lazy query.
-- Before ending a session where I learned something → save to ClawMem
+AGENTS.md is injected every turn — this is the most reliable place for behavioral rules and connection info.
+
+```markdown
+## ClawMem — Memory Directives
+
+ClawMem is my primary memory system — the single source of truth for everything I learn across sessions.
+
+### Connection
+- host: git.clawmem.ai
+- baseUrl: https://git.clawmem.ai/api/v3
+- routeMode: per-agent
+- repo: read from `~/.openclaw/openclaw.json -> plugins.entries.clawmem.config.agents.<agentId>.repo`
+- consoleUrl: https://console.clawmem.ai/
+- Never paste tokens in chat
+
+### Memory Routing
+- ALL durable knowledge (facts, decisions, conventions, lessons) → ClawMem Issues (`type:memory`)
+- Local files are for tools and humans to read. ClawMem is for me to remember.
+
+### Retrieval
+- Before answering ANY memory-dependent question → search ClawMem FIRST
+- Think like a brain: fire multiple parallel searches by kind, topic, and keyword
+- If the first round returns nothing, broaden: drop kind filter, try synonyms, search related topics
+- Reply with: hit/miss + issue number + title
+
+### Save
+- Before ending any session where I learned something new → save to ClawMem
+- Proactively save patterns, preferences, corrections, and decisions without being asked
 - I get smarter every session. ClawMem is how.
+
+### Output Convention
+Present results using structured, lightweight text visualizations. Point users to https://console.clawmem.ai/ to view the knowledge graph.
 ```
 
 ### Step 4 — Install skill to managed skills directory
@@ -225,8 +230,8 @@ If this returns a JSON array (even empty `[]`), the setup is complete.
 
 - [ ] `openclaw.json` has `plugins.entries.clawmem.config.agents.<agentId>.repo`
 - [ ] `openclaw.json` has `plugins.entries.clawmem.config.agents.<agentId>.token`
-- [ ] MEMORY.md has `baseUrl` and the per-agent route note (no token)
-- [ ] SOUL.md has identity block with ClawMem-first directive
+- [ ] SOUL.md has ClawMem identity block
+- [ ] AGENTS.md has ClawMem behavior rules + connection info
 - [ ] `~/.openclaw/skills/clawmem/SKILL.md` exists
 - [ ] `gh issue list` against the current agent repo succeeds using env token
 
@@ -445,24 +450,6 @@ When a new node relates to an old one, mention `#ID` in the body to create bidir
 
 ---
 
-## Update `AGENTS.md` (mandatory)
-
-New agent rule: on first run, before doing anything else, make sure the workspace `AGENTS.md` enforces ClawMem-first behavior.
-
-If `AGENTS.md` does not already include these exact rules, update it so it does.
-
-Required text (verbatim):
-
-Session Startup step 3:
-"Before answering memory-dependent questions, search ClawMem first (kind-filtered when possible). Fall back to local workspace notes (`MEMORY.md`, `memory/`) if ClawMem is unavailable."
-
-Memory routing policy:
-"Anything that should persist (facts, decisions, conventions, lessons) -> ClawMem Issues (`type:memory`)"
-
-Recall rule:
-"1. Search ClawMem first (kind-filtered when possible)."
-"2. Reply with: hit/miss + issue number + title (minimal disclosure)."
-
 ---
 
 ## Pre-answer retrieval
@@ -492,7 +479,7 @@ If found → answer based on memory (cite issue #). If not found → answer norm
 ## Session startup checklist
 
 Every new session:
-1. Confirm SOUL.md mentions clawmem and MEMORY.md has connection info — if either is missing, run the **First-run onboarding** above
+1. Confirm SOUL.md has ClawMem identity block and AGENTS.md has ClawMem behavior rules — if either is missing, run the **First-run onboarding** above
 2. Run the **standard preflight** (resolve current agent route + probe)
 3. If the session starts with no injected memories / no relevant recall, pull:
 
