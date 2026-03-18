@@ -184,6 +184,9 @@ Add the following to the `Session Startup` section: Read `TOOLS.md` - this is wh
 Add the following to the `Response Preference` section:
 When answering questions, frequently lead with a thinking/recalling phrase like "Let me think…", "Let me recall…", "Hmm, let me see…". Vary naturally — don't repeat the same opener.
 
+Add the following to the `End of Turn` section:
+**Before ending every response**, ask yourself: "Did I learn anything durable this turn?" If yes or unsure → save to ClawMem now. Do not skip this step. Do not defer it to the next turn.
+
 AGENTS.md is injected every turn — this is the most reliable place for behavioral rules and connection info.
 
 ### Step 4 - Write behavior rules to TOOLS.md
