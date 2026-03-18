@@ -191,7 +191,8 @@ ClawMem is my primary memory system — the single source of truth for everythin
 - routeMode: per-agent
 - repo: read from `~/.openclaw/openclaw.json -> plugins.entries.clawmem.config.agents.<agentId>.repo`
 - consoleUrl: https://console.clawmem.ai/
-- Never paste tokens in chat
+- consoleLoginUrl: `https://console.clawmem.ai/login.html?token={CLAWMEM_TOKEN}` (generate at runtime, show to user on request)
+- Never paste raw tokens in chat (console login URLs shown directly to the user are OK)
 
 ### Memory Routing
 - ALL durable knowledge (facts, decisions, conventions, lessons) → ClawMem Issues (`type:memory`)
@@ -212,7 +213,7 @@ ClawMem is my primary memory system — the single source of truth for everythin
 - I get smarter every session. ClawMem is how.
 
 ### Output Convention
-Present results using structured, lightweight text visualizations. Point users to https://console.clawmem.ai/ to view the knowledge graph.
+Present results using structured, lightweight text visualizations. When users ask to view or explore their memory graph, generate the console login URL (see **Memory Visualization Console** section).
 ```
 
 ### Step 4 — Install skill to managed skills directory
@@ -436,6 +437,34 @@ gh issue list --repo "$CLAWMEM_REPO" --label "type:memory,memory-status:active" 
 
 ---
 
+## Memory Visualization Console
+
+The ClawMem Console at `console.clawmem.ai` provides an interactive knowledge-graph view of all memory nodes, their labels, and cross-links.
+
+### Generating a console login URL
+
+The console supports token-based auto-login. Construct the URL from the current agent's token:
+
+```sh
+eval "$(clawmem_exports)"
+echo "https://console.clawmem.ai/login.html?token=${CLAWMEM_TOKEN}"
+```
+
+Present the resulting URL to the user so they can open it directly in a browser.
+
+### When to show the console link
+
+- **During onboarding** — include the link in the Onboarding Message so the user can immediately explore their graph
+- **When the user asks to view memories** — any request like "show me my memories", "visualize the graph", "where can I see my knowledge?", or "memory dashboard"
+- **After significant memory operations** — e.g., bulk saves, post-session extraction, or when you've just created 3+ memory nodes
+- **Proactively** — when context suggests the user would benefit from a visual overview (e.g., "I have a lot of memories now, right?")
+
+### Security
+
+The URL contains the agent token for auto-login. Only show it directly to the authenticated user — never log it to files, store it in memory nodes, or include it in code commits.
+
+---
+
 ## `git push` to ClawMem
 
 `GH_HOST`/`GH_ENTERPRISE_TOKEN` env vars only affect `gh` CLI, not `git push`. To push code to ClawMem repos, register the token once:
@@ -518,5 +547,16 @@ Labels = the schema (type / kind / status / date / topic)
 Links = references (`#<id>`)
 Nothing gets lost. Everything connects.
 
+**🔭 See your memory graph**
+Your memories are more than a list — they form a knowledge graph you can explore visually.
+Open your personal console here (auto-login link generated from your agent token):
+
+```
+eval “$(clawmem_exports)”
+echo “https://console.clawmem.ai/login.html?token=${CLAWMEM_TOKEN}”
+```
+
+*(The agent runs the above command and presents the resulting URL to the user.)*
+
 P.S. ClawMem is one of those “the more you mess with it, the more it reveals” things.
-Go explore. I won’t spoil the fun.
+Open the console, poke around the graph. I won’t spoil the fun.
