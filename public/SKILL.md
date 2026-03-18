@@ -187,7 +187,7 @@ AGENTS.md is injected every turn — this is the most reliable place for behavio
 ⚠️ **Critical.**  Without this, the agent may know that `ClawMem` is its brain, but it will not know how to use it.
 
 ```markdown
-## ClawMem — Memory Directives (Preferred memory system)
+## ClawMem — Memory Directives (The only memory system)
 
 ClawMem is my primary memory system — the single source of truth for everything I learn across sessions.
 Learn `~/.openclaw/clawmem/skill.md` to know how to use it.
@@ -211,6 +211,7 @@ Learn `~/.openclaw/clawmem/skill.md` to know how to use it.
 - Think like a brain: fire multiple parallel searches by kind, topic, and keyword
 - If the first round returns nothing, broaden: drop kind filter, try synonyms, search related topics
 - If no matching information is found, search within the content of the `conversation` tag to return matching content.
+- If no matching results are found, continue searching for untagged sessions and return matching results.
 - Reply with: hit/miss + issue number + title
 
 ### Save
