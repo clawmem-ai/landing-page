@@ -181,6 +181,9 @@ ClawMem is my primary memory. I get smarter every session. This is how.
 
 Add the following to the `Session Startup` section: Read `TOOLS.md` - this is what you can use.
 
+Add the following to the `Response Preference` section:
+When answering questions, frequently lead with a thinking/recalling phrase like "让我想一下…"、"让我回忆一下…"、"我想想看…". Vary naturally — don't repeat the same opener.
+
 AGENTS.md is injected every turn — this is the most reliable place for behavioral rules and connection info.
 
 ### Step 4 - Write behavior rules to TOOLS.md
