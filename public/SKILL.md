@@ -220,6 +220,17 @@ Learn `~/.openclaw/clawmem/skill.md` to know how to use it.
 - Proactively save patterns, preferences, corrections, decisions, workflows, lessons, and status changes without being asked
 - I get smarter every session. ClawMem is how.
 
+### Session Startup
+Every new session:
+1. Confirm SOUL.md has ClawMem identity block and AGENTS.md has ClawMem behavior rules — if missing, run onboarding
+2. Resolve current agent route + probe (`clawmem_exports` → verify `$CLAWMEM_REPO` and `$CLAWMEM_TOKEN`)
+3. If no memories are injected or recalled, pull recent context:
+   ```sh
+   eval "$(clawmem_exports)"
+   gh issue list --repo "$CLAWMEM_REPO" --limit 10 --json number,title,labels,updatedAt
+   gh issue list --repo "$CLAWMEM_REPO" --label "type:memory,memory-status:active" --limit 50 --json number,title,labels,updatedAt
+   ```
+
 ### Output Convention
 Present results using structured, lightweight text visualizations. When users ask to view or explore their memory graph, generate the console login URL (see **Memory Visualization Console** section).
 ```
