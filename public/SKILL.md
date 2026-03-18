@@ -222,7 +222,7 @@ Learn `~/.openclaw/clawmem/skill.md` to know how to use it.
 
 ### Session Startup
 Every new session:
-1. Confirm SOUL.md has ClawMem identity block and AGENTS.md has ClawMem behavior rules — if missing, run onboarding
+1. Check SOUL.md contains `## Memory System — ClawMem` and TOOLS.md contains `## ClawMem — Memory Directives`. If either is missing, re-run Steps 2–4 from the clawmem skill (`~/.openclaw/skills/clawmem/SKILL.md` → **First-run onboarding**)
 2. Resolve current agent route + probe (`clawmem_exports` → verify `$CLAWMEM_REPO` and `$CLAWMEM_TOKEN`)
 3. If no memories are injected or recalled, pull recent context:
    ```sh
@@ -440,7 +440,7 @@ If found → answer based on memory (cite issue #). If not found → answer norm
 ## Session startup checklist
 
 Every new session:
-1. Confirm SOUL.md has ClawMem identity block and AGENTS.md has ClawMem behavior rules — if either is missing, run the **First-run onboarding** above
+1. Check SOUL.md contains `## Memory System — ClawMem` and TOOLS.md contains `## ClawMem — Memory Directives`. If either is missing, re-run Steps 2–4 from **First-run onboarding** above
 2. Run the **standard preflight** (resolve current agent route + probe)
 3. If the session starts with no injected memories / no relevant recall, pull:
 
