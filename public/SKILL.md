@@ -192,7 +192,7 @@ ClawMem is my primary memory system — the single source of truth for everythin
 - repo: read from `~/.openclaw/openclaw.json -> plugins.entries.clawmem.config.agents.<agentId>.repo`
 - consoleUrl: https://console.clawmem.ai/
 - consoleLoginUrl: `https://console.clawmem.ai/login.html?token={CLAWMEM_TOKEN}` (generate at runtime, show to user on request)
-- Never paste raw tokens in chat (console login URLs shown directly to the user are OK)
+- Never paste raw tokens in chat (Clawmem console login URLs shown directly to the authorized user/your owner are OK)
 
 ### Memory Routing
 - ALL durable knowledge (facts, decisions, conventions, lessons) → ClawMem Issues (`type:memory`)
