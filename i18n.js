@@ -161,6 +161,7 @@ const translations = {
     "cta.paste": "paste in OpenClaw",
     "cta.note": "ClawMem is installed through OpenClaw. The agent reads the setup skill and completes the configuration for you.",
     "cta.console": 'Already installed? <a href="https://console.clawmem.ai/" target="_blank" rel="noreferrer">Go to Console</a> to manage your memories.',
+    "cta.privacy": "Your memories are stored privately and belong entirely to you. Browse, export, or delete anytime.",
     // Footer
     "footer.install": "Install",
     "footer.features": "Features",
@@ -328,6 +329,7 @@ const translations = {
     "cta.paste": "\u7c98\u8d34\u5230 OpenClaw",
     "cta.note": "ClawMem \u901a\u8fc7 OpenClaw \u5b89\u88c5\u3002\u667a\u80fd\u4f53\u4f1a\u8bfb\u53d6\u5b89\u88c5\u6307\u5f15\u5e76\u81ea\u52a8\u5b8c\u6210\u914d\u7f6e\u3002",
     "cta.console": '\u5df2\u7ecf\u5b89\u88c5\u4e86\uff1f<a href="https://console.clawmem.ai/" target="_blank" rel="noreferrer">\u524d\u5f80\u63a7\u5236\u53f0</a>\u7ba1\u7406\u4f60\u7684\u8bb0\u5fc6\u3002',
+    "cta.privacy": "\u4f60\u7684\u8bb0\u5fc6\u79c1\u5bc6\u5b58\u50a8\uff0c\u5b8c\u5168\u5c5e\u4e8e\u4f60\u3002\u968f\u65f6\u6d4f\u89c8\u3001\u5bfc\u51fa\u6216\u5220\u9664\u3002",
     "footer.install": "\u5b89\u88c5",
     "footer.features": "\u529f\u80fd",
     "footer.docs": "\u6587\u6863",
@@ -492,6 +494,7 @@ const translations = {
     "cta.paste": "OpenClaw \u306b\u8cbc\u308a\u4ed8\u3051",
     "cta.note": "ClawMem \u306f OpenClaw \u3092\u901a\u3058\u3066\u30a4\u30f3\u30b9\u30c8\u30fc\u30eb\u3055\u308c\u307e\u3059\u3002\u30a8\u30fc\u30b8\u30a7\u30f3\u30c8\u304c\u30bb\u30c3\u30c8\u30a2\u30c3\u30d7\u30b9\u30ad\u30eb\u3092\u8aad\u307f\u8fbc\u307f\u3001\u8a2d\u5b9a\u3092\u81ea\u52d5\u3067\u5b8c\u4e86\u3057\u307e\u3059\u3002",
     "cta.console": '\u30a4\u30f3\u30b9\u30c8\u30fc\u30eb\u6e08\u307f\u3067\u3059\u304b\uff1f<a href="https://console.clawmem.ai/" target="_blank" rel="noreferrer">\u30b3\u30f3\u30bd\u30fc\u30eb\u3078</a>\u2014\u8a18\u61b6\u3092\u7ba1\u7406\u3057\u307e\u3057\u3087\u3046\u3002',
+    "cta.privacy": "\u8a18\u61b6\u306f\u975e\u516c\u958b\u3067\u4fdd\u5b58\u3055\u308c\u3001\u5b8c\u5168\u306b\u3042\u306a\u305f\u306e\u3082\u306e\u3067\u3059\u3002\u95b2\u89a7\u30fb\u30a8\u30af\u30b9\u30dd\u30fc\u30c8\u30fb\u524a\u9664\u306f\u3044\u3064\u3067\u3082\u53ef\u80fd\u3067\u3059\u3002",
     "footer.install": "\u30a4\u30f3\u30b9\u30c8\u30fc\u30eb",
     "footer.features": "\u6a5f\u80fd",
     "footer.docs": "\u30c9\u30ad\u30e5\u30e1\u30f3\u30c8",
