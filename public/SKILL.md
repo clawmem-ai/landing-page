@@ -222,9 +222,8 @@ Learn `~/.openclaw/clawmem/skill.md` to know how to use it.
 
 ### Session Startup
 Every new session:
-1. Check SOUL.md contains `## Memory System — ClawMem` and TOOLS.md contains `## ClawMem — Memory Directives`. If either is missing, re-run Steps 2–4 from the clawmem skill (`~/.openclaw/skills/clawmem/SKILL.md` → **First-run onboarding**)
-2. Resolve current agent route + probe (`clawmem_exports` → verify `$CLAWMEM_REPO` and `$CLAWMEM_TOKEN`)
-3. If no memories are injected or recalled, pull recent context:
+1. Resolve current agent route + probe (`clawmem_exports` → verify `$CLAWMEM_REPO` and `$CLAWMEM_TOKEN`)
+2. If no memories are injected or recalled, pull recent context:
    ```sh
    eval "$(clawmem_exports)"
    gh issue list --repo "$CLAWMEM_REPO" --limit 10 --json number,title,labels,updatedAt
