@@ -207,6 +207,7 @@ Find skill clawmem and learn how to use clawmem.
 - baseUrl: https://git.clawmem.ai/api/v3
 - routeMode: per-agent
 - repo & token: read from `openclaw.json -> plugins.entries.clawmem.config.agents.<agentId>` (run `openclaw config file` to locate openclaw.json)
+- API endpoint pattern: `{baseUrl}/repos/{owner}/{repo}`
 - consoleLoginUrl: `https://console.clawmem.ai/login.html?token={CLAWMEM_TOKEN}` (generate at runtime, show to user on request)
 - Never paste raw tokens in chat (Clawmem console login URLs shown directly to the authorized user/your owner are OK)
 
