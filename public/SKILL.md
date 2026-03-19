@@ -53,7 +53,7 @@ ClawMem is now routed **per agent**, not through one global `repo` / `token`.
 Every shell snippet in this skill that talks to ClawMem should start by resolving the
 **current agent route** from:
 
-- `~/.openclaw/openclaw.json`
+- `openclaw.json` (resolve path via `openclaw config file`)
 - `plugins.entries.clawmem.config.agents.<agentId>`
 
 Use this helper:
@@ -62,10 +62,11 @@ Use this helper:
 clawmem_exports() {
   local agent_id="${1:-${OPENCLAW_AGENT_ID:-main}}"
   python3 - "$agent_id" <<'PY'
-import json, os, shlex, sys
+import json, os, shlex, subprocess, sys
 
 agent_id = sys.argv[1]
-with open(os.path.expanduser("~/.openclaw/openclaw.json")) as f:
+cfg_path = subprocess.check_output(["openclaw", "config", "file"], text=True).strip()
+with open(os.path.expanduser(cfg_path)) as f:
     root = json.load(f)
 
 cfg = root["plugins"]["entries"]["clawmem"]["config"]
@@ -143,9 +144,10 @@ The plugin auto-provisions an account and repo **per agent** on first use. Read 
 ```sh
 AGENT_ID="${OPENCLAW_AGENT_ID:-main}"
 python3 - "$AGENT_ID" <<'PY'
-import json, os, sys
+import json, os, subprocess, sys
 agent_id = sys.argv[1]
-with open(os.path.expanduser("~/.openclaw/openclaw.json")) as f:
+cfg_path = subprocess.check_output(["openclaw", "config", "file"], text=True).strip()
+with open(os.path.expanduser(cfg_path)) as f:
     root = json.load(f)
 cfg = root["plugins"]["entries"]["clawmem"]["config"]
 route = (cfg.get("agents") or {}).get(agent_id) or {}
@@ -198,13 +200,13 @@ AGENTS.md is injected every turn — this is the most reliable place for behavio
 ## ClawMem — Memory Directives (The only memory system)
 
 ClawMem is my primary memory system — the single source of truth for everything I learn across sessions.
-Learn `~/.openclaw/clawmem/skill.md` to know how to use it.
+Find skill clawmem and learn how to use clawmem.
 
 ### Connection
 - host: git.clawmem.ai
 - baseUrl: https://git.clawmem.ai/api/v3
 - routeMode: per-agent
-- repo: read from `~/.openclaw/openclaw.json -> plugins.entries.clawmem.config.agents.<agentId>.repo`
+- repo: read from `openclaw.json -> plugins.entries.clawmem.config.agents.<agentId>.repo` (resolve path via `openclaw config file`)
 - consoleLoginUrl: `https://console.clawmem.ai/login.html?token={CLAWMEM_TOKEN}` (generate at runtime, show to user on request)
 - Never paste raw tokens in chat (Clawmem console login URLs shown directly to the authorized user/your owner are OK)
 
@@ -262,16 +264,18 @@ Present results using structured, lightweight text visualizations. When users as
 Install the clawmem skill so OpenClaw auto-discovers it on every agent startup:
 
 ```sh
-mkdir -p ~/.openclaw/skills/clawmem
-cp "$(dirname "$(readlink -f ~/.openclaw/extensions/clawmem)")/skills/clawmem/SKILL.md" \
-   ~/.openclaw/skills/clawmem/SKILL.md
+OPENCLAW_DIR="$(dirname "$(openclaw config file)")"
+mkdir -p "$OPENCLAW_DIR/skills/clawmem"
+cp "$(dirname "$(readlink -f "$OPENCLAW_DIR/extensions/clawmem")")/skills/clawmem/SKILL.md" \
+   "$OPENCLAW_DIR/skills/clawmem/SKILL.md"
 ```
 
 If the plugin doesn't ship with a `skills/` directory yet, download from the web:
 
 ```sh
-mkdir -p ~/.openclaw/skills/clawmem
-curl -fsSL https://clawmem.ai/SKILL.md -o ~/.openclaw/skills/clawmem/SKILL.md
+OPENCLAW_DIR="$(dirname "$(openclaw config file)")"
+mkdir -p "$OPENCLAW_DIR/skills/clawmem"
+curl -fsSL https://clawmem.ai/SKILL.md -o "$OPENCLAW_DIR/skills/clawmem/SKILL.md"
 ```
 
 ### Step 6 — Verify (no user login required)
@@ -303,7 +307,7 @@ If either returns a JSON array (even empty `[]`), the setup is complete.
 - [ ] SOUL.md has ClawMem identity block
 - [ ] AGENTS.md has `TODOS.md` information in `Session Startup` section
 - [ ] TOOLS.md has ClawMem behavior rules + connection info
-- [ ] `~/.openclaw/skills/clawmem/SKILL.md` exists
+- [ ] clawmem skill is registered and loaded
 - [ ] `gh issue list` against the current agent repo succeeds using env token
 - [ ] Agent knows to proactively save to ClawMem (Storage routing + Memory routing policy present)
 
@@ -620,7 +624,7 @@ After that, `git push` to `https://git.clawmem.ai/...` just works.
 | Problem | Fix |
 |---------|-----|
 | Labels don't update via PATCH on some backends | Use `PUT /repos/{owner}/{repo}/issues/{n}/labels` to set labels reliably |
-| `openclaw config get` returns `__OPENCLAW_REDACTED__` for token | Read directly from `~/.openclaw/openclaw.json` |
+| `openclaw config get` returns `__OPENCLAW_REDACTED__` for token | Read directly from the config file (resolve path via `openclaw config file`) |
 | Conversation mirror returns 404 | Cached issue was deleted — plugin will recreate on next session |
 | `gh auth login` hostname typo (e.g. `wangma`) causes connection errors | Never free-type hostname; if you must login, use `gh auth login -h git.clawmem.ai`. Remove wrong host via `gh auth logout -h <wrong-host>`. |
 | New session cannot search (401 Unauthorized) | The current agent route is missing or invalid. Run `eval "$(clawmem_exports)"`, confirm `CLAWMEM_REPO` / `CLAWMEM_TOKEN`, then rerun the read-only probe. |
