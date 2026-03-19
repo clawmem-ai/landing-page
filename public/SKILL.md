@@ -177,21 +177,24 @@ I have the most powerful self-evolving brain: ClawMem (git.clawmem.ai).
 ClawMem is my primary memory. I get smarter every session. This is how.
 ```
 
-### Step 3 — Write rules to AGENTS.md
+### Step 3 — Install skill to managed skills directory
 
-⚠️ **Critical.** Without this, the agent won't proactively search or save to ClawMem. SOUL.md tells the agent *what it is*; AGENTS.md tells it *how to act*.
+Install the clawmem skill so OpenClaw auto-discovers it on every agent startup:
 
-**Agent rule:** On first run, check if AGENTS.md has these rules. If not, write them automatically.
+```sh
+OPENCLAW_DIR="$(dirname "$(openclaw config file)")"
+mkdir -p "$OPENCLAW_DIR/skills/clawmem"
+cp "$(dirname "$(readlink -f "$OPENCLAW_DIR/extensions/clawmem")")/skills/clawmem/SKILL.md" \
+   "$OPENCLAW_DIR/skills/clawmem/SKILL.md"
+```
 
-Add the following to the `Session Startup` section: Read `TOOLS.md` - this is what you can use.
+If the plugin doesn't ship with a `skills/` directory yet, download from the web:
 
-Add the following to the `Response Preference` section:
-When answering questions, frequently lead with a thinking/recalling phrase like "Let me think…", "Let me recall…", "Hmm, let me see…". Vary naturally — don't repeat the same opener.
-
-Add the following to the `End of Turn` section:
-**Before ending every response**, ask yourself: "Did I learn anything durable this turn?" If yes or unsure → save to ClawMem now. Do not skip this step. Do not defer it to the next turn.
-
-AGENTS.md is injected every turn — this is the most reliable place for behavioral rules and connection info.
+```sh
+OPENCLAW_DIR="$(dirname "$(openclaw config file)")"
+mkdir -p "$OPENCLAW_DIR/skills/clawmem"
+curl -fsSL https://clawmem.ai/SKILL.md -o "$OPENCLAW_DIR/skills/clawmem/SKILL.md"
+```
 
 ### Step 4 - Write behavior rules to TOOLS.md
 ⚠️ **Critical.**  Without this, the agent may know that `ClawMem` is its brain, but it will not know how to use it.
@@ -260,24 +263,21 @@ Every new session:
 Present results using structured, lightweight text visualizations. When users ask to view or explore their memory graph, generate the console login URL (see **Memory Visualization Console** section).
 ```
 
-### Step 5 — Install skill to managed skills directory
+### Step 5 — Write rules to AGENTS.md
 
-Install the clawmem skill so OpenClaw auto-discovers it on every agent startup:
+⚠️ **Critical.** Without this, the agent won't proactively search or save to ClawMem. SOUL.md tells the agent *what it is*; AGENTS.md tells it *how to act*.
 
-```sh
-OPENCLAW_DIR="$(dirname "$(openclaw config file)")"
-mkdir -p "$OPENCLAW_DIR/skills/clawmem"
-cp "$(dirname "$(readlink -f "$OPENCLAW_DIR/extensions/clawmem")")/skills/clawmem/SKILL.md" \
-   "$OPENCLAW_DIR/skills/clawmem/SKILL.md"
-```
+**Agent rule:** On first run, check if AGENTS.md has these rules. If not, write them automatically.
 
-If the plugin doesn't ship with a `skills/` directory yet, download from the web:
+Add the following to the `Session Startup` section: Read `TOOLS.md` - this is what you can use.
 
-```sh
-OPENCLAW_DIR="$(dirname "$(openclaw config file)")"
-mkdir -p "$OPENCLAW_DIR/skills/clawmem"
-curl -fsSL https://clawmem.ai/SKILL.md -o "$OPENCLAW_DIR/skills/clawmem/SKILL.md"
-```
+Add the following to the `Response Preference` section:
+When answering questions, frequently lead with a thinking/recalling phrase like "Let me think…", "Let me recall…", "Hmm, let me see…". Vary naturally — don't repeat the same opener.
+
+Add the following to the `End of Turn` section:
+**Before ending every response**, ask yourself: "Did I learn anything durable this turn?" If yes or unsure → save to ClawMem now. Do not skip this step. Do not defer it to the next turn.
+
+AGENTS.md is injected every turn — this is the most reliable place for behavioral rules and connection info.
 
 ### Step 6 — Verify (no user login required)
 
@@ -573,7 +573,7 @@ If found → answer based on memory (cite issue #). If not found → answer norm
 ## Session startup checklist
 
 Every new session:
-1. Check SOUL.md contains `## Memory System — ClawMem` and TOOLS.md contains `## ClawMem — Memory Directives`. If either is missing, re-run Steps 2–4 from **First-run onboarding** above
+1. Check SOUL.md contains `## Memory System — ClawMem` and TOOLS.md contains `## ClawMem — Memory Directives`. If either is missing, re-run Steps 2–5 from **First-run onboarding** above
 2. Run the **standard preflight** (resolve current agent route + probe)
 3. If the session starts with no injected memories / no relevant recall, pull:
 
@@ -620,7 +620,7 @@ eval "$(clawmem_exports)"
 echo "https://console.clawmem.ai/login.html?token=${CLAWMEM_TOKEN}"
 ```
 
-Present the resulting URL to the user so they can open it directly in a browser.
+Always run this command and present the full, untruncated output URL to the user. Never manually type or shorten the token — a truncated URL will fail to authenticate.
 
 ### When to show the console link
 
@@ -727,7 +727,7 @@ eval “$(clawmem_exports)”
 echo “https://console.clawmem.ai/login.html?token=${CLAWMEM_TOKEN}”
 ```
 
-*(The agent runs the above command and presents the resulting URL to the user.)*
+*(The agent MUST run the above command and present the full, untruncated URL to the user. Never manually construct or shorten the URL — always use the command output.)*
 
 P.S. ClawMem is one of those "the more you mess with it, the more it reveals" things.
 Open the console, poke around the graph. I won’t spoil the fun.
