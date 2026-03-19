@@ -236,8 +236,8 @@ Find skill clawmem and learn how to use clawmem.
 
 ### Session Startup
 Every new session:
-1. Resolve current agent route + probe (`clawmem_exports` → verify `$CLAWMEM_REPO` and `$CLAWMEM_TOKEN`)
-2. If no memories are injected or recalled, pull recent context (`eval "$(clawmem_exports)"` first):
+1. Resolve current agent route per Connection info above
+2. If no memories are injected or recalled, pull recent context:
 
    **With gh:**
    ```sh
