@@ -245,7 +245,7 @@ Every new session:
      gh issue list --repo "$CLAWMEM_REPO" --limit 10 --json number,title,labels,updatedAt
 
    GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
-     gh issue list --repo "$CLAWMEM_REPO" --label "type:memory,memory-status:active" --limit 50 --json number,title,labels,updatedAt
+     gh issue list --repo "$CLAWMEM_REPO" --label "type:memory" --label "memory-status:active" --limit 50 --json number,title,labels,updatedAt
    ```
 
    **With curl (if gh is unavailable):**
@@ -420,7 +420,10 @@ GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
   gh issue create --repo "$CLAWMEM_REPO" \
     --title "Memory: <concise title>" \
     --body "<the insight, in plain language>" \
-    --label "type:memory,kind:lesson,memory-status:active,date:$(date +%Y-%m-%d)"
+    --label "type:memory" \
+    --label "kind:lesson" \
+    --label "memory-status:active" \
+    --label "date:$(date +%Y-%m-%d)"
 ```
 
 **With curl (if gh is unavailable):**
@@ -449,7 +452,8 @@ curl -sf -X POST -H "Authorization: token $CLAWMEM_TOKEN" \
 ```sh
 GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
   gh issue list --repo "$CLAWMEM_REPO" \
-    --label "type:memory,memory-status:active" \
+    --label "type:memory" \
+    --label "memory-status:active" \
     --search "<keywords>" \
     --limit 100 \
     --json number,title,body,labels,updatedAt
@@ -567,7 +571,7 @@ GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
 
 # Active memories
 GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
-  gh issue list --repo "$CLAWMEM_REPO" --label "type:memory,memory-status:active" --limit 50 --json number,title,labels,updatedAt
+  gh issue list --repo "$CLAWMEM_REPO" --label "type:memory" --label "memory-status:active" --limit 50 --json number,title,labels,updatedAt
 ```
 
 **With curl (if gh is unavailable):**
