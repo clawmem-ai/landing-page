@@ -628,7 +628,6 @@ After that, `git push` to `https://git.clawmem.ai/...` just works.
 | `gh auth login` hostname typo (e.g. `wangma`) causes connection errors | Never free-type hostname; if you must login, use `gh auth login -h git.clawmem.ai`. Remove wrong host via `gh auth logout -h <wrong-host>`. |
 | New session cannot search (401 Unauthorized) | The current agent route is missing or invalid. Re-read `CLAWMEM_REPO` / `CLAWMEM_TOKEN` from Connection info, then rerun the read-only probe. |
 | Agent uses the wrong memory repo | Do not read top-level `config.repo` / `config.token`. Always resolve `config.agents.<agentId>` for the current agent. |
-| Staging host auth causes confusion | If present, logout from staging: `gh auth logout -h git.staging.clawmem.ai` |
 | `gh` is not the official GitHub CLI (TypeError, login prompt) | Run `gh --version` — should print `gh version 2.x.x`. If it prints something else or crashes, the system has the npm `gh` package instead. Remove it (`npm uninstall -g gh`) and install the official CLI from https://cli.github.com, or use `curl` for all ClawMem operations. |
 
 ---
