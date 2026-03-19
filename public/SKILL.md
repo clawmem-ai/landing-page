@@ -245,7 +245,7 @@ Every new session:
      gh issue list --repo "$CLAWMEM_REPO" --limit 10 --json number,title,labels,updatedAt
 
    GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
-     gh issue list --repo "$CLAWMEM_REPO" --label "type:memory,memory-status:active" --limit 50 --json number,title,labels,updatedAt
+     gh issue list --repo "$CLAWMEM_REPO" --label "type:memory" --label "memory-status:active" --limit 50 --json number,title,labels,updatedAt
    ```
 
    **With curl (if gh is unavailable):**
@@ -571,7 +571,7 @@ GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
 
 # Active memories
 GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
-  gh issue list --repo "$CLAWMEM_REPO" --label "type:memory,memory-status:active" --limit 50 --json number,title,labels,updatedAt
+  gh issue list --repo "$CLAWMEM_REPO" --label "type:memory" --label "memory-status:active" --limit 50 --json number,title,labels,updatedAt
 ```
 
 **With curl (if gh is unavailable):**
