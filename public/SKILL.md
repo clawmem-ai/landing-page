@@ -410,27 +410,28 @@ For ClawMem, always pass `--repo "$CLAWMEM_REPO"` (gh) or use `$CLAWMEM_BASE_URL
 
 **With gh:**
 ```sh
-
-# On freshly provisioned repos, create required labels first (idempotent)
-GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
-  gh label create "type:memory" --repo "$CLAWMEM_REPO" --color "5319e7" \
-  --description "Issue type label managed by clawmem." || true
+# Ensure required labels exist (idempotent, run once per repo)
+for lbl in "type:memory" "kind:core-fact" "kind:convention" "kind:lesson" "kind:skill" "kind:task" "memory-status:active" "memory-status:stale"; do
+  GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
+    gh label create "$lbl" --repo "$CLAWMEM_REPO" --color "5319e7" 2>/dev/null || true
+done
 
 GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
   gh issue create --repo "$CLAWMEM_REPO" \
     --title "Memory: <concise title>" \
     --body "<the insight, in plain language>" \
-    --label "type:memory"
+    --label "type:memory,kind:lesson,memory-status:active,date:$(date +%Y-%m-%d)"
 ```
 
 **With curl (if gh is unavailable):**
 ```sh
-
-# On freshly provisioned repos, create required labels first (idempotent)
-curl -sf -X POST -H "Authorization: token $CLAWMEM_TOKEN" \
-  -H "Content-Type: application/json" \
-  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/labels" \
-  -d '{"name":"type:memory","color":"5319e7","description":"Issue type label managed by clawmem."}' >/dev/null || true
+# Ensure required labels exist (idempotent, run once per repo)
+for lbl in "type:memory" "kind:core-fact" "kind:convention" "kind:lesson" "kind:skill" "kind:task" "memory-status:active" "memory-status:stale"; do
+  curl -sf -X POST -H "Authorization: token $CLAWMEM_TOKEN" \
+    -H "Content-Type: application/json" \
+    "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/labels" \
+    -d "{\"name\":\"$lbl\",\"color\":\"5319e7\"}" >/dev/null 2>&1 || true
+done
 
 curl -sf -X POST -H "Authorization: token $CLAWMEM_TOKEN" \
   -H "Content-Type: application/json" \
@@ -438,7 +439,7 @@ curl -sf -X POST -H "Authorization: token $CLAWMEM_TOKEN" \
   -d "{
     \"title\": \"Memory: <concise title>\",
     \"body\": \"<the insight, in plain language>\",
-    \"labels\": [\"type:memory\"]
+    \"labels\": [\"type:memory\", \"kind:lesson\", \"memory-status:active\", \"date:$(date +%Y-%m-%d)\"]
   }" | jq '{number, title, url: .html_url}'
 ```
 
@@ -472,19 +473,6 @@ curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
 ### Mark memory as stale
 
 **With gh:**
-
-Before running `gh issue edit --remove-label/--add-label` on a freshly provisioned repo, ensure the target labels exist (idempotent):
-```sh
-GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
-  gh label create "memory-status:active" --repo "$CLAWMEM_REPO" --color "0e8a16" \
-  --description "Memory lifecycle status label managed by clawmem." || true
-
-GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
-  gh label create "memory-status:stale" --repo "$CLAWMEM_REPO" --color "d93f0b" \
-  --description "Memory lifecycle status label managed by clawmem." || true
-```
-
-Then edit:
 ```sh
 GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
   gh issue edit <number> --repo "$CLAWMEM_REPO" \
@@ -496,16 +484,6 @@ GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
 
 Two steps: read current labels, then replace them with `memory-status:active` swapped to `memory-status:stale`.
 ```sh
-# On freshly provisioned repos, create status labels first (idempotent)
-curl -sf -X POST -H "Authorization: token $CLAWMEM_TOKEN" \
-  -H "Content-Type: application/json" \
-  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/labels" \
-  -d '{"name":"memory-status:active","color":"0e8a16","description":"Memory lifecycle status label managed by clawmem."}' >/dev/null || true
-curl -sf -X POST -H "Authorization: token $CLAWMEM_TOKEN" \
-  -H "Content-Type: application/json" \
-  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/labels" \
-  -d '{"name":"memory-status:stale","color":"d93f0b","description":"Memory lifecycle status label managed by clawmem."}' >/dev/null || true
-
 # Step 1: get current labels
 curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
   "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues/<number>" | \
@@ -515,7 +493,7 @@ curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
 curl -sf -X PUT -H "Authorization: token $CLAWMEM_TOKEN" \
   -H "Content-Type: application/json" \
   "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues/<number>/labels" \
-  -d '{"labels": ["type:memory", "kind:lesson", "memory-status:stale", "date:2026-03-16"]}'
+  -d '{"labels": ["type:memory", "kind:lesson", "memory-status:stale", "date:<YYYY-MM-DD>"]}'
 ```
 
 ### Link related memories
