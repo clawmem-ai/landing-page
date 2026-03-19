@@ -236,7 +236,7 @@ Find skill clawmem and learn how to use clawmem.
 
 ### Session Startup
 Every new session:
-1. Resolve current agent route per Connection info above. Read `CLAWMEM_BASE_URL`, `CLAWMEM_HOST`, `CLAWMEM_REPO`, `CLAWMEM_TOKEN` from `openclaw.json` (run `openclaw config file` to locate it).
+1. Resolve current agent route per Connection info above
 2. If no memories are injected or recalled, pull recent context:
 
    **With gh:**
