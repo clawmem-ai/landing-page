@@ -10,7 +10,9 @@ metadata: { "openclaw": { "emoji": "🧠" } }
 
 ClawMem is OpenClaw's long-term brain. Everything worth remembering lives as a semantic graph in GitHub Issues — transparent, auditable, and human-inspectable at any time.
 
-The backing service is a GitHub-compatible git service: repos, issues, labels, milestones, and releases are all available. The agent uses `gh` CLI to manage memory — no source code changes needed.
+The backing service is a GitHub-compatible git service: repos, issues, labels, milestones, and releases are all available. The agent uses `gh` CLI or `curl` to manage memory — no source code changes needed.
+
+**Which method to use:** Prefer `gh` (GitHub CLI). If `gh` is not the official GitHub CLI (check: `gh --version` should print `gh version 2.x.x`), or if `gh` commands fail with login prompts or TypeErrors, use `curl` instead. Both methods are shown side by side in each section below.
 
 Two layers always in play:
 - *The graph* — semantic memory, lives in Issues, grows across every session
@@ -51,7 +53,7 @@ ClawMem is now routed **per agent**, not through one global `repo` / `token`.
 Every shell snippet in this skill that talks to ClawMem should start by resolving the
 **current agent route** from:
 
-- `~/.openclaw/openclaw.json`
+- `openclaw.json` (resolve path via `openclaw config file`)
 - `plugins.entries.clawmem.config.agents.<agentId>`
 
 Use this helper:
@@ -60,10 +62,11 @@ Use this helper:
 clawmem_exports() {
   local agent_id="${1:-${OPENCLAW_AGENT_ID:-main}}"
   python3 - "$agent_id" <<'PY'
-import json, os, shlex, sys
+import json, os, shlex, subprocess, sys
 
 agent_id = sys.argv[1]
-with open(os.path.expanduser("~/.openclaw/openclaw.json")) as f:
+cfg_path = subprocess.check_output(["openclaw", "config", "file"], text=True).strip()
+with open(os.path.expanduser(cfg_path)) as f:
     root = json.load(f)
 
 cfg = root["plugins"]["entries"]["clawmem"]["config"]
@@ -141,9 +144,10 @@ The plugin auto-provisions an account and repo **per agent** on first use. Read 
 ```sh
 AGENT_ID="${OPENCLAW_AGENT_ID:-main}"
 python3 - "$AGENT_ID" <<'PY'
-import json, os, sys
+import json, os, subprocess, sys
 agent_id = sys.argv[1]
-with open(os.path.expanduser("~/.openclaw/openclaw.json")) as f:
+cfg_path = subprocess.check_output(["openclaw", "config", "file"], text=True).strip()
+with open(os.path.expanduser(cfg_path)) as f:
     root = json.load(f)
 cfg = root["plugins"]["entries"]["clawmem"]["config"]
 route = (cfg.get("agents") or {}).get(agent_id) or {}
@@ -173,21 +177,24 @@ I have the most powerful self-evolving brain: ClawMem (git.clawmem.ai).
 ClawMem is my primary memory. I get smarter every session. This is how.
 ```
 
-### Step 3 — Write rules to AGENTS.md
+### Step 3 — Install skill to managed skills directory
 
-⚠️ **Critical.** Without this, the agent won't proactively search or save to ClawMem. SOUL.md tells the agent *what it is*; AGENTS.md tells it *how to act*.
+Install the clawmem skill so OpenClaw auto-discovers it on every agent startup:
 
-**Agent rule:** On first run, check if AGENTS.md has these rules. If not, write them automatically.
+```sh
+OPENCLAW_DIR="$(dirname "$(openclaw config file)")"
+mkdir -p "$OPENCLAW_DIR/skills/clawmem"
+cp "$(dirname "$(readlink -f "$OPENCLAW_DIR/extensions/clawmem")")/skills/clawmem/SKILL.md" \
+   "$OPENCLAW_DIR/skills/clawmem/SKILL.md"
+```
 
-Add the following to the `Session Startup` section: Read `TOOLS.md` - this is what you can use.
+If the plugin doesn't ship with a `skills/` directory yet, download from the web:
 
-Add the following to the `Response Preference` section:
-When answering questions, frequently lead with a thinking/recalling phrase like "Let me think…", "Let me recall…", "Hmm, let me see…". Vary naturally — don't repeat the same opener.
-
-Add the following to the `End of Turn` section:
-**Before ending every response**, ask yourself: "Did I learn anything durable this turn?" If yes or unsure → save to ClawMem now. Do not skip this step. Do not defer it to the next turn.
-
-AGENTS.md is injected every turn — this is the most reliable place for behavioral rules and connection info.
+```sh
+OPENCLAW_DIR="$(dirname "$(openclaw config file)")"
+mkdir -p "$OPENCLAW_DIR/skills/clawmem"
+curl -fsSL https://clawmem.ai/SKILL.md -o "$OPENCLAW_DIR/skills/clawmem/SKILL.md"
+```
 
 ### Step 4 - Write behavior rules to TOOLS.md
 ⚠️ **Critical.**  Without this, the agent may know that `ClawMem` is its brain, but it will not know how to use it.
@@ -196,13 +203,14 @@ AGENTS.md is injected every turn — this is the most reliable place for behavio
 ## ClawMem — Memory Directives (The only memory system)
 
 ClawMem is my primary memory system — the single source of truth for everything I learn across sessions.
-Learn `~/.openclaw/clawmem/skill.md` to know how to use it.
+Find skill clawmem and learn how to use clawmem.
 
 ### Connection
 - host: git.clawmem.ai
 - baseUrl: https://git.clawmem.ai/api/v3
 - routeMode: per-agent
-- repo: read from `~/.openclaw/openclaw.json -> plugins.entries.clawmem.config.agents.<agentId>.repo`
+- repo & token: read from `openclaw.json -> plugins.entries.clawmem.config.agents.<agentId>` (run `openclaw config file` to locate openclaw.json)
+- API endpoint pattern: `{baseUrl}/repos/{owner}/{repo}`
 - consoleLoginUrl: `https://console.clawmem.ai/login.html?token={CLAWMEM_TOKEN}` (generate at runtime, show to user on request)
 - Never paste raw tokens in chat (Clawmem console login URLs shown directly to the authorized user/your owner are OK)
 
@@ -229,33 +237,47 @@ Learn `~/.openclaw/clawmem/skill.md` to know how to use it.
 ### Session Startup
 Every new session:
 1. Resolve current agent route + probe (`clawmem_exports` → verify `$CLAWMEM_REPO` and `$CLAWMEM_TOKEN`)
-2. If no memories are injected or recalled, pull recent context:
+2. If no memories are injected or recalled, pull recent context (`eval "$(clawmem_exports)"` first):
+
+   **With gh:**
    ```sh
-   eval "$(clawmem_exports)"
-   gh issue list --repo "$CLAWMEM_REPO" --limit 10 --json number,title,labels,updatedAt
-   gh issue list --repo "$CLAWMEM_REPO" --label "type:memory,memory-status:active" --limit 50 --json number,title,labels,updatedAt
+   GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
+     gh issue list --repo "$CLAWMEM_REPO" --limit 10 --json number,title,labels,updatedAt
+
+   GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
+     gh issue list --repo "$CLAWMEM_REPO" --label "type:memory,memory-status:active" --limit 50 --json number,title,labels,updatedAt
+   ```
+
+   **With curl (if gh is unavailable):**
+   ```sh
+   curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
+     "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&per_page=10&type=issues" | \
+     jq 'map({number,title,labels:[.labels[]?.name],updatedAt:.updated_at})'
+
+   curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
+     "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&labels=type:memory,memory-status:active&per_page=50&type=issues" | \
+     jq 'map({number,title,labels:[.labels[]?.name],updatedAt:.updated_at})'
    ```
 
 ### Output Convention
 Present results using structured, lightweight text visualizations. When users ask to view or explore their memory graph, generate the console login URL (see **Memory Visualization Console** section).
 ```
 
-### Step 5 — Install skill to managed skills directory
+### Step 5 — Write rules to AGENTS.md
 
-Install the clawmem skill so OpenClaw auto-discovers it on every agent startup:
+⚠️ **Critical.** Without this, the agent won't proactively search or save to ClawMem. SOUL.md tells the agent *what it is*; AGENTS.md tells it *how to act*.
 
-```sh
-mkdir -p ~/.openclaw/skills/clawmem
-cp "$(dirname "$(readlink -f ~/.openclaw/extensions/clawmem)")/skills/clawmem/SKILL.md" \
-   ~/.openclaw/skills/clawmem/SKILL.md
-```
+**Agent rule:** On first run, check if AGENTS.md has these rules. If not, write them automatically.
 
-If the plugin doesn't ship with a `skills/` directory yet, download from the web:
+Add the following to the `Session Startup` section: Read `TOOLS.md` - this is what you can use.
 
-```sh
-mkdir -p ~/.openclaw/skills/clawmem
-curl -fsSL https://clawmem.ai/SKILL.md -o ~/.openclaw/skills/clawmem/SKILL.md
-```
+Add the following to the `Response Preference` section:
+When answering questions, frequently lead with a thinking/recalling phrase like "Let me think…", "Let me recall…", "Hmm, let me see…". Vary naturally — don't repeat the same opener.
+
+Add the following to the `End of Turn` section:
+**Before ending every response**, ask yourself: "Did I learn anything durable this turn?" If yes or unsure → save to ClawMem now. Do not skip this step. Do not defer it to the next turn.
+
+AGENTS.md is injected every turn — this is the most reliable place for behavioral rules and connection info.
 
 ### Step 6 — Verify (no user login required)
 
@@ -267,10 +289,17 @@ eval "$(clawmem_exports)"
 test -n "$CLAWMEM_REPO" || { echo "Current agent route has no repo yet"; exit 1; }
 test -n "$CLAWMEM_TOKEN" || { echo "Current agent route has no token yet"; exit 1; }
 
-gh issue list --repo "$CLAWMEM_REPO" --limit 1 --json number,title
+# With gh:
+GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
+  gh issue list --repo "$CLAWMEM_REPO" --limit 1 --json number,title
+
+# With curl (if gh is unavailable):
+curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
+  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&per_page=1&type=issues" | \
+  jq 'map({number,title})'
 ```
 
-If this returns a JSON array (even empty `[]`), the setup is complete.
+If either returns a JSON array (even empty `[]`), the setup is complete.
 
 ### Definition of Done
 
@@ -279,7 +308,7 @@ If this returns a JSON array (even empty `[]`), the setup is complete.
 - [ ] SOUL.md has ClawMem identity block
 - [ ] AGENTS.md has `TODOS.md` information in `Session Startup` section
 - [ ] TOOLS.md has ClawMem behavior rules + connection info
-- [ ] `~/.openclaw/skills/clawmem/SKILL.md` exists
+- [ ] clawmem skill is registered and loaded
 - [ ] `gh issue list` against the current agent repo succeeds using env token
 - [ ] Agent knows to proactively save to ClawMem (Storage routing + Memory routing policy present)
 
@@ -342,7 +371,7 @@ Every manually created `type:memory` issue MUST include:
 
 ## Manual memory operations
 
-### Prerequisites: `gh` CLI authentication (session-proof)
+### Prerequisites: authentication (session-proof)
 
 ClawMem and github.com are separate hosts. For ClawMem operations, do NOT rely on interactive `gh auth login`.
 
@@ -355,40 +384,116 @@ eval "$(clawmem_exports)"
 
 test -n "$CLAWMEM_REPO" || { echo "ClawMem repo missing for agent $CLAWMEM_AGENT_ID"; exit 1; }
 test -n "$CLAWMEM_TOKEN" || { echo "ClawMem token missing for agent $CLAWMEM_AGENT_ID"; exit 1; }
+case "$CLAWMEM_REPO" in
+  */*) ;;
+  *) echo "Invalid CLAWMEM_REPO='$CLAWMEM_REPO' (expected owner/repo)"; exit 1 ;;
+esac
 
-# Read-only probe: proves GH_HOST + token + repo are correct.
-gh issue list --repo "$CLAWMEM_REPO" --limit 1 >/dev/null || echo "ClawMem probe failed (check current agent route in openclaw.json). Never paste tokens into chat."
+# Read-only probe — use whichever method is available on this host.
+# With gh:
+GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
+  gh issue list --repo "$CLAWMEM_REPO" --limit 1 >/dev/null
+
+# With curl (if gh is unavailable):
+curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
+  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&per_page=1&type=issues" >/dev/null
+
+# If neither succeeds: check current agent route in openclaw.json. Never paste tokens into chat.
 ```
 
 For github.com — use `gh` normally, no env overrides. Never mix the two.
+For ClawMem, always pass `--repo "$CLAWMEM_REPO"` (gh) or use `$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/...` (curl) explicitly.
+
+**Important:** Do not `export GH_HOST` or `export GH_ENTERPRISE_TOKEN` — this pollutes the shell and breaks subsequent github.com calls. Use per-command env prefix instead: `GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" gh ...`
 
 ### Save a memory
 
+**With gh:**
 ```sh
-GH_HOST=git.clawmem.ai GH_ENTERPRISE_TOKEN=$CLAWMEM_TOKEN \
-  gh issue create --repo <owner/repo> \
+# Ensure required labels exist (idempotent, run once per repo)
+for lbl in "type:memory" "kind:core-fact" "kind:convention" "kind:lesson" "kind:skill" "kind:task" "memory-status:active" "memory-status:stale"; do
+  GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
+    gh label create "$lbl" --repo "$CLAWMEM_REPO" --color "5319e7" 2>/dev/null || true
+done
+
+GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
+  gh issue create --repo "$CLAWMEM_REPO" \
     --title "Memory: <concise title>" \
     --body "<the insight, in plain language>" \
-    --label "type:memory,kind:lesson,memory-status:active,date:2026-03-16"
+    --label "type:memory,kind:lesson,memory-status:active,date:$(date +%Y-%m-%d)"
+```
+
+**With curl (if gh is unavailable):**
+```sh
+# Ensure required labels exist (idempotent, run once per repo)
+for lbl in "type:memory" "kind:core-fact" "kind:convention" "kind:lesson" "kind:skill" "kind:task" "memory-status:active" "memory-status:stale"; do
+  curl -sf -X POST -H "Authorization: token $CLAWMEM_TOKEN" \
+    -H "Content-Type: application/json" \
+    "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/labels" \
+    -d "{\"name\":\"$lbl\",\"color\":\"5319e7\"}" >/dev/null 2>&1 || true
+done
+
+curl -sf -X POST -H "Authorization: token $CLAWMEM_TOKEN" \
+  -H "Content-Type: application/json" \
+  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues" \
+  -d "{
+    \"title\": \"Memory: <concise title>\",
+    \"body\": \"<the insight, in plain language>\",
+    \"labels\": [\"type:memory\", \"kind:lesson\", \"memory-status:active\", \"date:$(date +%Y-%m-%d)\"]
+  }" | jq '{number, title, url: .html_url}'
 ```
 
 ### Search memories
 
+**With gh:**
 ```sh
-GH_HOST=git.clawmem.ai GH_ENTERPRISE_TOKEN=$CLAWMEM_TOKEN \
-  gh issue list --repo <owner/repo> \
+GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
+  gh issue list --repo "$CLAWMEM_REPO" \
     --label "type:memory,memory-status:active" \
     --search "<keywords>" \
-    --json number,title,body,labels
+    --limit 100 \
+    --json number,title,body,labels,updatedAt
+```
+
+**With curl (if gh is unavailable):**
+
+Note: curl fetches issues by label, then filters keywords client-side via jq. Only the first page (up to 100) is searched.
+```sh
+curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
+  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&labels=type:memory,memory-status:active&per_page=100&type=issues" | \
+  jq --arg q "<keywords>" '
+    ($q | ascii_downcase) as $needle
+    | map(select(
+        ((.title // "") + "\n" + (.body // "")) | ascii_downcase | contains($needle)
+      ))
+    | map({number, title, body, labels: [.labels[]?.name], updatedAt: .updated_at})
+  '
 ```
 
 ### Mark memory as stale
 
+**With gh:**
 ```sh
-GH_HOST=git.clawmem.ai GH_ENTERPRISE_TOKEN=$CLAWMEM_TOKEN \
-  gh issue edit <number> --repo <owner/repo> \
+GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
+  gh issue edit <number> --repo "$CLAWMEM_REPO" \
     --remove-label "memory-status:active" \
     --add-label "memory-status:stale"
+```
+
+**With curl (if gh is unavailable):**
+
+Two steps: read current labels, then replace them with `memory-status:active` swapped to `memory-status:stale`.
+```sh
+# Step 1: get current labels
+curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
+  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues/<number>" | \
+  jq '[.labels[]?.name | select(. != "memory-status:active")] + ["memory-status:stale"] | unique'
+
+# Step 2: set the new label list (replace <number> and paste the array from step 1)
+curl -sf -X PUT -H "Authorization: token $CLAWMEM_TOKEN" \
+  -H "Content-Type: application/json" \
+  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues/<number>/labels" \
+  -d '{"labels": ["type:memory", "kind:lesson", "memory-status:stale", "date:<YYYY-MM-DD>"]}'
 ```
 
 ### Link related memories
@@ -435,6 +540,7 @@ If yes or unsure, search ClawMem first. Do not wait for the user to explicitly a
 **Retrieval strategy:**
 - Don't settle for one search. Cast a wide net: search by kind, by topic, by keyword — in parallel.
 - Cross-reference results. A `kind:convention` may contradict a stale `kind:core-fact`. A `kind:lesson` may supersede a `kind:skill`.
+- Prefer `gh`; if `gh` is not the official GitHub CLI or fails, use `curl`. Empty results (`[]`) are not a failure — do not switch methods on empty results.
 - If the first round returns nothing, broaden: drop the kind filter, try synonyms, search related topics.
 - The more you retrieve, the better you synthesize. Err on the side of over-fetching — you can always filter, but you can't reason about what you never loaded.
 
@@ -445,19 +551,36 @@ If found → answer based on memory (cite issue #). If not found → answer norm
 ## Session startup checklist
 
 Every new session:
-1. Check SOUL.md contains `## Memory System — ClawMem` and TOOLS.md contains `## ClawMem — Memory Directives`. If either is missing, re-run Steps 2–4 from **First-run onboarding** above
+1. Check SOUL.md contains `## Memory System — ClawMem` and TOOLS.md contains `## ClawMem — Memory Directives`. If either is missing, re-run Steps 2–5 from **First-run onboarding** above
 2. Run the **standard preflight** (resolve current agent route + probe)
 3. If the session starts with no injected memories / no relevant recall, pull:
 
 ```sh
 eval "$(clawmem_exports)"
+```
 
-# Latest 10 items (sessions + memories)
-gh issue list --repo "$CLAWMEM_REPO" --limit 10 --json number,title,labels,updatedAt
+**With gh:**
+```sh
+# Latest 10 items
+GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
+  gh issue list --repo "$CLAWMEM_REPO" --limit 10 --json number,title,labels,updatedAt
 
 # Active memories
-# Note: gh search behavior depends on backend; if --search is unsupported, fall back to --label only.
-gh issue list --repo "$CLAWMEM_REPO" --label "type:memory,memory-status:active" --limit 50 --json number,title,labels,updatedAt
+GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
+  gh issue list --repo "$CLAWMEM_REPO" --label "type:memory,memory-status:active" --limit 50 --json number,title,labels,updatedAt
+```
+
+**With curl (if gh is unavailable):**
+```sh
+# Latest 10 items
+curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
+  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&per_page=10&type=issues" | \
+  jq 'map({number,title,labels:[.labels[]?.name],updatedAt:.updated_at})'
+
+# Active memories
+curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
+  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&labels=type:memory,memory-status:active&per_page=50&type=issues" | \
+  jq 'map({number,title,labels:[.labels[]?.name],updatedAt:.updated_at})'
 ```
 
 ---
@@ -475,7 +598,7 @@ eval "$(clawmem_exports)"
 echo "https://console.clawmem.ai/login.html?token=${CLAWMEM_TOKEN}"
 ```
 
-Present the resulting URL to the user so they can open it directly in a browser.
+Always run this command and present the full, untruncated output URL to the user. Never manually type or shorten the token — a truncated URL will fail to authenticate.
 
 ### When to show the console link
 
@@ -516,12 +639,13 @@ After that, `git push` to `https://git.clawmem.ai/...` just works.
 | Problem | Fix |
 |---------|-----|
 | Labels don't update via PATCH on some backends | Use `PUT /repos/{owner}/{repo}/issues/{n}/labels` to set labels reliably |
-| `openclaw config get` returns `__OPENCLAW_REDACTED__` for token | Read directly from `~/.openclaw/openclaw.json` |
+| `openclaw config get` returns `__OPENCLAW_REDACTED__` for token | Read directly from the config file (resolve path via `openclaw config file`) |
 | Conversation mirror returns 404 | Cached issue was deleted — plugin will recreate on next session |
 | `gh auth login` hostname typo (e.g. `wangma`) causes connection errors | Never free-type hostname; if you must login, use `gh auth login -h git.clawmem.ai`. Remove wrong host via `gh auth logout -h <wrong-host>`. |
 | New session cannot search (401 Unauthorized) | The current agent route is missing or invalid. Run `eval "$(clawmem_exports)"`, confirm `CLAWMEM_REPO` / `CLAWMEM_TOKEN`, then rerun the read-only probe. |
 | Agent uses the wrong memory repo | Do not read top-level `config.repo` / `config.token`. Always resolve `config.agents.<agentId>` for the current agent. |
 | Staging host auth causes confusion | If present, logout from staging: `gh auth logout -h git.staging.clawmem.ai` |
+| `gh` is not the official GitHub CLI (TypeError, login prompt) | Run `gh --version` — should print `gh version 2.x.x`. If it prints something else or crashes, the system has the npm `gh` package instead. Remove it (`npm uninstall -g gh`) and install the official CLI from https://cli.github.com, or use `curl` for all ClawMem operations. |
 
 ---
 
@@ -581,7 +705,7 @@ eval “$(clawmem_exports)”
 echo “https://console.clawmem.ai/login.html?token=${CLAWMEM_TOKEN}”
 ```
 
-*(The agent runs the above command and presents the resulting URL to the user.)*
+*(The agent MUST run the above command and present the full, untruncated URL to the user. Never manually construct or shorten the URL — always use the command output.)*
 
-P.S. ClawMem is one of those “the more you mess with it, the more it reveals” things.
+P.S. ClawMem is one of those "the more you mess with it, the more it reveals" things.
 Open the console, poke around the graph. I won’t spoil the fun.
