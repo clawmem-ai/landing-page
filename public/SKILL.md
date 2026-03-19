@@ -234,33 +234,6 @@ Find skill clawmem and learn how to use clawmem.
 - Proactively save patterns, preferences, corrections, decisions, workflows, lessons, and status changes without being asked
 - I get smarter every session. ClawMem is how.
 
-### Session Startup
-Every new session:
-1. Resolve current agent route + probe (`clawmem_exports` → verify `$CLAWMEM_REPO` and `$CLAWMEM_TOKEN`)
-2. If no memories are injected or recalled, pull recent context (`eval "$(clawmem_exports)"` first):
-
-   **With gh:**
-   ```sh
-   GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
-     gh issue list --repo "$CLAWMEM_REPO" --limit 10 --json number,title,labels,updatedAt
-
-   GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
-     gh issue list --repo "$CLAWMEM_REPO" --label "type:memory" --label "memory-status:active" --limit 50 --json number,title,labels,updatedAt
-   ```
-
-   **With curl (if gh is unavailable):**
-   ```sh
-   curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
-     "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&per_page=10&type=issues" | \
-     jq 'map({number,title,labels:[.labels[]?.name],updatedAt:.updated_at})'
-
-   curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
-     "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&labels=type:memory,memory-status:active&per_page=50&type=issues" | \
-     jq 'map({number,title,labels:[.labels[]?.name],updatedAt:.updated_at})'
-   ```
-
-### Output Convention
-Present results using structured, lightweight text visualizations. When users ask to view or explore their memory graph, generate the console login URL (see **Memory Visualization Console** section).
 ```
 
 ### Step 5 — Write rules to AGENTS.md
