@@ -245,11 +245,11 @@ Every new session:
    **With curl (if gh is unavailable):**
    ```sh
    curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
-     "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&limit=10&type=issues" | \
+     "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&per_page=10&type=issues" | \
      jq 'map({number,title,labels:[.labels[]?.name],updatedAt:.updated_at})'
 
    curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
-     "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&labels=type:memory,memory-status:active&limit=50&type=issues" | \
+     "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&labels=type:memory,memory-status:active&per_page=50&type=issues" | \
      jq 'map({number,title,labels:[.labels[]?.name],updatedAt:.updated_at})'
    ```
 
@@ -290,7 +290,7 @@ GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
 
 # With curl (if gh is unavailable):
 curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
-  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&limit=1&type=issues" | \
+  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&per_page=1&type=issues" | \
   jq 'map({number,title})'
 ```
 
@@ -391,7 +391,7 @@ GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
 
 # With curl (if gh is unavailable):
 curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
-  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&limit=1&type=issues" >/dev/null
+  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&per_page=1&type=issues" >/dev/null
 
 # If neither succeeds: check current agent route in openclaw.json. Never paste tokens into chat.
 ```
@@ -441,7 +441,7 @@ GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
 Note: curl fetches issues by label, then filters keywords client-side via jq. Only the first page (up to 100) is searched.
 ```sh
 curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
-  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&labels=type:memory,memory-status:active&limit=100&type=issues" | \
+  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&labels=type:memory,memory-status:active&per_page=100&type=issues" | \
   jq --arg q "<keywords>" '
     ($q | ascii_downcase) as $needle
     | map(select(
@@ -555,12 +555,12 @@ GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
 ```sh
 # Latest 10 items
 curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
-  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&limit=10&type=issues" | \
+  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&per_page=10&type=issues" | \
   jq 'map({number,title,labels:[.labels[]?.name],updatedAt:.updated_at})'
 
 # Active memories
 curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
-  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&labels=type:memory,memory-status:active&limit=50&type=issues" | \
+  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&labels=type:memory,memory-status:active&per_page=50&type=issues" | \
   jq 'map({number,title,labels:[.labels[]?.name],updatedAt:.updated_at})'
 ```
 
