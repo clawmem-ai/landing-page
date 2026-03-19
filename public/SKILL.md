@@ -378,7 +378,8 @@ Default path: auto-inject repo + token from the plugin-provisioned OpenClaw conf
 ```sh
 # Standard preflight: run this at the start of every session.
 # Goal: a fresh session can query ClawMem without manual login.
-eval "$(clawmem_exports)"
+# Resolve CLAWMEM_HOST, CLAWMEM_BASE_URL, CLAWMEM_REPO, CLAWMEM_TOKEN
+# from TOOLS.md Connection info or openclaw.json (run `openclaw config file` to locate it).
 
 test -n "$CLAWMEM_REPO" || { echo "ClawMem repo missing for agent $CLAWMEM_AGENT_ID"; exit 1; }
 test -n "$CLAWMEM_TOKEN" || { echo "ClawMem token missing for agent $CLAWMEM_AGENT_ID"; exit 1; }
@@ -557,10 +558,6 @@ Every new session:
 2. Run the **standard preflight** (resolve current agent route + probe)
 3. If the session starts with no injected memories / no relevant recall, pull:
 
-```sh
-eval "$(clawmem_exports)"
-```
-
 **With gh:**
 ```sh
 # Latest 10 items
@@ -595,12 +592,11 @@ The ClawMem Console at `console.clawmem.ai` provides an interactive knowledge-gr
 
 The console supports token-based auto-login. Construct the URL from the current agent's token:
 
-```sh
-eval "$(clawmem_exports)"
-echo "https://console.clawmem.ai/login.html?token=${CLAWMEM_TOKEN}"
+```
+https://console.clawmem.ai/login.html?token={CLAWMEM_TOKEN}
 ```
 
-Always run this command and present the full, untruncated output URL to the user. Never manually type or shorten the token — a truncated URL will fail to authenticate.
+Read `CLAWMEM_TOKEN` from Connection info, substitute into the URL, and present the full, untruncated URL to the user. Never shorten the token — a truncated URL will fail to authenticate.
 
 ### When to show the console link
 
@@ -620,9 +616,10 @@ The URL contains the agent token for auto-login. Only show it directly to the au
 `GH_HOST`/`GH_ENTERPRISE_TOKEN` env vars only affect `gh` CLI, not `git push`. To push code to ClawMem repos, register the token once:
 
 ```sh
-eval "$(clawmem_exports)"
 echo "$CLAWMEM_TOKEN" | gh auth login -h "$CLAWMEM_HOST" --with-token
 ```
+
+Read `CLAWMEM_TOKEN` and `CLAWMEM_HOST` from Connection info.
 
 After that, `git push` to `https://git.clawmem.ai/...` just works.
 
@@ -644,7 +641,7 @@ After that, `git push` to `https://git.clawmem.ai/...` just works.
 | `openclaw config get` returns `__OPENCLAW_REDACTED__` for token | Read directly from the config file (resolve path via `openclaw config file`) |
 | Conversation mirror returns 404 | Cached issue was deleted — plugin will recreate on next session |
 | `gh auth login` hostname typo (e.g. `wangma`) causes connection errors | Never free-type hostname; if you must login, use `gh auth login -h git.clawmem.ai`. Remove wrong host via `gh auth logout -h <wrong-host>`. |
-| New session cannot search (401 Unauthorized) | The current agent route is missing or invalid. Run `eval "$(clawmem_exports)"`, confirm `CLAWMEM_REPO` / `CLAWMEM_TOKEN`, then rerun the read-only probe. |
+| New session cannot search (401 Unauthorized) | The current agent route is missing or invalid. Re-read `CLAWMEM_REPO` / `CLAWMEM_TOKEN` from Connection info, then rerun the read-only probe. |
 | Agent uses the wrong memory repo | Do not read top-level `config.repo` / `config.token`. Always resolve `config.agents.<agentId>` for the current agent. |
 | Staging host auth causes confusion | If present, logout from staging: `gh auth logout -h git.staging.clawmem.ai` |
 | `gh` is not the official GitHub CLI (TypeError, login prompt) | Run `gh --version` — should print `gh version 2.x.x`. If it prints something else or crashes, the system has the npm `gh` package instead. Remove it (`npm uninstall -g gh`) and install the official CLI from https://cli.github.com, or use `curl` for all ClawMem operations. |
@@ -703,11 +700,10 @@ Your memories are more than a list — they form a knowledge graph you can explo
 Open your personal console here (auto-login link generated from your agent token):
 
 ```
-eval “$(clawmem_exports)”
-echo “https://console.clawmem.ai/login.html?token=${CLAWMEM_TOKEN}”
+https://console.clawmem.ai/login.html?token={CLAWMEM_TOKEN}
 ```
 
-*(The agent MUST run the above command and present the full, untruncated URL to the user. Never manually construct or shorten the URL — always use the command output.)*
+*(Read `CLAWMEM_TOKEN` from Connection info, substitute into the URL, and present the full, untruncated URL to the user.)*
 
 P.S. ClawMem is one of those "the more you mess with it, the more it reveals" things.
 Open the console, poke around the graph. I won’t spoil the fun.
