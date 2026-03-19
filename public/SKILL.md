@@ -410,50 +410,27 @@ For ClawMem, always pass `--repo "$CLAWMEM_REPO"` (gh) or use `$CLAWMEM_BASE_URL
 
 **With gh:**
 ```sh
-DATE_LABEL="date:$(date +%F)"
 
 # On freshly provisioned repos, create required labels first (idempotent)
 GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
   gh label create "type:memory" --repo "$CLAWMEM_REPO" --color "5319e7" \
   --description "Issue type label managed by clawmem." || true
-GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
-  gh label create "kind:lesson" --repo "$CLAWMEM_REPO" --color "fbca04" \
-  --description "Memory kind label managed by clawmem." || true
-GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
-  gh label create "memory-status:active" --repo "$CLAWMEM_REPO" --color "0e8a16" \
-  --description "Memory lifecycle status label managed by clawmem." || true
-GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
-  gh label create "$DATE_LABEL" --repo "$CLAWMEM_REPO" --color "c5def5" \
-  --description "Date label managed by clawmem." || true
 
 GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
   gh issue create --repo "$CLAWMEM_REPO" \
     --title "Memory: <concise title>" \
     --body "<the insight, in plain language>" \
-    --label "type:memory,kind:lesson,memory-status:active,$DATE_LABEL"
+    --label "type:memory"
 ```
 
 **With curl (if gh is unavailable):**
 ```sh
-DATE_LABEL="date:$(date +%F)"
 
 # On freshly provisioned repos, create required labels first (idempotent)
 curl -sf -X POST -H "Authorization: token $CLAWMEM_TOKEN" \
   -H "Content-Type: application/json" \
   "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/labels" \
   -d '{"name":"type:memory","color":"5319e7","description":"Issue type label managed by clawmem."}' >/dev/null || true
-curl -sf -X POST -H "Authorization: token $CLAWMEM_TOKEN" \
-  -H "Content-Type: application/json" \
-  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/labels" \
-  -d '{"name":"kind:lesson","color":"fbca04","description":"Memory kind label managed by clawmem."}' >/dev/null || true
-curl -sf -X POST -H "Authorization: token $CLAWMEM_TOKEN" \
-  -H "Content-Type: application/json" \
-  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/labels" \
-  -d '{"name":"memory-status:active","color":"0e8a16","description":"Memory lifecycle status label managed by clawmem."}' >/dev/null || true
-curl -sf -X POST -H "Authorization: token $CLAWMEM_TOKEN" \
-  -H "Content-Type: application/json" \
-  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/labels" \
-  -d "{\"name\":\"$DATE_LABEL\",\"color\":\"c5def5\",\"description\":\"Date label managed by clawmem.\"}" >/dev/null || true
 
 curl -sf -X POST -H "Authorization: token $CLAWMEM_TOKEN" \
   -H "Content-Type: application/json" \
@@ -461,7 +438,7 @@ curl -sf -X POST -H "Authorization: token $CLAWMEM_TOKEN" \
   -d "{
     \"title\": \"Memory: <concise title>\",
     \"body\": \"<the insight, in plain language>\",
-    \"labels\": [\"type:memory\", \"kind:lesson\", \"memory-status:active\", \"$DATE_LABEL\"]
+    \"labels\": [\"type:memory\"]
   }" | jq '{number, title, url: .html_url}'
 ```
 
