@@ -10,7 +10,9 @@ metadata: { "openclaw": { "emoji": "🧠" } }
 
 ClawMem is OpenClaw's long-term brain. Everything worth remembering lives as a semantic graph in GitHub Issues — transparent, auditable, and human-inspectable at any time.
 
-The backing service is a GitHub-compatible git service: repos, issues, labels, milestones, and releases are all available. The agent uses `gh` CLI to manage memory — no source code changes needed.
+The backing service is a GitHub-compatible git service: repos, issues, labels, milestones, and releases are all available. The agent uses `gh` CLI or `curl` to manage memory — no source code changes needed.
+
+**Which method to use:** Prefer `gh` (GitHub CLI). If `gh` is not the official GitHub CLI (check: `gh --version` should print `gh version 2.x.x`), or if `gh` commands fail with login prompts or TypeErrors, use `curl` instead. Both methods are shown side by side in each section below.
 
 Two layers always in play:
 - *The graph* — semantic memory, lives in Issues, grows across every session
@@ -229,16 +231,26 @@ Learn `~/.openclaw/clawmem/skill.md` to know how to use it.
 ### Session Startup
 Every new session:
 1. Resolve current agent route + probe (`clawmem_exports` → verify `$CLAWMEM_REPO` and `$CLAWMEM_TOKEN`)
-2. If no memories are injected or recalled, pull recent context:
-   ```sh
-   eval "$(clawmem_exports)"
-   gh issue list --repo "$CLAWMEM_REPO" --limit 10 --json number,title,labels,updatedAt \
-     || gh api "repos/$CLAWMEM_REPO/issues" -f state=open -f per_page=10 \
-          --jq 'map({number,title,labels:[.labels[]?.name],updatedAt:.updated_at})'
+2. If no memories are injected or recalled, pull recent context (`eval "$(clawmem_exports)"` first):
 
-   gh issue list --repo "$CLAWMEM_REPO" --label "type:memory,memory-status:active" --limit 50 --json number,title,labels,updatedAt \
-     || gh api "repos/$CLAWMEM_REPO/issues" -f state=open -f labels='type:memory,memory-status:active' -f per_page=50 \
-          --jq 'map({number,title,labels:[.labels[]?.name],updatedAt:.updated_at})'
+   **With gh:**
+   ```sh
+   GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
+     gh issue list --repo "$CLAWMEM_REPO" --limit 10 --json number,title,labels,updatedAt
+
+   GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
+     gh issue list --repo "$CLAWMEM_REPO" --label "type:memory,memory-status:active" --limit 50 --json number,title,labels,updatedAt
+   ```
+
+   **With curl (if gh is unavailable):**
+   ```sh
+   curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
+     "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&limit=10&type=issues" | \
+     jq 'map({number,title,labels:[.labels[]?.name],updatedAt:.updated_at})'
+
+   curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
+     "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&labels=type:memory,memory-status:active&limit=50&type=issues" | \
+     jq 'map({number,title,labels:[.labels[]?.name],updatedAt:.updated_at})'
    ```
 
 ### Output Convention
@@ -272,11 +284,17 @@ eval "$(clawmem_exports)"
 test -n "$CLAWMEM_REPO" || { echo "Current agent route has no repo yet"; exit 1; }
 test -n "$CLAWMEM_TOKEN" || { echo "Current agent route has no token yet"; exit 1; }
 
-gh issue list --repo "$CLAWMEM_REPO" --limit 1 --json number,title \
-  || gh api "repos/$CLAWMEM_REPO/issues" -f state=open -f per_page=1 --jq 'map({number,title})'
+# With gh:
+GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
+  gh issue list --repo "$CLAWMEM_REPO" --limit 1 --json number,title
+
+# With curl (if gh is unavailable):
+curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
+  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&limit=1&type=issues" | \
+  jq 'map({number,title})'
 ```
 
-If this returns a JSON array (even empty `[]`), the setup is complete.
+If either returns a JSON array (even empty `[]`), the setup is complete.
 
 ### Definition of Done
 
@@ -348,7 +366,7 @@ Every manually created `type:memory` issue MUST include:
 
 ## Manual memory operations
 
-### Prerequisites: `gh` CLI authentication (session-proof)
+### Prerequisites: authentication (session-proof)
 
 ClawMem and github.com are separate hosts. For ClawMem operations, do NOT rely on interactive `gh auth login`.
 
@@ -366,26 +384,27 @@ case "$CLAWMEM_REPO" in
   *) echo "Invalid CLAWMEM_REPO='$CLAWMEM_REPO' (expected owner/repo)"; exit 1 ;;
 esac
 
-# Bind gh to the ClawMem host for this shell session.
-export GH_HOST="$CLAWMEM_HOST"
-export GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN"
+# Read-only probe — use whichever method is available on this host.
+# With gh:
+GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
+  gh issue list --repo "$CLAWMEM_REPO" --limit 1 >/dev/null
 
-# Read-only probe: proves GH_HOST + token + repo are correct (GH-first, API fallback).
-gh issue list --repo "$CLAWMEM_REPO" --limit 1 >/dev/null \
-  || gh api "repos/$CLAWMEM_REPO/issues" -f state=open -f per_page=1 --jq 'length >= 0' >/dev/null \
-  || echo "ClawMem probe failed (check current agent route in openclaw.json). Never paste tokens into chat."
+# With curl (if gh is unavailable):
+curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
+  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&limit=1&type=issues" >/dev/null
+
+# If neither succeeds: check current agent route in openclaw.json. Never paste tokens into chat.
 ```
 
 For github.com — use `gh` normally, no env overrides. Never mix the two.
-For ClawMem search, always pass `--repo "$CLAWMEM_REPO"` explicitly. Never rely on implicit current-repo context.
-For `gh api`, always use endpoints under `repos/$CLAWMEM_REPO/...`.
+For ClawMem, always pass `--repo "$CLAWMEM_REPO"` (gh) or use `$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/...` (curl) explicitly.
 
-### Save a memory (GH-first, API fallback)
+**Important:** Do not `export GH_HOST` or `export GH_ENTERPRISE_TOKEN` — this pollutes the shell and breaks subsequent github.com calls. Use per-command env prefix instead: `GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" gh ...`
 
-Prefer `gh issue create` first. If it fails (backend mismatch, auth/path error, label parsing incompatibility), retry with `gh api` in the same turn.
+### Save a memory
 
+**With gh:**
 ```sh
-# Preferred path
 GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
   gh issue create --repo "$CLAWMEM_REPO" \
     --title "Memory: <concise title>" \
@@ -393,25 +412,22 @@ GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
     --label "type:memory,kind:lesson,memory-status:active,date:2026-03-16"
 ```
 
+**With curl (if gh is unavailable):**
 ```sh
-# Fallback path (when gh issue create fails)
-GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
-  gh api -X POST "repos/$CLAWMEM_REPO/issues" \
-    -f title='Memory: <concise title>' \
-    -f body='<the insight, in plain language>' \
-    -f labels[]='type:memory' \
-    -f labels[]='kind:lesson' \
-    -f labels[]='memory-status:active' \
-    -f labels[]='date:2026-03-16' \
-    --jq '{number,title,url:.html_url}'
+curl -sf -X POST -H "Authorization: token $CLAWMEM_TOKEN" \
+  -H "Content-Type: application/json" \
+  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues" \
+  -d '{
+    "title": "Memory: <concise title>",
+    "body": "<the insight, in plain language>",
+    "labels": ["type:memory", "kind:lesson", "memory-status:active", "date:2026-03-16"]
+  }' | jq '{number, title, url: .html_url}'
 ```
 
-### Search memories (GH-first, API fallback)
+### Search memories
 
-Prefer `gh issue list` first. If it fails (unsupported `--search`, backend mismatch, auth/path error), retry with `gh api` in the same turn.
-
+**With gh:**
 ```sh
-# Preferred path
 GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
   gh issue list --repo "$CLAWMEM_REPO" \
     --label "type:memory,memory-status:active" \
@@ -420,49 +436,45 @@ GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
     --json number,title,body,labels,updatedAt
 ```
 
+**With curl (if gh is unavailable):**
+
+Note: curl fetches issues by label, then filters keywords client-side via jq. Only the first page (up to 100) is searched.
 ```sh
-# Fallback path (when gh issue list fails)
-GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
-  gh api "repos/$CLAWMEM_REPO/issues" \
-    -f state=open \
-    -f labels='type:memory,memory-status:active' \
-    -f per_page=100 \
-    --jq --arg q "<keywords>" '
-      ($q | ascii_downcase) as $needle
-      | map(select((((.title // "") + "\n" + (.body // "")) | ascii_downcase | contains($needle))))
-      | map({
-          number,
-          title,
-          body,
-          labels: [(.labels[]?.name)],
-          updatedAt: .updated_at
-        })
-    '
+curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
+  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&labels=type:memory,memory-status:active&limit=100&type=issues" | \
+  jq --arg q "<keywords>" '
+    ($q | ascii_downcase) as $needle
+    | map(select(
+        ((.title // "") + "\n" + (.body // "")) | ascii_downcase | contains($needle)
+      ))
+    | map({number, title, body, labels: [.labels[]?.name], updatedAt: .updated_at})
+  '
 ```
 
-### Mark memory as stale (GH-first, API fallback)
+### Mark memory as stale
 
-Prefer `gh issue edit` first. If it fails (backend mismatch, label mutation incompatibility), retry with `gh api` in the same turn.
-
+**With gh:**
 ```sh
-# Preferred path
 GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
   gh issue edit <number> --repo "$CLAWMEM_REPO" \
     --remove-label "memory-status:active" \
     --add-label "memory-status:stale"
 ```
 
-```sh
-# Fallback path (when gh issue edit fails)
-labels_json="$(
-  GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
-    gh api "repos/$CLAWMEM_REPO/issues/<number>" \
-    --jq '[.labels[]?.name | select(. != "memory-status:active" and . != "memory-status:stale")] + ["memory-status:stale"] | unique'
-)"
+**With curl (if gh is unavailable):**
 
-printf '{"labels": %s}\n' "$labels_json" | \
-  GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
-    gh api -X PUT "repos/$CLAWMEM_REPO/issues/<number>/labels" --input -
+Two steps: read current labels, then replace them with `memory-status:active` swapped to `memory-status:stale`.
+```sh
+# Step 1: get current labels
+curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
+  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues/<number>" | \
+  jq '[.labels[]?.name | select(. != "memory-status:active")] + ["memory-status:stale"] | unique'
+
+# Step 2: set the new label list (replace <number> and paste the array from step 1)
+curl -sf -X PUT -H "Authorization: token $CLAWMEM_TOKEN" \
+  -H "Content-Type: application/json" \
+  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues/<number>/labels" \
+  -d '{"labels": ["type:memory", "kind:lesson", "memory-status:stale", "date:2026-03-16"]}'
 ```
 
 ### Link related memories
@@ -509,7 +521,7 @@ If yes or unsure, search ClawMem first. Do not wait for the user to explicitly a
 **Retrieval strategy:**
 - Don't settle for one search. Cast a wide net: search by kind, by topic, by keyword — in parallel.
 - Cross-reference results. A `kind:convention` may contradict a stale `kind:core-fact`. A `kind:lesson` may supersede a `kind:skill`.
-- Execution order is mandatory: try `gh issue list` first; only if command execution fails, fall back to `gh api`. Empty results (`[]`) are not a failure.
+- Prefer `gh`; if `gh` is not the official GitHub CLI or fails, use `curl`. Empty results (`[]`) are not a failure — do not switch methods on empty results.
 - If the first round returns nothing, broaden: drop the kind filter, try synonyms, search related topics.
 - The more you retrieve, the better you synthesize. Err on the side of over-fetching — you can always filter, but you can't reason about what you never loaded.
 
@@ -526,17 +538,30 @@ Every new session:
 
 ```sh
 eval "$(clawmem_exports)"
+```
 
-# Latest 10 items (sessions + memories)
-gh issue list --repo "$CLAWMEM_REPO" --limit 10 --json number,title,labels,updatedAt \
-  || gh api "repos/$CLAWMEM_REPO/issues" -f state=open -f per_page=10 \
-       --jq 'map({number,title,labels:[.labels[]?.name],updatedAt:.updated_at})'
+**With gh:**
+```sh
+# Latest 10 items
+GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
+  gh issue list --repo "$CLAWMEM_REPO" --limit 10 --json number,title,labels,updatedAt
 
 # Active memories
-# Note: if gh issue list fails on this backend, fall back to gh api with equivalent label filtering.
-gh issue list --repo "$CLAWMEM_REPO" --label "type:memory,memory-status:active" --limit 50 --json number,title,labels,updatedAt \
-  || gh api "repos/$CLAWMEM_REPO/issues" -f state=open -f labels='type:memory,memory-status:active' -f per_page=50 \
-       --jq 'map({number,title,labels:[.labels[]?.name],updatedAt:.updated_at})'
+GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
+  gh issue list --repo "$CLAWMEM_REPO" --label "type:memory,memory-status:active" --limit 50 --json number,title,labels,updatedAt
+```
+
+**With curl (if gh is unavailable):**
+```sh
+# Latest 10 items
+curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
+  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&limit=10&type=issues" | \
+  jq 'map({number,title,labels:[.labels[]?.name],updatedAt:.updated_at})'
+
+# Active memories
+curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
+  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&labels=type:memory,memory-status:active&limit=50&type=issues" | \
+  jq 'map({number,title,labels:[.labels[]?.name],updatedAt:.updated_at})'
 ```
 
 ---
@@ -601,6 +626,7 @@ After that, `git push` to `https://git.clawmem.ai/...` just works.
 | New session cannot search (401 Unauthorized) | The current agent route is missing or invalid. Run `eval "$(clawmem_exports)"`, confirm `CLAWMEM_REPO` / `CLAWMEM_TOKEN`, then rerun the read-only probe. |
 | Agent uses the wrong memory repo | Do not read top-level `config.repo` / `config.token`. Always resolve `config.agents.<agentId>` for the current agent. |
 | Staging host auth causes confusion | If present, logout from staging: `gh auth logout -h git.staging.clawmem.ai` |
+| `gh` is not the official GitHub CLI (TypeError, login prompt) | Run `gh --version` — should print `gh version 2.x.x`. If it prints something else or crashes, the system has the npm `gh` package instead. Remove it (`npm uninstall -g gh`) and install the official CLI from https://cli.github.com, or use `curl` for all ClawMem operations. |
 
 ---
 
