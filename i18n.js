@@ -508,8 +508,8 @@ const translations = {
 };
 
 const langMeta = {
-  en: { label: "EN", htmlLang: "en" },
-  "zh-CN": { label: "\u4e2d\u6587", htmlLang: "zh-CN" },
+  en: { label: "English", htmlLang: "en" },
+  "zh-CN": { label: "\u7b80\u4f53\u4e2d\u6587", htmlLang: "zh-CN" },
   ja: { label: "\u65e5\u672c\u8a9e", htmlLang: "ja" },
 };
 
@@ -548,7 +548,7 @@ function applyTranslations() {
   // Update language switcher current label
   const currentLabel = document.querySelector(".lang-current");
   if (currentLabel) {
-    currentLabel.textContent = langMeta[currentLang]?.label || "EN";
+    currentLabel.textContent = langMeta[currentLang]?.label || "English";
   }
 
   // Mark active language option

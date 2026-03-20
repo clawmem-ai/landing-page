@@ -351,7 +351,9 @@ section {
 .lang-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: space-between;
   gap: 4px;
+  min-width: 104px;
   padding: 6px 10px;
   border-radius: 8px;
   border: 1px solid var(--border-subtle);
@@ -363,6 +365,10 @@ section {
   cursor: pointer;
   backdrop-filter: blur(10px);
   transition: all 0.2s ease;
+}
+
+.lang-current {
+  white-space: nowrap;
 }
 .lang-btn:hover {
   border-color: var(--border-accent);
