@@ -23,7 +23,7 @@ Two layers always in play:
 The clawmem plugin handles these without agent involvement:
 - **Per-agent account & repo provisioning** — auto-creates a private repo for each agent on first use, writes credentials to `openclaw.json -> plugins.entries.clawmem.config.agents.<agentId>`
 - **Session mirroring** — one `type:conversation` issue per session, transcript as comments
-- **Memory extraction** — best-effort during turn sync and again at session end, a subagent extracts durable facts into `type:memory` issues
+- **Memory extraction** — best-effort during later request-scoped maintenance, a subagent extracts durable facts into `type:memory` issues
 - **Memory recall** — at session start, searches active memories by relevance and injects them into context
 - **Memory tools** — exposes `memory_labels`, `memory_recall`, `memory_store`, and `memory_forget` for mid-session use
 
@@ -252,6 +252,7 @@ Find skill clawmem and learn how to use clawmem.
 - After EVERY turn, reflect on whether I learned anything durable
 - If yes or unsure → inspect existing schema with `memory_labels` when needed, then call `memory_store` before ending the turn
 - Proactively save patterns, preferences, corrections, decisions, workflows, lessons, and status changes without being asked
+- Automatic extraction may lag until the next real request; never rely on a just-ended session being fully processed in the background
 - I get smarter every session. ClawMem is how.
 
 ### Schema discipline
@@ -341,6 +342,7 @@ Then verify the plugin tool path from inside a real ClawMem-enabled session:
 - `memory_labels` should return the current reusable schema labels
 - `memory_recall` should return either a hit list or a clean miss, not a tool failure
 - `memory_store` should be available for immediate durable saves
+- conversation summaries or auto-extracted memories from a just-finished session may appear on the next real request, not necessarily immediately at session close
 
 ### Definition of Done
 
@@ -361,7 +363,7 @@ Then verify the plugin tool path from inside a real ClawMem-enabled session:
 
 ### Self-evolution
 
-The graph is a living knowledge base. After every turn and session, ask: _what did I learn? what changed? what can I make better?_
+The graph is a living knowledge base. After every turn, and again when later request-scoped maintenance catches up, ask: _what did I learn? what changed? what can I make better?_
 
 Promote patterns and preferences to the graph without waiting to be asked. Update stale nodes when reality has moved on. Link related issues — a dense graph retrieves better. Detect recurring problems and file a `Lesson-Learned`. Retire superseded conventions.
 
@@ -384,7 +386,7 @@ Nothing interesting happens silently. The agent notices things the user doesn't 
 *Issues are nodes. Labels are schema. `#ID` cross-links are edges.*
 
 There are two valid memory shapes:
-- **Plugin-managed structured memories** — created via `memory_store` or automatic extraction; the plugin manages core labels and can also persist agent-selected `kind:*` and `topic:*`
+- **Plugin-managed structured memories** — created via `memory_store` or later automatic extraction during request-scoped maintenance; the plugin manages core labels and can also persist agent-selected `kind:*` and `topic:*`
 - **Curated graph memories** — manually created via `gh` / `curl` when you explicitly need richer labels like `kind:*` or `topic:*`
 
 | Kind | `type:` | `kind:` | What it represents |
@@ -603,6 +605,8 @@ When a new node relates to an old one, mention `#ID` in the body to create bidir
 Ask yourself: _"Did I learn something durable in this turn?"_
 
 If yes or unsure → save to ClawMem immediately. Do not wait for extraction.
+
+If a session has just ended, assume summary/title/auto-extracted memories may still be `pending` until the next real request. Important knowledge should be locked with `memory_store` now, not deferred.
 
 **What to save:**
 - User corrections
