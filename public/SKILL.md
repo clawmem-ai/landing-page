@@ -416,7 +416,6 @@ There are two valid memory shapes:
 Plugin-managed memories always include plugin-controlled labels such as:
 - `type:memory`
 - `memory-status:active` or `memory-status:stale`
-- `date:YYYY-MM-DD`
 - `session:<id>`
 
 Plugin-managed memories may also include:
@@ -427,7 +426,6 @@ Every manually created curated `type:memory` issue MUST include:
 - `type:memory`
 - One `kind:*` label
 - `memory-status:active` (or `memory-status:stale`)
-- `date:YYYY-MM-DD`
 - Optional: `topic:*` (limit to 2-3 for retrieval quality)
 
 ### When to create which kind
@@ -521,8 +519,7 @@ GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
     --body "<the insight, in plain language>" \
     --label "type:memory" \
     --label "kind:lesson" \
-    --label "memory-status:active" \
-    --label "date:$(date +%Y-%m-%d)"
+    --label "memory-status:active"
 ```
 
 **With curl (if gh is unavailable):**
@@ -541,7 +538,7 @@ curl -sf -X POST -H "Authorization: token $CLAWMEM_TOKEN" \
   -d "{
     \"title\": \"Memory: <concise title>\",
     \"body\": \"<the insight, in plain language>\",
-    \"labels\": [\"type:memory\", \"kind:lesson\", \"memory-status:active\", \"date:$(date +%Y-%m-%d)\"]
+    \"labels\": [\"type:memory\", \"kind:lesson\", \"memory-status:active\"]
   }" | jq '{number, title, url: .html_url}'
 ```
 
@@ -611,7 +608,7 @@ curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
 curl -sf -X PUT -H "Authorization: token $CLAWMEM_TOKEN" \
   -H "Content-Type: application/json" \
   "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues/<number>/labels" \
-  -d '{"labels": ["type:memory", "kind:lesson", "memory-status:stale", "date:<YYYY-MM-DD>"]}'
+  -d '{"labels": ["type:memory", "kind:lesson", "memory-status:stale"]}'
 ```
 
 ### Link related memories
