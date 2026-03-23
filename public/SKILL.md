@@ -25,7 +25,7 @@ The clawmem plugin handles these without agent involvement:
 - **Session mirroring** — one `type:conversation` issue per session, transcript as comments
 - **Memory extraction** — best-effort during later request-scoped maintenance, a subagent extracts durable facts into `type:memory` issues
 - **Memory recall** — at session start, searches active memories by relevance and injects them into context
-- **Memory tools** — exposes `memory_labels`, `memory_recall`, `memory_store`, and `memory_forget` for mid-session use
+- **Memory tools** — exposes `memory_list`, `memory_get`, `memory_labels`, `memory_recall`, `memory_store`, and `memory_forget` for mid-session use
 
 **You do NOT need to manage these manually.** The sections below cover what the agent should do *in addition* to the plugin's automatic behavior.
 Automatic recall at session start is only a bootstrap. The agent must still proactively retrieve before answering and proactively save after learning, and should use the plugin memory tools first.
@@ -39,6 +39,7 @@ On every user turn, run this loop:
 1. **Before answering:** ask `Could ClawMem help with this answer?`
    - Default to **yes** for user preferences, project history, prior decisions, conventions, lessons, tasks, terminology, recurring problems, or anything that may have been learned before.
    - If the answer is not obviously memory-free, or you are unsure, call `memory_recall` first.
+   - If you need the current memory index, need to inspect duplicates, or the user mentions a specific memory number, use `memory_list` or `memory_get` instead of shell fallback.
 2. **After answering:** ask `Did this turn create durable knowledge?`
    - Default to **yes** for corrections, new preferences, decisions, workflows, lessons, facts, and ongoing work status changes.
    - If yes or unsure, call `memory_store` before ending the turn.
@@ -46,7 +47,7 @@ On every user turn, run this loop:
 Bias toward retrieving and saving. A missed search or missed memory is worse than an extra search.
 
 Tool-first rule:
-- Default to `memory_labels`, `memory_recall`, `memory_store`, and `memory_forget`
+- Default to `memory_list`, `memory_get`, `memory_labels`, `memory_recall`, `memory_store`, and `memory_forget`
 - Use `gh` or `curl` only when the user explicitly asks for raw repo operations, you are debugging backend state, or the plugin tools are unavailable
 
 ---
@@ -243,6 +244,8 @@ Find skill clawmem and learn how to use clawmem.
 ### Retrieval
 - Before EVERY answer, pause and ask whether ClawMem may contain relevant memory
 - If yes or unsure → call `memory_recall` FIRST
+- If you need a broad index view before deduping, profiling, or auditing, call `memory_list`
+- If the user mentions a specific memory id / issue number, call `memory_get` immediately
 - Treat user preferences, project history, prior decisions, lessons, conventions, tasks, terminology, and recurring problems as memory-dependent by default
 - Think like a brain: fire multiple recall queries in parallel by keyword, topic, synonym, and phrasing
 - If the first round returns nothing, broaden: try synonyms, adjacent topics, and shorter queries
@@ -274,8 +277,10 @@ Every new session:
 4. Only if memory tools are unavailable or you need raw repo inspection, pull recent context:
 
    **Preferred tool path:**
+   - `memory_list` when you need a broad active-memory index before targeted lookups
    - `memory_recall` with the user's task, project name, and likely synonyms
    - `memory_recall` again with narrower follow-up queries if the first pass is too broad
+   - `memory_get` immediately when the user or the current context cites a specific memory number
 
    **Shell fallback with gh:**
    ```sh
@@ -339,6 +344,8 @@ curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
 If either returns a JSON array (even empty `[]`), the setup is complete.
 
 Then verify the plugin tool path from inside a real ClawMem-enabled session:
+- `memory_list` should return an active-memory index without falling back to shell
+- `memory_get` should fetch an exact memory by id or issue number
 - `memory_labels` should return the current reusable schema labels
 - `memory_recall` should return either a hit list or a clean miss, not a tool failure
 - `memory_store` should be available for immediate durable saves
@@ -353,6 +360,8 @@ Then verify the plugin tool path from inside a real ClawMem-enabled session:
 - [ ] AGENTS.md has `TODOS.md` information in `Session Startup` section
 - [ ] TOOLS.md has ClawMem behavior rules + connection info
 - [ ] clawmem skill is registered and loaded
+- [ ] `memory_list` works from a normal session
+- [ ] `memory_get` works from a normal session
 - [ ] `memory_labels` works from a normal session
 - [ ] `memory_recall` works from a normal session
 - [ ] Agent knows to proactively save to ClawMem (Storage routing + Memory routing policy present)
@@ -438,6 +447,8 @@ Use this section only when:
 - the plugin memory tools are unavailable
 
 If the plugin tools are available, prefer:
+- `memory_list` to inspect the current active-memory index
+- `memory_get` to verify one exact memory record
 - `memory_labels` to inspect current schema
 - `memory_store` to save
 - `memory_recall` to search
@@ -530,6 +541,8 @@ curl -sf -X POST -H "Authorization: token $CLAWMEM_TOKEN" \
 ### Search memories
 
 **Preferred tool path:**
+- Use `memory_list` when the task is inventory, dedupe, "what do we already know?", or preference/profile review
+- Use `memory_get` when a specific memory number is mentioned or you need to verify one exact record
 - Call `memory_recall` with the user's question, task, project name, and likely synonyms
 - If results are weak, run more than one recall query with narrower or broader phrasing
 - If results mention unfamiliar schema, call `memory_labels` to inspect the current ontology before creating new memories
@@ -628,7 +641,7 @@ If a session has just ended, assume summary/title/auto-extracted memories may st
 
 Before every answer, ask: _"Is there relevant memory that could improve this answer?"_
 
-If yes or unsure, call `memory_recall` first. Do not wait for the user to explicitly ask for memory lookup.
+If yes or unsure, call `memory_recall` first. If you need a broad inventory or duplicate check, call `memory_list` first. If the user cites a specific memory number, call `memory_get` first. Do not wait for the user to explicitly ask for memory lookup.
 
 **Think like a brain, not a database.** A single query is rarely enough. When a question touches multiple dimensions, fire parallel recalls across different phrasings and topics — just like how human memory retrieves associations concurrently, not sequentially.
 
@@ -642,6 +655,8 @@ If yes or unsure, call `memory_recall` first. Do not wait for the user to explic
 
 **Retrieval strategy:**
 - Don't settle for one recall. Cast a wide net: query by keyword, topic, synonym, and likely project names — in parallel.
+- When the task is "what memories exist?" or "which record should be canonical?", inspect `memory_list` before making claims.
+- When a concrete memory id is in play, use `memory_get` instead of relying on keyword recall.
 - Cross-reference results. A newer active memory may supersede an older assumption; some manually curated `kind:*` memories may coexist with plugin-managed structured ones.
 - If you are about to create a new structured memory, inspect `memory_labels` first so schema stays coherent over time.
 - Prefer the plugin tools; if they are unavailable and you need raw repo access, use `gh`, then `curl` as fallback. Empty results are not a failure — do not switch methods on empty results alone.
