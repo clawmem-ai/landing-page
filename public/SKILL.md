@@ -25,7 +25,7 @@ The clawmem plugin handles these without agent involvement:
 - **Session mirroring** — one `type:conversation` issue per session, transcript as comments
 - **Memory extraction** — best-effort during turn sync and again at session end, a subagent extracts durable facts into `type:memory` issues
 - **Memory recall** — at session start, searches active memories by relevance and injects them into context
-- **Memory tools** — exposes `memory_recall`, `memory_store`, and `memory_forget` for mid-session use
+- **Memory tools** — exposes `memory_labels`, `memory_recall`, `memory_store`, and `memory_forget` for mid-session use
 
 **You do NOT need to manage these manually.** The sections below cover what the agent should do *in addition* to the plugin's automatic behavior.
 Automatic recall at session start is only a bootstrap. The agent must still proactively retrieve before answering and proactively save after learning, and should use the plugin memory tools first.
@@ -46,7 +46,7 @@ On every user turn, run this loop:
 Bias toward retrieving and saving. A missed search or missed memory is worse than an extra search.
 
 Tool-first rule:
-- Default to `memory_recall`, `memory_store`, and `memory_forget`
+- Default to `memory_labels`, `memory_recall`, `memory_store`, and `memory_forget`
 - Use `gh` or `curl` only when the user explicitly asks for raw repo operations, you are debugging backend state, or the plugin tools are unavailable
 
 ---
@@ -250,9 +250,15 @@ Find skill clawmem and learn how to use clawmem.
 
 ### Save
 - After EVERY turn, reflect on whether I learned anything durable
-- If yes or unsure → call `memory_store` before ending the turn
+- If yes or unsure → inspect existing schema with `memory_labels` when needed, then call `memory_store` before ending the turn
 - Proactively save patterns, preferences, corrections, decisions, workflows, lessons, and status changes without being asked
 - I get smarter every session. ClawMem is how.
+
+### Schema discipline
+- Before inventing a new `kind` or `topic`, call `memory_labels` and reuse existing schema whenever possible
+- Prefer stable reusable labels over hyper-specific one-off labels
+- If existing schema is not expressive enough, you may add a new `kind` or `topic`, but keep it short, general, and reusable
+- Never invent arbitrary label prefixes. New schema must stay within `kind:*` and `topic:*`
 
 ### Forget / Supersede
 - If a memory is no longer true, superseded, or harmful if reused, call `memory_forget`
@@ -332,6 +338,7 @@ curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
 If either returns a JSON array (even empty `[]`), the setup is complete.
 
 Then verify the plugin tool path from inside a real ClawMem-enabled session:
+- `memory_labels` should return the current reusable schema labels
 - `memory_recall` should return either a hit list or a clean miss, not a tool failure
 - `memory_store` should be available for immediate durable saves
 
@@ -344,6 +351,7 @@ Then verify the plugin tool path from inside a real ClawMem-enabled session:
 - [ ] AGENTS.md has `TODOS.md` information in `Session Startup` section
 - [ ] TOOLS.md has ClawMem behavior rules + connection info
 - [ ] clawmem skill is registered and loaded
+- [ ] `memory_labels` works from a normal session
 - [ ] `memory_recall` works from a normal session
 - [ ] Agent knows to proactively save to ClawMem (Storage routing + Memory routing policy present)
 
@@ -376,7 +384,7 @@ Nothing interesting happens silently. The agent notices things the user doesn't 
 *Issues are nodes. Labels are schema. `#ID` cross-links are edges.*
 
 There are two valid memory shapes:
-- **Plugin-managed default memories** — created via `memory_store` or automatic extraction; minimal schema optimized for fast capture and recall
+- **Plugin-managed structured memories** — created via `memory_store` or automatic extraction; the plugin manages core labels and can also persist agent-selected `kind:*` and `topic:*`
 - **Curated graph memories** — manually created via `gh` / `curl` when you explicitly need richer labels like `kind:*` or `topic:*`
 
 | Kind | `type:` | `kind:` | What it represents |
@@ -389,11 +397,15 @@ There are two valid memory shapes:
 
 ### Labels
 
-Plugin-managed default memories usually include only the labels the plugin controls, such as:
+Plugin-managed memories always include plugin-controlled labels such as:
 - `type:memory`
 - `memory-status:active` or `memory-status:stale`
 - `date:YYYY-MM-DD`
 - `session:<id>`
+
+Plugin-managed memories may also include:
+- One `kind:*` label chosen by the agent
+- Optional `topic:*` labels chosen by the agent
 
 Every manually created curated `type:memory` issue MUST include:
 - `type:memory`
@@ -404,7 +416,7 @@ Every manually created curated `type:memory` issue MUST include:
 
 ### When to create which kind
 
-Use this table when you are creating a curated memory manually. For normal day-to-day capture through `memory_store`, just write the durable knowledge in plain language.
+Use this table when you are choosing schema for `memory_store` or when creating a curated memory manually.
 
 | Trigger | Kind |
 |---------|------|
@@ -424,6 +436,7 @@ Use this section only when:
 - the plugin memory tools are unavailable
 
 If the plugin tools are available, prefer:
+- `memory_labels` to inspect current schema
 - `memory_store` to save
 - `memory_recall` to search
 - `memory_forget` to mark stale
@@ -467,7 +480,9 @@ For ClawMem, always pass `--repo "$CLAWMEM_REPO"` (gh) or use `$CLAWMEM_BASE_URL
 ### Save a memory
 
 **Preferred tool path:**
-- Call `memory_store` with the durable fact, decision, correction, workflow, or preference in plain language
+- If the right `kind` or `topic` is not obvious, call `memory_labels` first
+- Reuse existing schema when possible
+- Call `memory_store` with the durable fact, decision, correction, workflow, or preference in plain language, plus `kind` and `topics` when they improve retrieval
 - After save, announce: `Locked memory #<id>: <title>` if the tool response returns an id/title
 
 **Use `gh` / `curl` only when the tool path is unavailable or raw issue control is required.**
@@ -515,6 +530,7 @@ curl -sf -X POST -H "Authorization: token $CLAWMEM_TOKEN" \
 **Preferred tool path:**
 - Call `memory_recall` with the user's question, task, project name, and likely synonyms
 - If results are weak, run more than one recall query with narrower or broader phrasing
+- If results mention unfamiliar schema, call `memory_labels` to inspect the current ontology before creating new memories
 
 **Use `gh` / `curl` only when the tool path is unavailable or you need raw issue data.**
 
@@ -595,6 +611,10 @@ If yes or unsure → save to ClawMem immediately. Do not wait for extraction.
 - Workflows
 - Ongoing work
 
+**How to label it:**
+- Reuse an existing `kind` and existing `topic` labels whenever they fit
+- If none fit, add the smallest new reusable `kind` or `topic` that clearly improves future retrieval
+
 **Rule:** Anything that should persist → ClawMem Issues (`type:memory`). Local files are for tools and humans to read. ClawMem is for me to remember.
 
 
@@ -618,7 +638,8 @@ If yes or unsure, call `memory_recall` first. Do not wait for the user to explic
 
 **Retrieval strategy:**
 - Don't settle for one recall. Cast a wide net: query by keyword, topic, synonym, and likely project names — in parallel.
-- Cross-reference results. A newer active memory may supersede an older assumption; some manually curated `kind:*` memories may coexist with plugin-managed default ones.
+- Cross-reference results. A newer active memory may supersede an older assumption; some manually curated `kind:*` memories may coexist with plugin-managed structured ones.
+- If you are about to create a new structured memory, inspect `memory_labels` first so schema stays coherent over time.
 - Prefer the plugin tools; if they are unavailable and you need raw repo access, use `gh`, then `curl` as fallback. Empty results are not a failure — do not switch methods on empty results alone.
 - If the first round returns nothing, broaden: try synonyms, related topics, and shorter or more concrete phrasing.
 - The more you retrieve, the better you synthesize. Err on the side of over-fetching — you can always filter, but you can't reason about what you never loaded.
