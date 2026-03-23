@@ -25,7 +25,7 @@ The clawmem plugin handles these without agent involvement:
 - **Session mirroring** — one `type:conversation` issue per session, transcript as comments
 - **Memory extraction** — best-effort during later request-scoped maintenance, a subagent extracts durable facts into `type:memory` issues
 - **Memory recall** — at session start, searches active memories by relevance and injects them into context
-- **Memory tools** — exposes `memory_list`, `memory_get`, `memory_labels`, `memory_recall`, `memory_store`, and `memory_forget` for mid-session use
+- **Memory tools** — exposes `memory_list`, `memory_get`, `memory_labels`, `memory_recall`, `memory_store`, `memory_update`, and `memory_forget` for mid-session use
 
 **You do NOT need to manage these manually.** The sections below cover what the agent should do *in addition* to the plugin's automatic behavior.
 Automatic recall at session start is only a bootstrap. The agent must still proactively retrieve before answering and proactively save after learning, and should use the plugin memory tools first.
@@ -42,12 +42,12 @@ On every user turn, run this loop:
    - If you need the current memory index, need to inspect duplicates, or the user mentions a specific memory number, use `memory_list` or `memory_get` instead of shell fallback.
 2. **After answering:** ask `Did this turn create durable knowledge?`
    - Default to **yes** for corrections, new preferences, decisions, workflows, lessons, facts, and ongoing work status changes.
-   - If yes or unsure, call `memory_store` before ending the turn.
+   - If yes or unsure, call `memory_store` or `memory_update` before ending the turn.
 
 Bias toward retrieving and saving. A missed search or missed memory is worse than an extra search.
 
 Tool-first rule:
-- Default to `memory_list`, `memory_get`, `memory_labels`, `memory_recall`, `memory_store`, and `memory_forget`
+- Default to `memory_list`, `memory_get`, `memory_labels`, `memory_recall`, `memory_store`, `memory_update`, and `memory_forget`
 - Use `gh` or `curl` only when the user explicitly asks for raw repo operations, you are debugging backend state, or the plugin tools are unavailable
 
 ---
@@ -253,7 +253,9 @@ Find skill clawmem and learn how to use clawmem.
 
 ### Save
 - After EVERY turn, reflect on whether I learned anything durable
-- If yes or unsure → inspect existing schema with `memory_labels` when needed, then call `memory_store` before ending the turn
+- If yes or unsure → inspect existing schema with `memory_labels` when needed, then call `memory_store` or `memory_update` before ending the turn
+- Use `memory_update` when the same canonical fact or ongoing task has evolved and should stay one node
+- Use `memory_store` when this is a genuinely new memory, a new lesson, or a new decision/version worth preserving separately
 - Proactively save patterns, preferences, corrections, decisions, workflows, lessons, and status changes without being asked
 - Automatic extraction may lag until the next real request; never rely on a just-ended session being fully processed in the background
 - I get smarter every session. ClawMem is how.
@@ -266,6 +268,7 @@ Find skill clawmem and learn how to use clawmem.
 
 ### Forget / Supersede
 - If a memory is no longer true, superseded, or harmful if reused, call `memory_forget`
+- If the same canonical memory should remain one node, prefer `memory_update` instead of creating a replacement and forgetting the old one
 - Use `memory_forget` for stale / invalid memories instead of leaving contradictions active
 - If a new memory replaces an old one, save the new memory first, then mark the old one stale
 
@@ -349,6 +352,7 @@ Then verify the plugin tool path from inside a real ClawMem-enabled session:
 - `memory_labels` should return the current reusable schema labels
 - `memory_recall` should return either a hit list or a clean miss, not a tool failure
 - `memory_store` should be available for immediate durable saves
+- `memory_update` should update an existing memory in place
 - conversation summaries or auto-extracted memories from a just-finished session may appear on the next real request, not necessarily immediately at session close
 
 ### Definition of Done
@@ -364,6 +368,7 @@ Then verify the plugin tool path from inside a real ClawMem-enabled session:
 - [ ] `memory_get` works from a normal session
 - [ ] `memory_labels` works from a normal session
 - [ ] `memory_recall` works from a normal session
+- [ ] `memory_update` works from a normal session
 - [ ] Agent knows to proactively save to ClawMem (Storage routing + Memory routing policy present)
 
 ---
@@ -451,6 +456,7 @@ If the plugin tools are available, prefer:
 - `memory_get` to verify one exact memory record
 - `memory_labels` to inspect current schema
 - `memory_store` to save
+- `memory_update` to evolve one canonical memory in place
 - `memory_recall` to search
 - `memory_forget` to mark stale
 
@@ -495,7 +501,8 @@ For ClawMem, always pass `--repo "$CLAWMEM_REPO"` (gh) or use `$CLAWMEM_BASE_URL
 **Preferred tool path:**
 - If the right `kind` or `topic` is not obvious, call `memory_labels` first
 - Reuse existing schema when possible
-- Call `memory_store` with the durable fact, decision, correction, workflow, or preference in plain language, plus `kind` and `topics` when they improve retrieval
+- If the same memory node should keep evolving, call `memory_update`
+- Otherwise call `memory_store` with the durable fact, decision, correction, workflow, or preference in plain language, plus `kind` and `topics` when they improve retrieval
 - After save, announce: `Locked memory #<id>: <title>` if the tool response returns an id/title
 
 **Use `gh` / `curl` only when the tool path is unavailable or raw issue control is required.**
@@ -578,6 +585,7 @@ curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
 ### Mark memory as stale
 
 **Preferred tool path:**
+- If this is still the same canonical fact or task, prefer `memory_update` instead of staling the old node
 - Call `memory_forget` with the memory id or issue number you want to retire
 
 **Use `gh` / `curl` only when the tool path is unavailable or raw issue control is required.**
