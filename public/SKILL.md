@@ -291,7 +291,7 @@ Every new session:
      gh issue list --repo "$CLAWMEM_REPO" --limit 10 --json number,title,labels,updatedAt
 
    GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
-     gh issue list --repo "$CLAWMEM_REPO" --label "type:memory" --label "memory-status:active" --limit 50 --json number,title,labels,updatedAt
+     gh issue list --repo "$CLAWMEM_REPO" --state open --label "type:memory" --limit 50 --json number,title,labels,updatedAt
    ```
 
    **Shell fallback with curl (if gh is unavailable):**
@@ -301,7 +301,7 @@ Every new session:
      jq 'map({number,title,labels:[.labels[]?.name],updatedAt:.updated_at})'
 
    curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
-     "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&labels=type:memory,memory-status:active&per_page=50&type=issues" | \
+     "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&labels=type:memory&per_page=50&type=issues" | \
      jq 'map({number,title,labels:[.labels[]?.name],updatedAt:.updated_at})'
    ```
 
@@ -406,7 +406,7 @@ There are two valid memory shapes:
 | Kind | `type:` | `kind:` | What it represents |
 |---|---|---|---|
 | Core-Fact | `type:memory` | `kind:core-fact` | A stable truth — update in place as reality changes |
-| Convention | `type:memory` | `kind:convention` | An agreed rule — major revisions create a new issue, old gets `memory-status:stale` |
+| Convention | `type:memory` | `kind:convention` | An agreed rule — major revisions create a new issue, old one gets closed and linked |
 | Lesson-Learned | `type:memory` | `kind:lesson` | A correction or postmortem — append-only, never updated |
 | Skill-Blueprint | `type:memory` | `kind:skill` | A repeatable workflow — deterministic SOP |
 | Active-Task | `type:memory` | `kind:task` | Work in progress — checklist body, progress in comments |
@@ -415,18 +415,24 @@ There are two valid memory shapes:
 
 Plugin-managed memories always include plugin-controlled labels such as:
 - `type:memory`
-- `memory-status:active` or `memory-status:stale`
 - `session:<id>`
 
 Plugin-managed memories may also include:
 - One `kind:*` label chosen by the agent
 - Optional `topic:*` labels chosen by the agent
 
+Plugin-managed memory lifecycle is carried by native issue state:
+- open issue = active memory
+- closed issue = stale / superseded memory
+
 Every manually created curated `type:memory` issue MUST include:
 - `type:memory`
 - One `kind:*` label
-- `memory-status:active` (or `memory-status:stale`)
 - Optional: `topic:*` (limit to 2-3 for retrieval quality)
+
+For curated memory lifecycle:
+- create active memories as open issues
+- retire stale memories by closing the issue instead of swapping lifecycle labels
 
 ### When to create which kind
 
@@ -508,7 +514,7 @@ For ClawMem, always pass `--repo "$CLAWMEM_REPO"` (gh) or use `$CLAWMEM_BASE_URL
 **With gh:**
 ```sh
 # Ensure required labels exist (idempotent, run once per repo)
-for lbl in "type:memory" "kind:core-fact" "kind:convention" "kind:lesson" "kind:skill" "kind:task" "memory-status:active" "memory-status:stale"; do
+for lbl in "type:memory" "kind:core-fact" "kind:convention" "kind:lesson" "kind:skill" "kind:task"; do
   GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
     gh label create "$lbl" --repo "$CLAWMEM_REPO" --color "5319e7" 2>/dev/null || true
 done
@@ -518,14 +524,13 @@ GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
     --title "Memory: <concise title>" \
     --body "<the insight, in plain language>" \
     --label "type:memory" \
-    --label "kind:lesson" \
-    --label "memory-status:active"
+    --label "kind:lesson"
 ```
 
 **With curl (if gh is unavailable):**
 ```sh
 # Ensure required labels exist (idempotent, run once per repo)
-for lbl in "type:memory" "kind:core-fact" "kind:convention" "kind:lesson" "kind:skill" "kind:task" "memory-status:active" "memory-status:stale"; do
+for lbl in "type:memory" "kind:core-fact" "kind:convention" "kind:lesson" "kind:skill" "kind:task"; do
   curl -sf -X POST -H "Authorization: token $CLAWMEM_TOKEN" \
     -H "Content-Type: application/json" \
     "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/labels" \
@@ -538,7 +543,7 @@ curl -sf -X POST -H "Authorization: token $CLAWMEM_TOKEN" \
   -d "{
     \"title\": \"Memory: <concise title>\",
     \"body\": \"<the insight, in plain language>\",
-    \"labels\": [\"type:memory\", \"kind:lesson\", \"memory-status:active\"]
+    \"labels\": [\"type:memory\", \"kind:lesson\"]
   }" | jq '{number, title, url: .html_url}'
 ```
 
@@ -557,8 +562,8 @@ curl -sf -X POST -H "Authorization: token $CLAWMEM_TOKEN" \
 ```sh
 GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
   gh issue list --repo "$CLAWMEM_REPO" \
+    --state open \
     --label "type:memory" \
-    --label "memory-status:active" \
     --search "<keywords>" \
     --limit 100 \
     --json number,title,body,labels,updatedAt
@@ -569,7 +574,7 @@ GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
 Note: curl fetches issues by label, then filters keywords client-side via jq. Only the first page (up to 100) is searched.
 ```sh
 curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
-  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&labels=type:memory,memory-status:active&per_page=100&type=issues" | \
+  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&labels=type:memory&per_page=100&type=issues" | \
   jq --arg q "<keywords>" '
     ($q | ascii_downcase) as $needle
     | map(select(
@@ -590,25 +595,17 @@ curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
 **With gh:**
 ```sh
 GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
-  gh issue edit <number> --repo "$CLAWMEM_REPO" \
-    --remove-label "memory-status:active" \
-    --add-label "memory-status:stale"
+  gh issue close <number> --repo "$CLAWMEM_REPO"
 ```
 
 **With curl (if gh is unavailable):**
 
-Two steps: read current labels, then replace them with `memory-status:active` swapped to `memory-status:stale`.
+Close the issue. If the replacement memory exists, mention the old `#ID` in the new issue body so the supersession is explicit.
 ```sh
-# Step 1: get current labels
-curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
-  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues/<number>" | \
-  jq '[.labels[]?.name | select(. != "memory-status:active")] + ["memory-status:stale"] | unique'
-
-# Step 2: set the new label list (replace <number> and paste the array from step 1)
-curl -sf -X PUT -H "Authorization: token $CLAWMEM_TOKEN" \
+curl -sf -X PATCH -H "Authorization: token $CLAWMEM_TOKEN" \
   -H "Content-Type: application/json" \
-  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues/<number>/labels" \
-  -d '{"labels": ["type:memory", "kind:lesson", "memory-status:stale"]}'
+  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues/<number>" \
+  -d '{"state": "closed"}'
 ```
 
 ### Link related memories
@@ -689,7 +686,7 @@ GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
 
 # Active memories
 GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
-  gh issue list --repo "$CLAWMEM_REPO" --label "type:memory" --label "memory-status:active" --limit 50 --json number,title,labels,updatedAt
+  gh issue list --repo "$CLAWMEM_REPO" --state open --label "type:memory" --limit 50 --json number,title,labels,updatedAt
 ```
 
 **With curl (if gh is unavailable):**
@@ -701,7 +698,7 @@ curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
 
 # Active memories
 curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
-  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&labels=type:memory,memory-status:active&per_page=50&type=issues" | \
+  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&labels=type:memory&per_page=50&type=issues" | \
   jq 'map({number,title,labels:[.labels[]?.name],updatedAt:.updated_at})'
 ```
 
