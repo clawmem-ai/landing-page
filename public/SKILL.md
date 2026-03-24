@@ -38,8 +38,11 @@ On every user turn, run this loop:
 
 1. **Before answering:** ask `Could ClawMem help with this answer?`
    - Default to **yes** for user preferences, project history, prior decisions, conventions, lessons, tasks, terminology, recurring problems, or anything that may have been learned before.
-   - If the answer is not obviously memory-free, or you are unsure, call `memory_recall` first.
-   - If you need the current memory index, need to inspect duplicates, or the user mentions a specific memory number, use `memory_list` or `memory_get` instead of shell fallback.
+   - If the answer is not obviously memory-free, or you are unsure, choose the retrieval tool deliberately:
+     - use `memory_list` first for existence checks, preference/profile review, dedupe, canonical-record checks, or "what do we already know?"
+     - use `memory_get` first when a specific memory id / issue number is mentioned
+     - use `memory_recall` for relevance search when you already know the topic but need matching memories
+   - Never treat a `memory_recall` miss by itself as proof that no relevant memory exists. If absence matters, cross-check with `memory_list` or `memory_get`.
 2. **After answering:** ask `Did this turn create durable knowledge?`
    - Default to **yes** for corrections, new preferences, decisions, workflows, lessons, facts, and ongoing work status changes.
    - If yes or unsure, call `memory_store` or `memory_update` before ending the turn.
@@ -243,12 +246,14 @@ Find skill clawmem and learn how to use clawmem.
 
 ### Retrieval
 - Before EVERY answer, pause and ask whether ClawMem may contain relevant memory
-- If yes or unsure → call `memory_recall` FIRST
-- If you need a broad index view before deduping, profiling, or auditing, call `memory_list`
-- If the user mentions a specific memory id / issue number, call `memory_get` immediately
+- If yes or unsure, choose the first tool by task shape:
+  - `memory_list` for existence checks, broad index view, deduping, profiling, auditing, preference review, or canonical-record decisions
+  - `memory_get` immediately when the user mentions a specific memory id / issue number
+  - `memory_recall` for topic-driven relevance search after you know what space you are searching
 - Treat user preferences, project history, prior decisions, lessons, conventions, tasks, terminology, and recurring problems as memory-dependent by default
 - Think like a brain: fire multiple recall queries in parallel by keyword, topic, synonym, and phrasing
 - If the first round returns nothing, broaden: try synonyms, adjacent topics, and shorter queries
+- A `memory_recall` miss is not evidence of absence; when the answer depends on whether a memory exists, cross-check with `memory_list`
 - Reply with: hit/miss + memory id + title when memory was used
 
 ### Save
@@ -276,12 +281,12 @@ Find skill clawmem and learn how to use clawmem.
 Every new session:
 1. Resolve current agent route per Connection info above
 2. Check that ClawMem is the active memory plugin (`plugins.slots.memory = clawmem`)
-3. If the user request or current task might depend on prior context, call `memory_recall` before doing any shell-based fallback
+3. If the user request or current task might depend on prior context, use the appropriate memory tool before doing any shell-based fallback: `memory_list` for inventory/existence checks, `memory_get` for exact ids, `memory_recall` for topic-driven search
 4. Only if memory tools are unavailable or you need raw repo inspection, pull recent context:
 
    **Preferred tool path:**
-   - `memory_list` when you need a broad active-memory index before targeted lookups
-   - `memory_recall` with the user's task, project name, and likely synonyms
+   - `memory_list` when you need a broad active-memory index before targeted lookups, or when you are checking whether anything relevant exists at all
+   - `memory_recall` with the user's task, project name, and likely synonyms after the inventory step or when the task is clearly topic-driven
    - `memory_recall` again with narrower follow-up queries if the first pass is too broad
    - `memory_get` immediately when the user or the current context cites a specific memory number
 
@@ -554,6 +559,7 @@ curl -sf -X POST -H "Authorization: token $CLAWMEM_TOKEN" \
 - Use `memory_get` when a specific memory number is mentioned or you need to verify one exact record
 - Call `memory_recall` with the user's question, task, project name, and likely synonyms
 - If results are weak, run more than one recall query with narrower or broader phrasing
+- If `memory_recall` returns nothing and it matters whether a memory exists, cross-check with `memory_list` before claiming a miss
 - If results mention unfamiliar schema, call `memory_labels` to inspect the current ontology before creating new memories
 
 **Use `gh` / `curl` only when the tool path is unavailable or you need raw issue data.**
@@ -643,7 +649,7 @@ If a session has just ended, assume summary/title/auto-extracted memories may st
 
 Before every answer, ask: _"Is there relevant memory that could improve this answer?"_
 
-If yes or unsure, call `memory_recall` first. If you need a broad inventory or duplicate check, call `memory_list` first. If the user cites a specific memory number, call `memory_get` first. Do not wait for the user to explicitly ask for memory lookup.
+If yes or unsure, pick the first retrieval step intentionally. Use `memory_list` first for existence checks, broad inventory, duplicate checks, preference/profile review, or canonical-memory decisions. Use `memory_get` first if the user cites a specific memory number. Use `memory_recall` first only when the task is clearly topic-driven and you are looking for relevant matches rather than proving absence. Do not wait for the user to explicitly ask for memory lookup.
 
 **Think like a brain, not a database.** A single query is rarely enough. When a question touches multiple dimensions, fire parallel recalls across different phrasings and topics — just like how human memory retrieves associations concurrently, not sequentially.
 
@@ -659,6 +665,7 @@ If yes or unsure, call `memory_recall` first. If you need a broad inventory or d
 - Don't settle for one recall. Cast a wide net: query by keyword, topic, synonym, and likely project names — in parallel.
 - When the task is "what memories exist?" or "which record should be canonical?", inspect `memory_list` before making claims.
 - When a concrete memory id is in play, use `memory_get` instead of relying on keyword recall.
+- Never treat one `memory_recall` miss as proof that nothing relevant exists. If absence matters, inspect `memory_list` and then verify exact candidates with `memory_get`.
 - Cross-reference results. A newer active memory may supersede an older assumption; some manually curated `kind:*` memories may coexist with plugin-managed structured ones.
 - If you are about to create a new structured memory, inspect `memory_labels` first so schema stays coherent over time.
 - Prefer the plugin tools; if they are unavailable and you need raw repo access, use `gh`, then `curl` as fallback. Empty results are not a failure — do not switch methods on empty results alone.
