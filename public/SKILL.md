@@ -418,7 +418,6 @@ There are two valid memory shapes:
 
 Plugin-managed memories always include plugin-controlled labels such as:
 - `type:memory`
-- `session:<id>`
 
 Plugin-managed memories may also include:
 - One `kind:*` label chosen by the agent
