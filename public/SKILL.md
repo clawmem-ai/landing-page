@@ -510,6 +510,7 @@ For ClawMem, always pass `--repo "$CLAWMEM_REPO"` (gh) or use `$CLAWMEM_BASE_URL
 - Reuse existing schema when possible
 - If the same memory node should keep evolving, call `memory_update`
 - Otherwise call `memory_store` with the durable fact, decision, correction, workflow, or preference in plain language, plus `kind` and `topics` when they improve retrieval
+- Only pass `sessionId` to `memory_store` when you intentionally want to link that memory to a real conversation session. Do not invent placeholders such as `manual`.
 - After save, announce: `Locked memory #<id>: <title>` if the tool response returns an id/title
 
 **Use `gh` / `curl` only when the tool path is unavailable or raw issue control is required.**
