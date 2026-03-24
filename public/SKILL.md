@@ -23,11 +23,12 @@ Two layers always in play:
 The clawmem plugin handles these without agent involvement:
 - **Per-agent account & repo provisioning** — auto-creates a private repo for each agent on first use, writes credentials to `openclaw.json -> plugins.entries.clawmem.config.agents.<agentId>`
 - **Session mirroring** — one `type:conversation` issue per session, transcript as comments
-- **Memory extraction** — at session end, a subagent extracts durable facts into `type:memory` issues
+- **Memory extraction** — best-effort during later request-scoped maintenance, a subagent extracts durable facts into `type:memory` issues
 - **Memory recall** — at session start, searches active memories by relevance and injects them into context
+- **Memory tools** — exposes `memory_list`, `memory_get`, `memory_labels`, `memory_recall`, `memory_store`, `memory_update`, and `memory_forget` for mid-session use
 
 **You do NOT need to manage these manually.** The sections below cover what the agent should do *in addition* to the plugin's automatic behavior.
-Automatic recall at session start is only a bootstrap. The agent must still proactively retrieve before answering and proactively save after learning.
+Automatic recall at session start is only a bootstrap. The agent must still proactively retrieve before answering and proactively save after learning, and should use the plugin memory tools first.
 
 ---
 
@@ -37,12 +38,19 @@ On every user turn, run this loop:
 
 1. **Before answering:** ask `Could ClawMem help with this answer?`
    - Default to **yes** for user preferences, project history, prior decisions, conventions, lessons, tasks, terminology, recurring problems, or anything that may have been learned before.
-   - If the answer is not obviously memory-free, or you are unsure, search ClawMem first.
+   - If the answer is not obviously memory-free, or you are unsure, start with `memory_recall`.
+   - If `memory_recall` is weak or empty and it matters whether something exists, cross-check with `memory_list`.
+   - If a specific memory id / issue number is mentioned, use `memory_get` first instead of searching.
+   - Never treat a `memory_recall` miss by itself as proof that no relevant memory exists. If absence matters, cross-check with `memory_list` or `memory_get`.
 2. **After answering:** ask `Did this turn create durable knowledge?`
    - Default to **yes** for corrections, new preferences, decisions, workflows, lessons, facts, and ongoing work status changes.
-   - If yes or unsure, save to ClawMem before ending the turn.
+   - If yes or unsure, call `memory_store` or `memory_update` before ending the turn.
 
 Bias toward retrieving and saving. A missed search or missed memory is worse than an extra search.
+
+Tool-first rule:
+- Default to `memory_list`, `memory_get`, `memory_labels`, `memory_recall`, `memory_store`, `memory_update`, and `memory_forget`
+- Use `gh` or `curl` only when the user explicitly asks for raw repo operations, you are debugging backend state, or the plugin tools are unavailable
 
 ---
 
@@ -128,18 +136,51 @@ After clawmem is installed, three persistence layers exist. Each has one job:
 
 This task is NOT complete until all steps below are done. Do not skip any.
 
-### Step 0 — Install plugin
+### Step 0 — Install and activate plugin
 
-If `clawmem` is not yet in `openclaw.json` under `plugins.entries`, the plugin must be installed first. Ask the user how they installed clawmem and confirm it appears in the config before proceeding.
+If `clawmem` is not yet in `openclaw.json` under `plugins.entries`, the plugin must be installed first. This step is not complete until ClawMem is selected as OpenClaw's active memory plugin.
 
 ```sh
 openclaw plugins install @clawmem-ai/clawmem
+openclaw plugins enable clawmem
+openclaw config set plugins.slots.memory clawmem
+openclaw config validate
 openclaw gateway restart  # restart the gateway to apply the plugin
 ```
 
-### Step 1 — Verify provisioning
+Hard checks:
+- `clawmem` exists under `plugins.entries`
+- `plugins.slots.memory = clawmem`
 
-The plugin auto-provisions an account and repo **per agent** on first use. Read the route for the current agent:
+If `plugins.slots.memory` is not `clawmem`, stop here and fix that first. Installing the plugin alone is not enough.
+
+### Step 1 — Verify activation and provisioning
+
+First verify that ClawMem is the active memory plugin. Then verify that the current agent route has been provisioned.
+
+```sh
+openclaw status
+python3 - <<'PY'
+import json, os, subprocess
+cfg_path = subprocess.check_output(["openclaw", "config", "file"], text=True).strip()
+with open(os.path.expanduser(cfg_path)) as f:
+    root = json.load(f)
+slots = (root.get("plugins") or {}).get("slots") or {}
+print(f"plugins.slots.memory = {slots.get('memory', 'MISSING')}")
+PY
+```
+
+Expected:
+- OpenClaw status shows ClawMem as the active memory plugin
+- `plugins.slots.memory = clawmem`
+
+If the active memory slot is not `clawmem`:
+- do not continue onboarding
+- set `openclaw config set plugins.slots.memory clawmem`
+- restart the gateway
+- rerun Step 1
+
+The plugin auto-provisions an account and repo **per agent** on first use. Then read the route for the current agent:
 
 ```sh
 AGENT_ID="${OPENCLAW_AGENT_ID:-main}"
@@ -204,42 +245,66 @@ Find skill clawmem and learn how to use clawmem.
 
 ### Retrieval
 - Before EVERY answer, pause and ask whether ClawMem may contain relevant memory
-- If yes or unsure → search ClawMem FIRST
+- If yes or unsure → call `memory_recall` first
+- If `memory_recall` is weak or empty and the answer depends on whether a memory exists, cross-check with `memory_list`
+- If the user mentions a specific memory id / issue number, call `memory_get` immediately
 - Treat user preferences, project history, prior decisions, lessons, conventions, tasks, terminology, and recurring problems as memory-dependent by default
-- Think like a brain: fire multiple parallel searches by kind, topic, and keyword
-- If the first round returns nothing, broaden: drop kind filter, try synonyms, search related topics
-- If no matching information is found, search within the content of the `conversation` tag to return matching content.
-- If no matching results are found, continue searching for untagged sessions and return matching results.
-- Reply with: hit/miss + issue number + title
+- Think like a brain: fire multiple recall queries in parallel by keyword, topic, synonym, and phrasing
+- If the first round returns nothing, broaden: try synonyms, adjacent topics, and shorter queries
+- A `memory_recall` miss is not evidence of absence; when the answer depends on whether a memory exists, cross-check with `memory_list`
+- Reply with: hit/miss + memory id + title when memory was used
 
 ### Save
 - After EVERY turn, reflect on whether I learned anything durable
-- If yes or unsure → save to ClawMem before ending the turn
+- If yes or unsure → inspect existing schema with `memory_labels` when needed, then call `memory_store` or `memory_update` before ending the turn
+- Use `memory_update` when the same canonical fact or ongoing task has evolved and should stay one node
+- Use `memory_store` when this is a genuinely new memory, a new lesson, or a new decision/version worth preserving separately
 - Proactively save patterns, preferences, corrections, decisions, workflows, lessons, and status changes without being asked
+- Automatic extraction may lag until the next real request; never rely on a just-ended session being fully processed in the background
 - I get smarter every session. ClawMem is how.
+
+### Schema discipline
+- Before inventing a new `kind` or `topic`, call `memory_labels` and reuse existing schema whenever possible
+- Prefer stable reusable labels over hyper-specific one-off labels
+- If existing schema is not expressive enough, you may add a new `kind` or `topic`, but keep it short, general, and reusable
+- Never invent arbitrary label prefixes. New schema must stay within `kind:*` and `topic:*`
+
+### Forget / Supersede
+- If a memory is no longer true, superseded, or harmful if reused, call `memory_forget`
+- If the same canonical memory should remain one node, prefer `memory_update` instead of creating a replacement and forgetting the old one
+- Use `memory_forget` for stale / invalid memories instead of leaving contradictions active
+- If a new memory replaces an old one, save the new memory first, then mark the old one stale
 
 ### Session Startup
 Every new session:
 1. Resolve current agent route per Connection info above
-2. If no memories are injected or recalled, pull recent context:
+2. Check that ClawMem is the active memory plugin (`plugins.slots.memory = clawmem`)
+3. If the user request or current task might depend on prior context, call `memory_recall` before doing any shell-based fallback; if recall is weak and absence matters, follow with `memory_list`
+4. Only if memory tools are unavailable or you need raw repo inspection, pull recent context:
 
-   **With gh:**
+   **Preferred tool path:**
+   - `memory_recall` with the user's task, project name, and likely synonyms
+   - `memory_recall` again with narrower follow-up queries if the first pass is too broad
+   - `memory_list` when `memory_recall` is weak or empty and you need to confirm whether anything relevant exists
+   - `memory_get` immediately when the user or the current context cites a specific memory number
+
+   **Shell fallback with gh:**
    ```sh
    GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
      gh issue list --repo "$CLAWMEM_REPO" --limit 10 --json number,title,labels,updatedAt
 
    GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
-     gh issue list --repo "$CLAWMEM_REPO" --label "type:memory" --label "memory-status:active" --limit 50 --json number,title,labels,updatedAt
+     gh issue list --repo "$CLAWMEM_REPO" --state open --label "type:memory" --limit 50 --json number,title,labels,updatedAt
    ```
 
-   **With curl (if gh is unavailable):**
+   **Shell fallback with curl (if gh is unavailable):**
    ```sh
    curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
      "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&per_page=10&type=issues" | \
      jq 'map({number,title,labels:[.labels[]?.name],updatedAt:.updated_at})'
 
    curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
-     "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&labels=type:memory,memory-status:active&per_page=50&type=issues" | \
+     "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&labels=type:memory&per_page=50&type=issues" | \
      jq 'map({number,title,labels:[.labels[]?.name],updatedAt:.updated_at})'
    ```
 
@@ -284,15 +349,29 @@ curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
 
 If either returns a JSON array (even empty `[]`), the setup is complete.
 
+Then verify the plugin tool path from inside a real ClawMem-enabled session:
+- `memory_list` should return an active-memory index without falling back to shell
+- `memory_get` should fetch an exact memory by id or issue number
+- `memory_labels` should return the current reusable schema labels
+- `memory_recall` should return either a hit list or a clean miss, not a tool failure
+- `memory_store` should be available for immediate durable saves
+- `memory_update` should update an existing memory in place
+- conversation summaries or auto-extracted memories from a just-finished session may appear on the next real request, not necessarily immediately at session close
+
 ### Definition of Done
 
 - [ ] `openclaw.json` has `plugins.entries.clawmem.config.agents.<agentId>.repo`
 - [ ] `openclaw.json` has `plugins.entries.clawmem.config.agents.<agentId>.token`
+- [ ] `openclaw.json` has `plugins.slots.memory = clawmem`
 - [ ] SOUL.md has ClawMem identity block
 - [ ] AGENTS.md has `TODOS.md` information in `Session Startup` section
 - [ ] TOOLS.md has ClawMem behavior rules + connection info
 - [ ] clawmem skill is registered and loaded
-- [ ] `gh issue list` against the current agent repo succeeds using env token
+- [ ] `memory_list` works from a normal session
+- [ ] `memory_get` works from a normal session
+- [ ] `memory_labels` works from a normal session
+- [ ] `memory_recall` works from a normal session
+- [ ] `memory_update` works from a normal session
 - [ ] Agent knows to proactively save to ClawMem (Storage routing + Memory routing policy present)
 
 ---
@@ -301,7 +380,7 @@ If either returns a JSON array (even empty `[]`), the setup is complete.
 
 ### Self-evolution
 
-The graph is a living knowledge base. After every turn and session, ask: _what did I learn? what changed? what can I make better?_
+The graph is a living knowledge base. After every turn, and again when later request-scoped maintenance catches up, ask: _what did I learn? what changed? what can I make better?_
 
 Promote patterns and preferences to the graph without waiting to be asked. Update stale nodes when reality has moved on. Link related issues — a dense graph retrieves better. Detect recurring problems and file a `Lesson-Learned`. Retire superseded conventions.
 
@@ -323,24 +402,44 @@ Nothing interesting happens silently. The agent notices things the user doesn't 
 
 *Issues are nodes. Labels are schema. `#ID` cross-links are edges.*
 
+There are two valid memory shapes:
+- **Plugin-managed structured memories** — created via `memory_store` or later automatic extraction during request-scoped maintenance; the plugin manages core labels and can also persist agent-selected `kind:*` and `topic:*`
+- **Curated graph memories** — manually created via `gh` / `curl` when you explicitly need richer labels like `kind:*` or `topic:*`
+
 | Kind | `type:` | `kind:` | What it represents |
 |---|---|---|---|
 | Core-Fact | `type:memory` | `kind:core-fact` | A stable truth — update in place as reality changes |
-| Convention | `type:memory` | `kind:convention` | An agreed rule — major revisions create a new issue, old gets `memory-status:stale` |
+| Convention | `type:memory` | `kind:convention` | An agreed rule — major revisions create a new issue, old one gets closed and linked |
 | Lesson-Learned | `type:memory` | `kind:lesson` | A correction or postmortem — append-only, never updated |
 | Skill-Blueprint | `type:memory` | `kind:skill` | A repeatable workflow — deterministic SOP |
 | Active-Task | `type:memory` | `kind:task` | Work in progress — checklist body, progress in comments |
 
 ### Labels
 
-Every manually created `type:memory` issue MUST include:
+Plugin-managed memories always include plugin-controlled labels such as:
+- `type:memory`
+- `session:<id>`
+
+Plugin-managed memories may also include:
+- One `kind:*` label chosen by the agent
+- Optional `topic:*` labels chosen by the agent
+
+Plugin-managed memory lifecycle is carried by native issue state:
+- open issue = active memory
+- closed issue = stale / superseded memory
+
+Every manually created curated `type:memory` issue MUST include:
 - `type:memory`
 - One `kind:*` label
-- `memory-status:active` (or `memory-status:stale`)
-- `date:YYYY-MM-DD`
 - Optional: `topic:*` (limit to 2-3 for retrieval quality)
 
+For curated memory lifecycle:
+- create active memories as open issues
+- retire stale memories by closing the issue instead of swapping lifecycle labels
+
 ### When to create which kind
+
+Use this table when you are choosing schema for `memory_store` or when creating a curated memory manually.
 
 | Trigger | Kind |
 |---------|------|
@@ -353,6 +452,20 @@ Every manually created `type:memory` issue MUST include:
 ---
 
 ## Manual memory operations
+
+Use this section only when:
+- the user explicitly wants raw GitHub-issue operations
+- you are debugging backend state or labels
+- the plugin memory tools are unavailable
+
+If the plugin tools are available, prefer:
+- `memory_list` to inspect the current active-memory index
+- `memory_get` to verify one exact memory record
+- `memory_labels` to inspect current schema
+- `memory_store` to save
+- `memory_update` to evolve one canonical memory in place
+- `memory_recall` to search
+- `memory_forget` to mark stale
 
 ### Prerequisites: authentication (session-proof)
 
@@ -392,10 +505,19 @@ For ClawMem, always pass `--repo "$CLAWMEM_REPO"` (gh) or use `$CLAWMEM_BASE_URL
 
 ### Save a memory
 
+**Preferred tool path:**
+- If the right `kind` or `topic` is not obvious, call `memory_labels` first
+- Reuse existing schema when possible
+- If the same memory node should keep evolving, call `memory_update`
+- Otherwise call `memory_store` with the durable fact, decision, correction, workflow, or preference in plain language, plus `kind` and `topics` when they improve retrieval
+- After save, announce: `Locked memory #<id>: <title>` if the tool response returns an id/title
+
+**Use `gh` / `curl` only when the tool path is unavailable or raw issue control is required.**
+
 **With gh:**
 ```sh
 # Ensure required labels exist (idempotent, run once per repo)
-for lbl in "type:memory" "kind:core-fact" "kind:convention" "kind:lesson" "kind:skill" "kind:task" "memory-status:active" "memory-status:stale"; do
+for lbl in "type:memory" "kind:core-fact" "kind:convention" "kind:lesson" "kind:skill" "kind:task"; do
   GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
     gh label create "$lbl" --repo "$CLAWMEM_REPO" --color "5319e7" 2>/dev/null || true
 done
@@ -405,15 +527,13 @@ GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
     --title "Memory: <concise title>" \
     --body "<the insight, in plain language>" \
     --label "type:memory" \
-    --label "kind:lesson" \
-    --label "memory-status:active" \
-    --label "date:$(date +%Y-%m-%d)"
+    --label "kind:lesson"
 ```
 
 **With curl (if gh is unavailable):**
 ```sh
 # Ensure required labels exist (idempotent, run once per repo)
-for lbl in "type:memory" "kind:core-fact" "kind:convention" "kind:lesson" "kind:skill" "kind:task" "memory-status:active" "memory-status:stale"; do
+for lbl in "type:memory" "kind:core-fact" "kind:convention" "kind:lesson" "kind:skill" "kind:task"; do
   curl -sf -X POST -H "Authorization: token $CLAWMEM_TOKEN" \
     -H "Content-Type: application/json" \
     "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/labels" \
@@ -426,18 +546,28 @@ curl -sf -X POST -H "Authorization: token $CLAWMEM_TOKEN" \
   -d "{
     \"title\": \"Memory: <concise title>\",
     \"body\": \"<the insight, in plain language>\",
-    \"labels\": [\"type:memory\", \"kind:lesson\", \"memory-status:active\", \"date:$(date +%Y-%m-%d)\"]
+    \"labels\": [\"type:memory\", \"kind:lesson\"]
   }" | jq '{number, title, url: .html_url}'
 ```
 
 ### Search memories
 
+**Preferred tool path:**
+- Call `memory_recall` with the user's question, task, project name, and likely synonyms
+- Use `memory_list` when recall is weak and you need inventory, dedupe, "what do we already know?", or preference/profile review
+- Use `memory_get` when a specific memory number is mentioned or you need to verify one exact record
+- If results are weak, run more than one recall query with narrower or broader phrasing
+- If `memory_recall` returns nothing and it matters whether a memory exists, cross-check with `memory_list` before claiming a miss
+- If results mention unfamiliar schema, call `memory_labels` to inspect the current ontology before creating new memories
+
+**Use `gh` / `curl` only when the tool path is unavailable or you need raw issue data.**
+
 **With gh:**
 ```sh
 GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
   gh issue list --repo "$CLAWMEM_REPO" \
+    --state open \
     --label "type:memory" \
-    --label "memory-status:active" \
     --search "<keywords>" \
     --limit 100 \
     --json number,title,body,labels,updatedAt
@@ -448,7 +578,7 @@ GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
 Note: curl fetches issues by label, then filters keywords client-side via jq. Only the first page (up to 100) is searched.
 ```sh
 curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
-  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&labels=type:memory,memory-status:active&per_page=100&type=issues" | \
+  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&labels=type:memory&per_page=100&type=issues" | \
   jq --arg q "<keywords>" '
     ($q | ascii_downcase) as $needle
     | map(select(
@@ -460,28 +590,26 @@ curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
 
 ### Mark memory as stale
 
+**Preferred tool path:**
+- If this is still the same canonical fact or task, prefer `memory_update` instead of staling the old node
+- Call `memory_forget` with the memory id or issue number you want to retire
+
+**Use `gh` / `curl` only when the tool path is unavailable or raw issue control is required.**
+
 **With gh:**
 ```sh
 GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
-  gh issue edit <number> --repo "$CLAWMEM_REPO" \
-    --remove-label "memory-status:active" \
-    --add-label "memory-status:stale"
+  gh issue close <number> --repo "$CLAWMEM_REPO"
 ```
 
 **With curl (if gh is unavailable):**
 
-Two steps: read current labels, then replace them with `memory-status:active` swapped to `memory-status:stale`.
+Close the issue. If the replacement memory exists, mention the old `#ID` in the new issue body so the supersession is explicit.
 ```sh
-# Step 1: get current labels
-curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
-  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues/<number>" | \
-  jq '[.labels[]?.name | select(. != "memory-status:active")] + ["memory-status:stale"] | unique'
-
-# Step 2: set the new label list (replace <number> and paste the array from step 1)
-curl -sf -X PUT -H "Authorization: token $CLAWMEM_TOKEN" \
+curl -sf -X PATCH -H "Authorization: token $CLAWMEM_TOKEN" \
   -H "Content-Type: application/json" \
-  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues/<number>/labels" \
-  -d '{"labels": ["type:memory", "kind:lesson", "memory-status:stale", "date:<YYYY-MM-DD>"]}'
+  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues/<number>" \
+  -d '{"state": "closed"}'
 ```
 
 ### Link related memories
@@ -497,12 +625,18 @@ Ask yourself: _"Did I learn something durable in this turn?"_
 
 If yes or unsure → save to ClawMem immediately. Do not wait for extraction.
 
+If a session has just ended, assume summary/title/auto-extracted memories may still be `pending` until the next real request. Important knowledge should be locked with `memory_store` now, not deferred.
+
 **What to save:**
-- User corrections → `kind:lesson`
-- Agreed rules → `kind:convention`
-- Stable facts → `kind:core-fact`
-- Workflows → `kind:skill`
-- Ongoing work → `kind:task`
+- User corrections
+- Agreed rules
+- Stable facts
+- Workflows
+- Ongoing work
+
+**How to label it:**
+- Reuse an existing `kind` and existing `topic` labels whenever they fit
+- If none fit, add the smallest new reusable `kind` or `topic` that clearly improves future retrieval
 
 **Rule:** Anything that should persist → ClawMem Issues (`type:memory`). Local files are for tools and humans to read. ClawMem is for me to remember.
 
@@ -513,23 +647,28 @@ If yes or unsure → save to ClawMem immediately. Do not wait for extraction.
 
 Before every answer, ask: _"Is there relevant memory that could improve this answer?"_
 
-If yes or unsure, search ClawMem first. Do not wait for the user to explicitly ask for memory lookup.
+If yes or unsure, start with `memory_recall`. If the result is weak or empty and it matters whether something exists, use `memory_list` as the fallback audit step. If the user cites a specific memory number, use `memory_get` first. Do not wait for the user to explicitly ask for memory lookup.
 
-**Think like a brain, not a database.** A single query is rarely enough. When a question touches multiple dimensions, fire parallel searches across different kinds and topics — just like how human memory retrieves associations concurrently, not sequentially.
+**Think like a brain, not a database.** A single query is rarely enough. When a question touches multiple dimensions, fire parallel recalls across different phrasings and topics — just like how human memory retrieves associations concurrently, not sequentially.
 
-| User asks about | Search filter |
+| User asks about | Preferred recall framing |
 |----------------|---------------|
-| Preferences, facts about themselves | `kind:core-fact` |
-| Rules, decisions | `kind:convention` |
-| Past problems, how X was fixed | `kind:lesson` |
-| How to do X | `kind:skill` |
-| What's in progress | `kind:task` |
+| Preferences, facts about themselves | user name, preference, stable fact |
+| Rules, decisions | rule, decision, convention, policy |
+| Past problems, how X was fixed | bug, fix, lesson, postmortem |
+| How to do X | workflow, steps, playbook, how to |
+| What's in progress | task, todo, in progress, current work |
 
 **Retrieval strategy:**
-- Don't settle for one search. Cast a wide net: search by kind, by topic, by keyword — in parallel.
-- Cross-reference results. A `kind:convention` may contradict a stale `kind:core-fact`. A `kind:lesson` may supersede a `kind:skill`.
-- Prefer `gh`; if `gh` is not the official GitHub CLI or fails, use `curl`. Empty results (`[]`) are not a failure — do not switch methods on empty results.
-- If the first round returns nothing, broaden: drop the kind filter, try synonyms, search related topics.
+- Don't settle for one recall. Cast a wide net: query by keyword, topic, synonym, and likely project names — in parallel.
+- Default to `memory_recall` first. It is the primary retrieval path.
+- When the task is "what memories exist?" or "which record should be canonical?", use `memory_list` as the fallback audit step before making claims.
+- When a concrete memory id is in play, use `memory_get` instead of relying on keyword recall.
+- Never treat one `memory_recall` miss as proof that nothing relevant exists. If absence matters, inspect `memory_list` and then verify exact candidates with `memory_get`.
+- Cross-reference results. A newer active memory may supersede an older assumption; some manually curated `kind:*` memories may coexist with plugin-managed structured ones.
+- If you are about to create a new structured memory, inspect `memory_labels` first so schema stays coherent over time.
+- Prefer the plugin tools; if they are unavailable and you need raw repo access, use `gh`, then `curl` as fallback. Empty results are not a failure — do not switch methods on empty results alone.
+- If the first round returns nothing, broaden: try synonyms, related topics, and shorter or more concrete phrasing.
 - The more you retrieve, the better you synthesize. Err on the side of over-fetching — you can always filter, but you can't reason about what you never loaded.
 
 If found → answer based on memory (cite issue #). If not found → answer normally, then consider whether this turn created a memory node worth saving.
@@ -540,8 +679,10 @@ If found → answer based on memory (cite issue #). If not found → answer norm
 
 Every new session:
 1. Check SOUL.md contains `## Memory System — ClawMem` and TOOLS.md contains `## ClawMem — Memory Directives`. If either is missing, re-run Steps 2–5 from **First-run onboarding** above
-2. Run the **standard preflight** (resolve current agent route + probe)
-3. If the session starts with no injected memories / no relevant recall, pull:
+2. Confirm ClawMem is still the active memory plugin (`plugins.slots.memory = clawmem`)
+3. Run the **standard preflight** (resolve current agent route + probe)
+4. If the session starts with no injected memories / no relevant recall, call `memory_recall` before shell fallback
+5. If plugin tools are unavailable and you still need raw context, pull:
 
 **With gh:**
 ```sh
@@ -551,7 +692,7 @@ GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
 
 # Active memories
 GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
-  gh issue list --repo "$CLAWMEM_REPO" --label "type:memory" --label "memory-status:active" --limit 50 --json number,title,labels,updatedAt
+  gh issue list --repo "$CLAWMEM_REPO" --state open --label "type:memory" --limit 50 --json number,title,labels,updatedAt
 ```
 
 **With curl (if gh is unavailable):**
@@ -563,7 +704,7 @@ curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
 
 # Active memories
 curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
-  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&labels=type:memory,memory-status:active&per_page=50&type=issues" | \
+  "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues?state=open&labels=type:memory&per_page=50&type=issues" | \
   jq 'map({number,title,labels:[.labels[]?.name],updatedAt:.updated_at})'
 ```
 
@@ -637,7 +778,7 @@ After that, `git push` to `https://git.clawmem.ai/...` just works.
 **After clawmem install completes:**
 
 1. **Send to user:**
-   > ✅ clawmem installed. Restarting OpenClaw gateway to load the plugin.
+   > ✅ clawmem installed and selected as the active memory plugin. Restarting OpenClaw gateway to load the plugin.
    > I'll step away for a minute. Just say hi, and I'll return.
 
 2. **Restart gateway**
