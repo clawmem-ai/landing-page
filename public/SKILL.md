@@ -21,11 +21,11 @@ Two layers always in play:
 ## What the plugin does automatically
 
 The clawmem plugin handles these without agent involvement:
-- **Per-agent account & repo provisioning** — auto-creates a private repo for each agent on first use, writes credentials to `openclaw.json -> plugins.entries.clawmem.config.agents.<agentId>`
+- **Per-agent identity + default repo provisioning** — auto-creates a private default repo for each agent on first use, writes credentials to `openclaw.json -> plugins.entries.clawmem.config.agents.<agentId>`
 - **Session mirroring** — one `type:conversation` issue per session, transcript as comments
 - **Memory extraction** — best-effort during later request-scoped maintenance, a subagent extracts durable facts into `type:memory` issues
 - **Memory recall** — at session start, searches active memories by relevance and injects them into context
-- **Memory tools** — exposes `memory_list`, `memory_get`, `memory_labels`, `memory_recall`, `memory_store`, `memory_update`, and `memory_forget` for mid-session use
+- **Memory tools** — exposes `memory_repos`, `memory_repo_create`, `memory_list`, `memory_get`, `memory_labels`, `memory_recall`, `memory_store`, `memory_update`, and `memory_forget` for mid-session use
 
 **You do NOT need to manage these manually.** The sections below cover what the agent should do *in addition* to the plugin's automatic behavior.
 Automatic recall at session start is only a bootstrap. The agent must still proactively retrieve before answering and proactively save after learning, and should use the plugin memory tools first.
@@ -38,6 +38,7 @@ On every user turn, run this loop:
 
 1. **Before answering:** ask `Could ClawMem help with this answer?`
    - Default to **yes** for user preferences, project history, prior decisions, conventions, lessons, tasks, terminology, recurring problems, or anything that may have been learned before.
+   - Before any explicit memory tool call, decide which memory repo should be used. If unclear, fall back to the agent's `defaultRepo`.
    - If the answer is not obviously memory-free, or you are unsure, start with `memory_recall`.
    - If `memory_recall` is weak or empty and it matters whether something exists, cross-check with `memory_list`.
    - If a specific memory id / issue number is mentioned, use `memory_get` first instead of searching.
@@ -49,14 +50,14 @@ On every user turn, run this loop:
 Bias toward retrieving and saving. A missed search or missed memory is worse than an extra search.
 
 Tool-first rule:
-- Default to `memory_list`, `memory_get`, `memory_labels`, `memory_recall`, `memory_store`, `memory_update`, and `memory_forget`
+- Default to `memory_repos`, `memory_repo_create`, `memory_list`, `memory_get`, `memory_labels`, `memory_recall`, `memory_store`, `memory_update`, and `memory_forget`
 - Use `gh` or `curl` only when the user explicitly asks for raw repo operations, you are debugging backend state, or the plugin tools are unavailable
 
 ---
 
 ## Runtime route resolution (mandatory)
 
-ClawMem is now routed **per agent**, not through one global `repo` / `token`.
+ClawMem is now routed **per agent identity**, not through one global `repo` / `token`.
 
 Every shell snippet in this skill that talks to ClawMem should start by resolving the
 **current agent route** from:
@@ -69,10 +70,12 @@ Use this helper:
 ```sh
 clawmem_exports() {
   local agent_id="${1:-${OPENCLAW_AGENT_ID:-main}}"
-  python3 - "$agent_id" <<'PY'
+  local repo_override="${2:-}"
+  python3 - "$agent_id" "$repo_override" <<'PY'
 import json, os, shlex, subprocess, sys
 
 agent_id = sys.argv[1]
+repo_override = sys.argv[2].strip()
 cfg_path = subprocess.check_output(["openclaw", "config", "file"], text=True).strip()
 with open(os.path.expanduser(cfg_path)) as f:
     root = json.load(f)
@@ -84,7 +87,8 @@ route = agents.get(agent_id) or {}
 base_url = (route.get("baseUrl") or cfg.get("baseUrl") or "https://git.clawmem.ai/api/v3").rstrip("/")
 if not base_url.endswith("/api/v3"):
     base_url = f"{base_url}/api/v3"
-repo = route.get("repo") or ""
+default_repo = route.get("defaultRepo") or route.get("repo") or cfg.get("defaultRepo") or cfg.get("repo") or ""
+repo = repo_override or default_repo
 token = route.get("token") or ""
 host = base_url.removesuffix("/api/v3").replace("https://", "").replace("http://", "")
 
@@ -92,6 +96,7 @@ pairs = {
     "CLAWMEM_AGENT_ID": agent_id,
     "CLAWMEM_BASE_URL": base_url,
     "CLAWMEM_HOST": host,
+    "CLAWMEM_DEFAULT_REPO": default_repo,
     "CLAWMEM_REPO": repo,
     "CLAWMEM_TOKEN": token,
     "GH_HOST": host,
@@ -112,7 +117,9 @@ eval "$(clawmem_exports)"
 
 Rules:
 - Never store tokens in any file or chat
-- If `CLAWMEM_REPO` or `CLAWMEM_TOKEN` is empty, this agent has not been provisioned yet
+- `CLAWMEM_DEFAULT_REPO` is the agent's fallback space for automatic flows
+- `CLAWMEM_REPO` is the repo you have currently chosen for this operation; by default it equals `CLAWMEM_DEFAULT_REPO`
+- If `CLAWMEM_TOKEN` is empty, this agent identity has not been provisioned yet
 
 ---
 
@@ -180,7 +187,7 @@ If the active memory slot is not `clawmem`:
 - restart the gateway
 - rerun Step 1
 
-The plugin auto-provisions an account and repo **per agent** on first use. Then read the route for the current agent:
+The plugin auto-provisions an account and default repo **per agent** on first use. Then read the route for the current agent:
 
 ```sh
 AGENT_ID="${OPENCLAW_AGENT_ID:-main}"
@@ -193,16 +200,16 @@ with open(os.path.expanduser(cfg_path)) as f:
 cfg = root["plugins"]["entries"]["clawmem"]["config"]
 route = (cfg.get("agents") or {}).get(agent_id) or {}
 base_url = route.get("baseUrl") or cfg.get("baseUrl") or "MISSING"
-repo = route.get("repo") or "MISSING"
+default_repo = route.get("defaultRepo") or route.get("repo") or cfg.get("defaultRepo") or cfg.get("repo") or "MISSING"
 token = "SET" if route.get("token") else "MISSING"
 print(f"agentId: {agent_id}")
 print(f"baseUrl: {base_url}")
-print(f"repo:    {repo}")
+print(f"defaultRepo: {default_repo}")
 print(f"token:   {token}")
 PY
 ```
 
-If `repo` or `token` is `MISSING`, this agent has not been provisioned yet. Trigger one real turn with that agent, or restart OpenClaw and retry after the agent is first used.
+If `defaultRepo` or `token` is `MISSING`, this agent has not been provisioned yet. Trigger one real turn with that agent, or restart OpenClaw and retry after the agent is first used.
 
 ### Step 2 — Write identity block to SOUL.md
 
@@ -235,12 +242,17 @@ Find skill clawmem and learn how to use clawmem.
 - CLAWMEM_HOST: `git.clawmem.ai` — for `gh` CLI (`GH_HOST`)
 - CLAWMEM_BASE_URL: `https://git.clawmem.ai/api/v3` — for `curl` API calls
 - routeMode: per-agent
-- CLAWMEM_REPO & CLAWMEM_TOKEN: read from `openclaw.json -> plugins.entries.clawmem.config.agents.<agentId>` (run `openclaw config file` to locate openclaw.json)
+- CLAWMEM_DEFAULT_REPO & CLAWMEM_TOKEN: read from `openclaw.json -> plugins.entries.clawmem.config.agents.<agentId>` (run `openclaw config file` to locate openclaw.json)
+- CLAWMEM_REPO: the repo I have actively selected for the current operation; default it to `CLAWMEM_DEFAULT_REPO`, override it when the memory belongs somewhere else
 - consoleLoginUrl: `https://console.clawmem.ai/login.html?token={CLAWMEM_TOKEN}` (generate at runtime, show to user on request)
 - Never paste raw tokens in chat (Clawmem console login URLs shown directly to the authorized user/your owner are OK)
 
 ### Memory Routing
 - ALL durable knowledge (facts, decisions, conventions, lessons) → ClawMem Issues (`type:memory`)
+- Before explicit memory operations, decide which repo is the right memory space
+- If unclear, use `CLAWMEM_DEFAULT_REPO`
+- If repo choice is unclear, call `memory_repos`
+- If a new memory space is needed, call `memory_repo_create`
 - Local files are for tools and humans to read. ClawMem is for me to remember.
 
 ### Retrieval
@@ -329,7 +341,7 @@ AGENTS.md is injected every turn — this is the most reliable place for behavio
 
 ### Step 6 — Verify (no user login required)
 
-This verify step uses the **current agent's** provisioned repo + token and proves that a fresh session can query ClawMem without manual `gh auth login`.
+This verify step uses the **current agent's** provisioned default repo + token and proves that a fresh session can query ClawMem without manual `gh auth login`.
 
 ```sh
 eval "$(clawmem_exports)"
@@ -350,17 +362,19 @@ curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
 If either returns a JSON array (even empty `[]`), the setup is complete.
 
 Then verify the plugin tool path from inside a real ClawMem-enabled session:
+- `memory_repos` should list accessible repos and mark the default repo
 - `memory_list` should return an active-memory index without falling back to shell
 - `memory_get` should fetch an exact memory by id or issue number
 - `memory_labels` should return the current reusable schema labels
 - `memory_recall` should return either a hit list or a clean miss, not a tool failure
 - `memory_store` should be available for immediate durable saves
 - `memory_update` should update an existing memory in place
+- `memory_repo_create` should create a new repo when a new memory space is needed
 - conversation summaries or auto-extracted memories from a just-finished session may appear on the next real request, not necessarily immediately at session close
 
 ### Definition of Done
 
-- [ ] `openclaw.json` has `plugins.entries.clawmem.config.agents.<agentId>.repo`
+- [ ] `openclaw.json` has `plugins.entries.clawmem.config.agents.<agentId>.defaultRepo` (or legacy `repo`)
 - [ ] `openclaw.json` has `plugins.entries.clawmem.config.agents.<agentId>.token`
 - [ ] `openclaw.json` has `plugins.slots.memory = clawmem`
 - [ ] SOUL.md has ClawMem identity block
@@ -458,9 +472,11 @@ Use this section only when:
 - the plugin memory tools are unavailable
 
 If the plugin tools are available, prefer:
+- `memory_repos` to inspect available repos and choose the right memory space
 - `memory_list` to inspect the current active-memory index
 - `memory_get` to verify one exact memory record
 - `memory_labels` to inspect current schema
+- `memory_repo_create` to create a new memory repo when needed
 - `memory_store` to save
 - `memory_update` to evolve one canonical memory in place
 - `memory_recall` to search
@@ -505,10 +521,11 @@ For ClawMem, always pass `--repo "$CLAWMEM_REPO"` (gh) or use `$CLAWMEM_BASE_URL
 ### Save a memory
 
 **Preferred tool path:**
+- First decide which repo should own this memory. If unclear, use the current `defaultRepo`. If you need to inspect available spaces first, call `memory_repos`.
 - If the right `kind` or `topic` is not obvious, call `memory_labels` first
 - Reuse existing schema when possible
 - If the same memory node should keep evolving, call `memory_update`
-- Otherwise call `memory_store` with the durable fact, decision, correction, workflow, or preference in plain language, plus `kind` and `topics` when they improve retrieval
+- Otherwise call `memory_store` with the durable fact, decision, correction, workflow, or preference in plain language, plus `kind` and `topics` when they improve retrieval, and pass `repo` whenever the right memory space is not the current `defaultRepo`
 - After save, announce: `Locked memory #<id>: <title>` if the tool response returns an id/title
 
 **Use `gh` / `curl` only when the tool path is unavailable or raw issue control is required.**
@@ -552,6 +569,7 @@ curl -sf -X POST -H "Authorization: token $CLAWMEM_TOKEN" \
 ### Search memories
 
 **Preferred tool path:**
+- First decide which repo is the most likely memory space. If unclear, inspect `memory_repos` and then search the most relevant repo first.
 - Call `memory_recall` with the user's question, task, project name, and likely synonyms
 - Use `memory_list` when recall is weak and you need inventory, dedupe, "what do we already know?", or preference/profile review
 - Use `memory_get` when a specific memory number is mentioned or you need to verify one exact record
@@ -626,6 +644,12 @@ If yes or unsure → save to ClawMem immediately. Do not wait for extraction.
 
 If a session has just ended, assume summary/title/auto-extracted memories may still be `pending` until the next real request. Important knowledge should be locked with `memory_store` now, not deferred.
 
+Before explicit memory operations, choose the right repo:
+- private personal memory -> usually `defaultRepo`
+- project-specific memory -> the relevant project repo
+- shared/team knowledge -> the shared repo
+- unclear -> inspect `memory_repos`, then choose deliberately
+
 **What to save:**
 - User corrections
 - Agreed rules
@@ -660,6 +684,7 @@ If yes or unsure, start with `memory_recall`. If the result is weak or empty and
 
 **Retrieval strategy:**
 - Don't settle for one recall. Cast a wide net: query by keyword, topic, synonym, and likely project names — in parallel.
+- Before explicit retrieval, decide which repo is the right target. Use `defaultRepo` only as the fallback, not as the only space.
 - Default to `memory_recall` first. It is the primary retrieval path.
 - When the task is "what memories exist?" or "which record should be canonical?", use `memory_list` as the fallback audit step before making claims.
 - When a concrete memory id is in play, use `memory_get` instead of relying on keyword recall.
