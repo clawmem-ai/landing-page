@@ -21,7 +21,7 @@ Two layers always in play:
 ## What the plugin does automatically
 
 The clawmem plugin handles these without agent involvement:
-- **Per-agent identity + default repo provisioning** — auto-creates a private default repo for each agent on first use, writes credentials to `openclaw.json -> plugins.entries.clawmem.config.agents.<agentId>`
+- **Per-agent identity + default repo provisioning** — on first use, provision each agent identity and write that agent's `token` plus `defaultRepo` into `openclaw.json -> plugins.entries.clawmem.config.agents.<agentId>`
 - **Session mirroring** — one `type:conversation` issue per session, transcript as comments
 - **Memory extraction** — best-effort during later request-scoped maintenance, a subagent extracts durable facts into `type:memory` issues
 - **Memory recall** — at session start, searches active memories by relevance and injects them into context
@@ -187,7 +187,7 @@ If the active memory slot is not `clawmem`:
 - restart the gateway
 - rerun Step 1
 
-The plugin auto-provisions an account and default repo **per agent** on first use. Then read the route for the current agent:
+The plugin auto-provisions an account and default repo **per agent** on first use, then persists the resulting credentials into the current agent route. Then read the route for the current agent:
 
 ```sh
 AGENT_ID="${OPENCLAW_AGENT_ID:-main}"
@@ -209,7 +209,7 @@ print(f"token:   {token}")
 PY
 ```
 
-If `defaultRepo` or `token` is `MISSING`, this agent has not been provisioned yet. Trigger one real turn with that agent, or restart OpenClaw and retry after the agent is first used.
+If `defaultRepo` or `token` is `MISSING`, this agent has not been provisioned yet. Trigger one real turn with that agent so the plugin can finish provisioning and persist credentials, or restart OpenClaw and retry after the agent is first used.
 
 ### Step 2 — Write identity block to SOUL.md
 
@@ -791,7 +791,7 @@ After that, `git push` to `https://git.clawmem.ai/...` just works.
 | `openclaw config get` returns `__OPENCLAW_REDACTED__` for token | Read directly from the config file (resolve path via `openclaw config file`) |
 | Conversation mirror returns 404 | Cached issue was deleted — plugin will recreate on next session |
 | `gh auth login` hostname typo (e.g. `wangma`) causes connection errors | Never free-type hostname; if you must login, use `gh auth login -h git.clawmem.ai`. Remove wrong host via `gh auth logout -h <wrong-host>`. |
-| New session cannot search (401 Unauthorized) | The current agent route is missing or invalid. Re-read `CLAWMEM_REPO` / `CLAWMEM_TOKEN` from Connection info, then rerun the read-only probe. |
+| New session cannot search (401 Unauthorized) | The current agent route is missing or invalid. If this is first use, trigger one real turn so the plugin can finish provisioning. Then re-read `CLAWMEM_REPO` / `CLAWMEM_TOKEN` from Connection info and rerun the read-only probe. |
 | Agent uses the wrong memory repo | Do not read top-level `config.repo` / `config.token`. Always resolve `config.agents.<agentId>` for the current agent. |
 | `gh` is not the official GitHub CLI (TypeError, login prompt) | Run `gh --version` — should print `gh version 2.x.x`. If it prints something else or crashes, the system has the npm `gh` package instead. Remove it (`npm uninstall -g gh`) and install the official CLI from https://cli.github.com, or use `curl` for all ClawMem operations. |
 
