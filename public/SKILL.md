@@ -309,6 +309,130 @@ Every new session:
      jq 'map({number,title,labels:[.labels[]?.name],updatedAt:.updated_at})'
    ```
 
+### Repo Collaboration — Team Share
+Use this workflow when the user asks to share a repo, enable multi-user or multi-agent collaboration, invite a user, accept or decline a repo invitation, or move a personal repo into a shared org workspace.
+
+#### Defaults
+- Resolve the current agent route first per Connection info above.
+- Do not assume a default target repo for Team Share.
+- If the user does not specify the repo explicitly or the target repo is ambiguous, ask which repo should be shared before taking action.
+- When asking, remind the user that they can inspect their repos in the ClawMem console using the runtime console login URL: `https://console.clawmem.ai/login.html?token={CLAWMEM_TOKEN}`.
+- Only after the user identifies the repo should you set:
+  - `TARGET_REPO="$USER_SPECIFIED_REPO"`
+  - `OWNER="${TARGET_REPO%/*}"`
+  - `REPO="${TARGET_REPO#*/}"`
+- Prefer backend-equivalent API operations over clicking the web UI.
+- Prefer `gh api`; if `gh` is unavailable or failing, retry the same operation with `curl` against `CLAWMEM_BASE_URL`.
+- If the user names one specific user, prefer direct repo sharing or invitation. If the user wants multiple users or agents to share one repo, prefer team-based sharing.
+- Team Share works only for org-owned repos, and changing team repo access requires repo admin permission.
+- Require explicit confirmation before any transfer that changes the repo owner or full name.
+
+Do not run any Team Share mutation until the target repo is explicitly identified by the user.
+
+#### Common commands (`gh api`)
+```sh
+# list teams
+gh api "/orgs/$OWNER/teams"
+
+# enable default <repo>-share team on an org-owned repo
+gh api -X POST "/repos/$OWNER/$REPO/team-sharing/enable"
+
+# share or unshare a repo with a team
+TEAM_SLUG="example-team"
+PERMISSION="pull"   # pull | push | admin
+gh api -X PUT "/orgs/$OWNER/teams/$TEAM_SLUG/repos/$OWNER/$REPO" -f permission="$PERMISSION"
+gh api -X DELETE "/orgs/$OWNER/teams/$TEAM_SLUG/repos/$OWNER/$REPO"
+
+# create a team and add a member
+TEAM_NAME="repo-share"
+USERNAME="example-user"
+ROLE="member"   # member | maintainer
+gh api -X POST "/orgs/$OWNER/teams" -f name="$TEAM_NAME" -f description="Shared access for $REPO"
+gh api -X PUT "/orgs/$OWNER/teams/$TEAM_SLUG/memberships/$USERNAME" -f role="$ROLE"
+
+# share directly with one user or remove direct access
+USERNAME="example-user"
+PERMISSION="pull"
+gh api -X PUT "/repos/$OWNER/$REPO/collaborators/$USERNAME" -f permission="$PERMISSION"
+gh api -X DELETE "/repos/$OWNER/$REPO/collaborators/$USERNAME"
+
+# list, accept, or decline pending invitations
+gh api "/user/repository_invitations"
+INVITE_ID="123"
+gh api -X PATCH "/user/repository_invitations/$INVITE_ID"
+gh api -X DELETE "/user/repository_invitations/$INVITE_ID"
+```
+
+#### `curl` fallback
+```sh
+curl_api() {
+  curl -sf \
+    -H "Authorization: token $CLAWMEM_TOKEN" \
+    -H "Content-Type: application/json" \
+    "$@"
+}
+
+# list teams
+curl_api "$CLAWMEM_BASE_URL/orgs/$OWNER/teams"
+
+# enable default <repo>-share team on an org-owned repo
+curl_api -X POST "$CLAWMEM_BASE_URL/repos/$OWNER/$REPO/team-sharing/enable"
+
+# share or unshare a repo with a team
+TEAM_SLUG="example-team"
+PERMISSION="pull"
+curl_api -X PUT "$CLAWMEM_BASE_URL/orgs/$OWNER/teams/$TEAM_SLUG/repos/$OWNER/$REPO" \
+  -d "{\"permission\":\"$PERMISSION\"}"
+curl_api -X DELETE "$CLAWMEM_BASE_URL/orgs/$OWNER/teams/$TEAM_SLUG/repos/$OWNER/$REPO"
+
+# create a team and add a member
+TEAM_NAME="repo-share"
+USERNAME="example-user"
+ROLE="member"
+curl_api -X POST "$CLAWMEM_BASE_URL/orgs/$OWNER/teams" \
+  -d "{\"name\":\"$TEAM_NAME\",\"description\":\"Shared access for $REPO\"}"
+curl_api -X PUT "$CLAWMEM_BASE_URL/orgs/$OWNER/teams/$TEAM_SLUG/memberships/$USERNAME" \
+  -d "{\"role\":\"$ROLE\"}"
+
+# share directly with one user or remove direct access
+USERNAME="example-user"
+PERMISSION="pull"
+curl_api -X PUT "$CLAWMEM_BASE_URL/repos/$OWNER/$REPO/collaborators/$USERNAME" \
+  -d "{\"permission\":\"$PERMISSION\"}"
+curl_api -X DELETE "$CLAWMEM_BASE_URL/repos/$OWNER/$REPO/collaborators/$USERNAME"
+
+# list, accept, or decline pending invitations
+curl_api "$CLAWMEM_BASE_URL/user/repository_invitations"
+INVITE_ID="123"
+curl_api -X PATCH "$CLAWMEM_BASE_URL/user/repository_invitations/$INVITE_ID"
+curl_api -X DELETE "$CLAWMEM_BASE_URL/user/repository_invitations/$INVITE_ID"
+```
+
+#### Personal repo bootstrap
+- If the repo is personal, explain that Team Share requires an org-owned repo.
+- Offer transfer or bootstrap into an organization and require confirmation first.
+- After transfer, re-resolve `OWNER` and `REPO`, then run either:
+```sh
+gh api -X POST "/repos/$OWNER/$REPO/team-sharing/enable"
+# or
+curl_api -X POST "$CLAWMEM_BASE_URL/repos/$OWNER/$REPO/team-sharing/enable"
+```
+
+#### Verify
+```sh
+gh api "/repos/$OWNER/$REPO"
+gh api "/user/repos"
+gh api "/orgs/$OWNER/teams/$TEAM_SLUG/repos"
+# or use the same paths with curl_api if gh is unavailable
+```
+If the user wants to inspect it manually in the UI, direct them to `/vault/$OWNER/$REPO#teams`.
+
+#### Common failures
+- 404 on `team-sharing/enable`: the repo is personal or inaccessible.
+- 404 on team repo mutation: the actor likely lacks repo admin permission, or the org/team slug is wrong.
+- Repo appears in `/user/repos` but not in `/users/{username}/repos`: expected viewer-visible vs owner-owned behavior.
+- A team exists but access still fails: check both team membership and team repo grant.
+
 ### Output Convention
 Present results using structured, lightweight text visualizations. When users ask to view or explore their memory graph, generate the console login URL (see **Memory Visualization Console** section).
 
