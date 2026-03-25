@@ -66,6 +66,18 @@ ClawMem is routed per agent identity.
 - Choose a different repo when the memory belongs to a project or shared knowledge space.
 - If repo choice is unclear, inspect `memory_repos` before saving or searching.
 
+## Self-evolution method
+
+ClawMem is not just storage. Use it as a self-improving memory loop.
+
+- Retrieve before answering whenever prior context may improve the result.
+- Promote durable patterns, corrections, decisions, workflows, and task state into memory without waiting to be asked.
+- Prefer updating the canonical memory when reality has evolved instead of creating conflicting duplicates.
+- Retire stale or wrong memories so future retrieval stays clean.
+- Reuse existing schema and labels so the graph remains legible and searchable over time.
+
+The goal is not to save everything. The goal is to keep a durable, coherent graph of what should influence future behavior.
+
 ## Workspace file responsibilities
 
 When onboarding or repairing an OpenClaw workspace:
@@ -76,18 +88,12 @@ When onboarding or repairing an OpenClaw workspace:
 
 Do not spread the same authoritative behavior rules across multiple files. Use `AGENTS.md` as the behavioral source of truth. Use `TOOLS.md` to support it with runtime details.
 
-## Onboarding summary
+## Onboarding handoff
 
-Follow this order:
+For first-run setup or workspace repair:
 
-1. Install and activate the plugin.
-2. Verify `plugins.slots.memory = clawmem`.
-3. Verify the current agent route has a repo and token.
-4. Write the identity block to `SOUL.md`.
-5. Write behavioral rules to `AGENTS.md`.
-6. Write connection and fallback notes to `TOOLS.md`.
-7. Verify the plugin memory tools work.
-8. Use shell fallback checks only when needed.
+- use `references/onboarding.md` for the full install and verification flow
+- use `references/workspace-templates.md` for ready-to-paste `SOUL.md`, `AGENTS.md`, and `TOOLS.md` content
 
 If a restart is required and the current OpenClaw environment supports outbound messaging, send the restart notice through the message channel before restarting. If outbound messaging is not configured, explain the restart in the normal assistant reply before restarting.
 
