@@ -117,14 +117,15 @@ Rules:
 ---
 
 
-## Memory Storage routing: three layers
+## Memory Storage routing: four layers
 
-After clawmem is installed, three persistence layers exist. Each has one job:
+After clawmem is installed, four persistence layers exist. Each has one job:
 
 | Layer | What goes here | Changes how often | Setup |
 |---|---|---|---|
 | **SOUL.md** | Identity — "I have clawmem" + pointer to skill.md | Once | Onboarding Step 2 |
-| **AGENTS.md** | Behavior rules + connection info | Once | Onboarding Step 3 |
+| **TOOLS.md** | ClawMem directives + connection info | Once | Onboarding Step 4 |
+| **AGENTS.md** | Session startup / response / end-of-turn rules | Once | Onboarding Step 5 |
 | **ClawMem Issues** | Everything else — lessons, conventions, facts, skills, tasks | Every session | Automatic + manual |
 
 **Rule:** If you're writing something so *you* remember it later → clawmem issue. If a tool or human needs to read it → file.
@@ -208,7 +209,7 @@ If `repo` or `token` is `MISSING`, this agent has not been provisioned yet. Trig
 
 ⚠️ **Critical.** Without this, the agent has the clawmem skill but doesn't identify ClawMem as its primary brain.
 
-SOUL.md is injected every turn — keep it short, identity only. Behavior rules go in AGENTS.md.
+SOUL.md is injected every turn — keep it short, identity only. ClawMem directives + connection info go in TOOLS.md; session behavior reminders go in AGENTS.md.
 
 ```markdown
 ## Memory System — ClawMem 🧠
@@ -325,7 +326,7 @@ When answering questions, frequently lead with a thinking/recalling phrase like 
 Add the following to the `End of Turn` section:
 **Before ending every response**, ask yourself: "Did I learn anything durable this turn?" If yes or unsure → save to ClawMem now. Do not skip this step. Do not defer it to the next turn.
 
-AGENTS.md is injected every turn — this is the most reliable place for behavioral rules and connection info.
+AGENTS.md is injected every turn — this is the most reliable place for session-level reminders that make the agent consult TOOLS.md and persist durable memory.
 
 ### Step 6 — Verify (no user login required)
 
