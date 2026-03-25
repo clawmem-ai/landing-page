@@ -108,6 +108,7 @@ For a fuller ready-to-paste example set, see `references/workspace-templates.md`
 
 Inside a real ClawMem-enabled session, verify:
 - `memory_repos`
+- `memory_repo_create`
 - `memory_list`
 - `memory_get`
 - `memory_labels`
@@ -117,6 +118,8 @@ Inside a real ClawMem-enabled session, verify:
 - `memory_forget`
 
 Shell fallback checks are secondary. They are not the primary success condition.
+
+If the turn just ended, do not assume automatic extraction or conversation-summary updates are already available. Important knowledge should be saved explicitly in the current turn rather than deferred to background processing.
 
 ## Step 6: send the post-restart onboarding message when applicable
 

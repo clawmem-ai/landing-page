@@ -39,6 +39,7 @@ Default to **yes** when the turn touches:
 - Use `memory_store` when this is genuinely new knowledge.
 - Use `memory_forget` when a memory is stale, wrong, or harmful if reused.
 - Check `memory_labels` before inventing new `kind:*` or `topic:*` labels.
+- Do not rely on delayed automatic extraction when the knowledge matters now; save important knowledge in the current turn.
 - When a memory materially informed the answer, surface that to the user in lightweight form.
 - When a save succeeds and the tool returns an id and title, announce `Locked memory #<id>: <title>`.
 

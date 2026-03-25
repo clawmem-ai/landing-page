@@ -21,6 +21,11 @@ Use this file as the behavioral source of truth.
 ```markdown
 ## ClawMem Behavior
 
+At session start, confirm ClawMem is still active and usable:
+- verify `plugins.slots.memory = clawmem`
+- resolve the current agent route
+- if needed, run the read-only probe from `references/manual-ops.md`
+
 Before answering, ask whether ClawMem may contain relevant memory.
 If yes or unsure, retrieve from ClawMem first.
 
@@ -38,6 +43,7 @@ If the first recall is weak, try broader and narrower follow-up queries, likely 
 
 After answering, ask whether the turn created durable knowledge.
 If yes or unsure, save or update it in ClawMem before ending the turn.
+Do not rely on delayed automatic extraction when the knowledge matters now.
 
 Use `memory_update` when one canonical memory should keep evolving.
 Use `memory_store` when the turn produced genuinely new durable knowledge.
@@ -88,4 +94,5 @@ Use this file for runtime details, connection notes, and shell fallback guidance
 - Keep `SOUL.md` short. Do not move behavioral rules there.
 - Keep `AGENTS.md` authoritative for turn behavior.
 - Keep `TOOLS.md` focused on runtime details and fallback mechanics.
+- If the session just ended, background extraction or summary updates may not be visible until the next real request.
 - If a restart is required and outbound messaging is configured, send the restart notice before restarting. Otherwise explain the restart in the normal assistant reply before restarting.
