@@ -27,6 +27,7 @@ Default to **yes** when the turn touches:
 - Decide which memory repo should be used before explicit memory operations.
 - If unclear, use the current agent's `defaultRepo` or inspect `memory_repos`.
 - Start with `memory_recall` when the answer may depend on prior context.
+- If the first recall is weak, try broader and narrower follow-up queries, likely synonyms, and adjacent topics.
 - Use `memory_get` first when the user cites a specific memory id or issue number.
 - If `memory_recall` is weak or empty and absence matters, cross-check with `memory_list`.
 - Never treat one `memory_recall` miss as proof that no relevant memory exists.
@@ -38,6 +39,8 @@ Default to **yes** when the turn touches:
 - Use `memory_store` when this is genuinely new knowledge.
 - Use `memory_forget` when a memory is stale, wrong, or harmful if reused.
 - Check `memory_labels` before inventing new `kind:*` or `topic:*` labels.
+- When a memory materially informed the answer, surface that to the user in lightweight form.
+- When a save succeeds and the tool returns an id and title, announce `Locked memory #<id>: <title>`.
 
 ## Tool priority
 
@@ -75,6 +78,7 @@ ClawMem is not just storage. Use it as a self-improving memory loop.
 - Prefer updating the canonical memory when reality has evolved instead of creating conflicting duplicates.
 - Retire stale or wrong memories so future retrieval stays clean.
 - Reuse existing schema and labels so the graph remains legible and searchable over time.
+- Link related memories when a new node supersedes, refines, or depends on an older one.
 
 The goal is not to save everything. The goal is to keep a durable, coherent graph of what should influence future behavior.
 

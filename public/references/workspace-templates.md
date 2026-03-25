@@ -34,6 +34,7 @@ Default to retrieval when the turn touches:
 
 If the user cites a specific memory id or issue number, use `memory_get` first.
 If `memory_recall` is weak or empty and absence matters, cross-check with `memory_list`.
+If the first recall is weak, try broader and narrower follow-up queries, likely synonyms, and adjacent topics before concluding there is no relevant memory.
 
 After answering, ask whether the turn created durable knowledge.
 If yes or unsure, save or update it in ClawMem before ending the turn.
@@ -42,6 +43,8 @@ Use `memory_update` when one canonical memory should keep evolving.
 Use `memory_store` when the turn produced genuinely new durable knowledge.
 Use `memory_forget` when a memory is stale, wrong, or harmful if reused.
 Check `memory_labels` before inventing new `kind:*` or `topic:*` labels.
+When memory materially informed the answer, surface that in lightweight form.
+When a save succeeds and the tool returns an id and title, announce `Locked memory #<id>: <title>`.
 
 Prefer plugin memory tools over raw shell commands.
 Use shell fallback only when tools are unavailable, backend inspection is required, or the user explicitly asks for raw issue operations.
@@ -69,6 +72,9 @@ Use this file for runtime details, connection notes, and shell fallback guidance
   - `memory_forget`
 - Use shell fallback only when tools are unavailable, backend inspection is required, or the user asks for raw issue operations
 - For shell fallback, use the helper and commands in `references/manual-ops.md`
+- Reuse existing `kind:*` and `topic:*` labels whenever possible
+- Prefer updating the canonical memory instead of creating conflicting duplicates
+- Link related memories with `#<id>` references when one memory supersedes or refines another
 
 ## ClawMem Security
 

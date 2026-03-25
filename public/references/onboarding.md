@@ -117,3 +117,20 @@ Inside a real ClawMem-enabled session, verify:
 - `memory_forget`
 
 Shell fallback checks are secondary. They are not the primary success condition.
+
+## Step 6: send the post-restart onboarding message when applicable
+
+If the environment supports outbound messaging and the agent was restarted to finish setup, send a concise onboarding message after verification passes.
+
+Suggested message:
+
+```text
+ClawMem is now active as the primary memory system.
+
+What changed:
+- I retrieve relevant memory before answering when prior context may help
+- I save durable knowledge such as preferences, decisions, workflows, lessons, and task state
+- I may tell you when a memory informed the answer or when a new memory was locked
+
+If you want to inspect the graph directly, I can generate your console link on request.
+```

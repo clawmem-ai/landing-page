@@ -88,6 +88,19 @@ Reuse existing schema when possible:
 
 Use open issues for active memories and closed issues for stale or superseded memories.
 
+There are two valid memory shapes:
+- plugin-managed structured memories created through `memory_store` or `memory_update`
+- curated graph memories created manually through `gh` or `curl` when richer issue control is required
+
+Choose a `kind:*` label deliberately:
+- `kind:core-fact` for stable facts that should update in place as reality changes
+- `kind:convention` for agreed rules or policies
+- `kind:lesson` for corrections, postmortems, and things learned the hard way
+- `kind:skill` for repeatable workflows or playbooks
+- `kind:task` for ongoing work that should remain trackable across turns
+
+When a new memory supersedes, refines, or depends on an older one, mention `#<id>` in the body so the graph stays linked.
+
 ## Save a memory
 
 Preferred order:
@@ -99,6 +112,12 @@ Preferred order:
 Fallback with `gh`:
 
 ```sh
+# Ensure required labels exist in a fresh repo.
+for lbl in "type:memory" "kind:core-fact" "kind:convention" "kind:lesson" "kind:skill" "kind:task"; do
+  GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
+    gh label create "$lbl" --repo "$CLAWMEM_REPO" --color "5319e7" 2>/dev/null || true
+done
+
 GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
   gh issue create --repo "$CLAWMEM_REPO" \
     --title "Memory: <concise title>" \
@@ -110,6 +129,14 @@ GH_HOST="$CLAWMEM_HOST" GH_ENTERPRISE_TOKEN="$CLAWMEM_TOKEN" \
 Fallback with `curl`:
 
 ```sh
+# Ensure required labels exist in a fresh repo.
+for lbl in "type:memory" "kind:core-fact" "kind:convention" "kind:lesson" "kind:skill" "kind:task"; do
+  curl -sf -X POST -H "Authorization: token $CLAWMEM_TOKEN" \
+    -H "Content-Type: application/json" \
+    "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/labels" \
+    -d "{\"name\":\"$lbl\",\"color\":\"5319e7\"}" >/dev/null 2>&1 || true
+done
+
 curl -sf -X POST -H "Authorization: token $CLAWMEM_TOKEN" \
   -H "Content-Type: application/json" \
   "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues" \
@@ -127,6 +154,12 @@ Preferred order:
 2. use `memory_recall`
 3. use `memory_list` when recall is weak and absence matters
 4. use `memory_get` for exact ids
+
+If the first recall is weak:
+- try broader and narrower phrasings
+- try likely synonyms and neighboring topics
+- try project names, stable facts, and task-oriented wording
+- cross-check with `memory_list` before concluding there is no relevant memory
 
 Fallback with `gh`:
 
@@ -173,3 +206,27 @@ curl -sf -X PATCH -H "Authorization: token $CLAWMEM_TOKEN" \
   "$CLAWMEM_BASE_URL/repos/$CLAWMEM_REPO/issues/<number>" \
   -d '{"state": "closed"}'
 ```
+
+## User-visible feedback
+
+When memory materially informed the answer, prefer a lightweight acknowledgment such as:
+- `Memory hit: #12 Project naming convention`
+- `Memory miss after recall + list cross-check`
+
+When a save succeeds and the tool returns an id and title, announce:
+
+```text
+Locked memory #<id>: <title>
+```
+
+## Git push to ClawMem repos
+
+`GH_HOST` and `GH_ENTERPRISE_TOKEN` only affect the `gh` CLI, not `git push`.
+
+If direct git operations against a ClawMem repo are needed, register the host with `gh` first:
+
+```sh
+echo "$CLAWMEM_TOKEN" | gh auth login -h "$CLAWMEM_HOST" --with-token
+```
+
+After that, pushes to the ClawMem host can authenticate normally.
