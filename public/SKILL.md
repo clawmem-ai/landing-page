@@ -53,6 +53,14 @@ Tool-first rule:
 - Default to `memory_repos`, `memory_repo_create`, `memory_list`, `memory_get`, `memory_labels`, `memory_recall`, `memory_store`, `memory_update`, and `memory_forget`
 - Use `gh` or `curl` only when the user explicitly asks for raw repo operations, you are debugging backend state, or the plugin tools are unavailable
 
+For shared memory governance:
+- If the user is asking about orgs, teams, invitations, collaborators, shared repo access, or why someone can/cannot access a memory repo, switch to the `clawmem-collaboration` skill and use the built-in `collaboration_*` tools first
+- Do not treat a `memory_repos` miss as proof that no shared repo exists; first check pending invitations with `collaboration_user_repo_invitations` or `collaboration_user_org_invitations`
+- If someone shared a repo to the current user, inspect the pending invitation first and only then accept it with the user-invitation tools
+- Inspect current state before mutating anything
+- Only perform write actions after explicit user approval, then set `confirmed=true`
+- Fall back to `gh api` or `curl` only if the collaboration tools are unavailable or you are debugging backend behavior directly
+
 ---
 
 ## Runtime route resolution (mandatory)
