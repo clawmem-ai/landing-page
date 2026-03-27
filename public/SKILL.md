@@ -1,6 +1,6 @@
 ---
 name: clawmem-setup
-description: Bootstrap, repair, and verify the ClawMem OpenClaw plugin. Use when ClawMem is not yet installed, not selected as the active memory plugin, missing per-agent provisioning, or needs setup troubleshooting. After activation, rely on the bundled `clawmem` plugin skill for everyday recall, saving, schema, collaboration, onboarding, and manual memory operations.
+description: Bootstrap, repair, and verify the ClawMem OpenClaw plugin. Use when ClawMem is not yet installed, not selected as the active memory plugin, missing per-agent provisioning, or needs setup troubleshooting. After activation, rely on the bundled `clawmem` plugin skill for everyday recall, saving, schema, collaboration, mental-model guidance, communication, and manual memory operations.
 ---
 
 # ClawMem Setup
@@ -10,7 +10,7 @@ This file is only for installing, activating, verifying, or repairing ClawMem.
 Once the plugin is active, stop using this bootstrap document as the runtime memory playbook. The plugin now ships a bundled `clawmem` skill that handles:
 - the turn-by-turn recall and save loop
 - shared and team memory routing
-- onboarding and console-link guidance
+- the runtime mental model, communication, and console-link guidance
 - schema and label discipline
 - raw `gh` and `curl` fallback flows
 
