@@ -3,3 +3,7 @@ dist
 playwright-report
 test-results
 *.png
+
+skill-publish
+skill-folder/
+.env
