@@ -2,6 +2,17 @@
 
 Use this guide only when plugin memory tools are unavailable, when the user wants raw issue operations, or when you need to inspect backend state directly.
 
+## Quick index
+
+- Route helper
+- Read-only probe
+- Schema guidance
+- Save a memory
+- Search memories
+- Mark a memory stale
+- User-visible feedback
+- Git push to ClawMem repos
+
 ## Route helper
 
 Resolve the current agent route before shell-based ClawMem operations:

@@ -2,6 +2,16 @@
 
 Use this guide for first-run installation, workspace repair, or when the agent's memory path appears broken.
 
+## Quick index
+
+- Step 0: install and activate
+- Step 1: verify activation and current-agent provisioning
+- Step 2: write identity to `SOUL.md`
+- Step 3: write behavior rules to `AGENTS.md`
+- Step 4: write runtime details to `TOOLS.md`
+- Step 5: verify tool path
+- Step 6: send the post-restart onboarding message when applicable
+
 ## Step 0: install and activate
 
 ```sh
@@ -58,51 +68,19 @@ If repo or token is missing, this agent has not been provisioned yet. Trigger a 
 
 ## Step 2: write identity to SOUL.md
 
-Keep this short and identity-only.
-
-```markdown
-## Memory System - ClawMem
-I use ClawMem as my primary memory system.
-I search ClawMem when prior context may help, and I save durable knowledge back into ClawMem.
-```
-
-For a fuller ready-to-paste example set, see `references/workspace-templates.md`.
+Keep this short and identity-only. Use the `SOUL.md` template in `references/workspace-templates.md`.
 
 ## Step 3: write behavior rules to AGENTS.md
 
 Use `AGENTS.md` as the behavioral source of truth.
 
-Suggested content:
-
-```markdown
-## ClawMem Behavior
-
-Before answering, ask whether ClawMem may contain relevant memory. If yes or unsure, retrieve from ClawMem first.
-
-After answering, ask whether the turn created durable knowledge. If yes or unsure, save or update it in ClawMem before ending the turn.
-
-Prefer plugin memory tools over raw shell commands. If a specific memory id is mentioned, use `memory_get` first. If `memory_recall` is weak and absence matters, cross-check with `memory_list`.
-```
-
-For a fuller ready-to-paste example set, see `references/workspace-templates.md`.
+Use the `AGENTS.md` template in `references/workspace-templates.md`.
 
 ## Step 4: write runtime details to TOOLS.md
 
 Use `TOOLS.md` for connection details and shell fallback notes.
 
-Suggested content:
-
-```markdown
-## ClawMem Runtime Notes
-
-- Resolve repo and token from `openclaw.json -> plugins.entries.clawmem.config.agents.<agentId>`
-- Use the current agent's `defaultRepo` as the fallback memory space
-- Prefer plugin memory tools first
-- Use shell fallback only when tools are unavailable, debugging is needed, or the user asks for raw issue operations
-- For shell fallback, use the helper and commands in `references/manual-ops.md`
-```
-
-For a fuller ready-to-paste example set, see `references/workspace-templates.md`.
+Use the `TOOLS.md` template in `references/workspace-templates.md`.
 
 ## Step 5: verify tool path
 

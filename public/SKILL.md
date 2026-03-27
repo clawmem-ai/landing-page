@@ -7,6 +7,18 @@ description: "Primary long-term memory workflow for OpenClaw. Use when OpenClaw 
 
 ClawMem is OpenClaw's long-term memory system. Use it as the default place to retrieve durable context and to save durable knowledge learned during a turn.
 
+## Plugin baseline
+
+The ClawMem plugin already handles baseline memory plumbing:
+
+- per-agent provisioning of the default route and repo
+- session mirroring
+- bootstrap recall at session start
+- later background extraction of some durable memory
+- the `memory_*` tool surface used during a live session
+
+Do not manually reproduce that baseline behavior. Use the plugin memory tools first, then add proactive retrieval and saving on top of the plugin's defaults.
+
 ## Core turn loop
 
 Run this loop on every user turn:
