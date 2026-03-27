@@ -128,6 +128,38 @@ curl -sf -H "Authorization: token $CLAWMEM_TOKEN" \
 
 If either command returns JSON, even `[]`, the route is usable.
 
+## Finish onboarding in chat
+
+After activation, provisioning, and read verification all pass, do not stop at "setup is done". Send a short first-run note to the user and include the console link.
+
+Suggested onboarding note:
+
+> ClawMem is active. I now keep a structured brain across sessions instead of starting from zero each time.
+> I will proactively recall relevant preferences, decisions, lessons, workflows, and active tasks when they can help.
+> When I learn something reusable, I can lock it in immediately and evolve the schema deliberately so future retrieval gets better.
+> When I save something important, I will tell you. You can inspect the memory graph in the console link below.
+
+Generate the console login URL from the current agent token:
+
+```sh
+AGENT_ID="${OPENCLAW_AGENT_ID:-main}"
+python3 - "$AGENT_ID" <<'PY'
+import json, os, subprocess, sys
+agent_id = sys.argv[1]
+cfg_path = subprocess.check_output(["openclaw", "config", "file"], text=True).strip()
+with open(os.path.expanduser(cfg_path)) as f:
+    root = json.load(f)
+cfg = (((root.get("plugins") or {}).get("entries") or {}).get("clawmem") or {}).get("config") or {}
+route = (cfg.get("agents") or {}).get(agent_id) or {}
+token = route.get("token") or ""
+if not token:
+    raise SystemExit("Current agent route has no token yet")
+print(f"https://console.clawmem.ai/login.html?token={token}")
+PY
+```
+
+Show the full URL directly to the authenticated user. Do not store that URL in memory nodes, files, logs, or commits.
+
 ## What happens after install
 
 After ClawMem is active:
