@@ -1,0 +1,69 @@
+---
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('blog')).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
+);
+---
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Blog - ClawMem</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://api.fontshare.com" />
+    <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin />
+    <link href="https://api.fontshare.com/v2/css?f[]=general-sans@700,600,500&f[]=satoshi@400,500,700&display=swap" rel="stylesheet" />
+    <style>
+      :root { color-scheme: dark; --bg-deep: #080a14; --text-primary: #f0f4ff; --text-secondary: #8892b0; --coral-bright: #e0475a; --cyan-bright: #2dd4b8; --bg-surface: #0c1020; --border-subtle: rgba(136, 146, 176, 0.12); }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { font-family: 'Satoshi', system-ui, sans-serif; background: var(--bg-deep); color: var(--text-primary); min-height: 100vh; }
+      .container { max-width: 860px; margin: 0 auto; padding: 0 1.5rem; }
+      .blog-header { padding: 3rem 0 2rem; text-align: center; }
+      .blog-header h1 { font-family: 'General Sans', system-ui, sans-serif; font-size: 2.5rem; margin-bottom: 0.5rem; }
+      .blog-header p { color: var(--text-secondary); }
+      .blog-nav { display: flex; justify-content: center; gap: 1.5rem; padding: 1rem 0; margin-bottom: 2rem; }
+      .blog-nav a { color: var(--text-secondary); text-decoration: none; transition: color 0.2s; }
+      .blog-nav a:hover { color: var(--coral-bright); }
+      .blog-list { list-style: none; display: flex; flex-direction: column; gap: 1.5rem; padding-bottom: 4rem; }
+      .blog-card { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 0.75rem; padding: 1.5rem; text-decoration: none; color: inherit; display: block; transition: border-color 0.2s; }
+      .blog-card:hover { border-color: var(--coral-bright); }
+      .blog-card h2 { font-family: 'General Sans', system-ui, sans-serif; font-size: 1.25rem; margin-bottom: 0.5rem; }
+      .blog-card p { color: var(--text-secondary); font-size: 0.95rem; }
+      .blog-card time { color: var(--text-secondary); font-size: 0.85rem; opacity: 0.7; }
+      .empty { text-align: center; color: var(--text-secondary); padding: 4rem 0; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <nav class="blog-nav">
+        <a href="/">Home</a>
+        <a href="/docs/">Docs</a>
+        <a href="/blog/">Blog</a>
+      </nav>
+      <header class="blog-header">
+        <h1>ClawMem Blog</h1>
+        <p>Updates, guides, and insights from the ClawMem team.</p>
+      </header>
+      {posts.length > 0 ? (
+        <ul class="blog-list">
+          {posts.map((post) => (
+            <a class="blog-card" href={`/blog/${post.id}/`}>
+              <time datetime={post.data.date.toISOString()}>
+                {post.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+              </time>
+              <h2>{post.data.title}</h2>
+              <p>{post.data.description}</p>
+            </a>
+          ))}
+        </ul>
+      ) : (
+        <div class="empty">
+          <p>No blog posts yet. Stay tuned!</p>
+        </div>
+      )}
+    </div>
+  </body>
+</html>
