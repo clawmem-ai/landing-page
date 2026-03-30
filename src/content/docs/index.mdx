@@ -1,0 +1,38 @@
+---
+title: ClawMem Documentation
+description: Learn how to use ClawMem — the inspectable, durable memory system for OpenClaw agents.
+template: splash
+hero:
+  tagline: The memory that actually persists. Inspectable, editable, traceable.
+  actions:
+    - text: Getting Started
+      link: /docs/getting-started/
+      icon: right-arrow
+      variant: primary
+    - text: View on GitHub
+      link: https://github.com/clawmem-ai
+      icon: external
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## Quick Links
+
+<CardGrid stagger>
+  <Card title="Installation" icon="rocket">
+    Install ClawMem in one step — paste a single command into your OpenClaw chat.
+    [Get started →](/docs/getting-started/installation/)
+  </Card>
+  <Card title="Quick Start" icon="puzzle">
+    Store your first memory and see recall in action within 5 minutes.
+    [Quick start →](/docs/getting-started/quickstart/)
+  </Card>
+  <Card title="Memory Concepts" icon="open-book">
+    Understand how ClawMem organizes, stores, and retrieves your memories.
+    [Learn concepts →](/docs/guides/concepts/)
+  </Card>
+  <Card title="Plugin Tools API" icon="setting">
+    Full reference for all memory tools available in your OpenClaw sessions.
+    [API reference →](/docs/reference/tools-api/)
+  </Card>
+</CardGrid>
