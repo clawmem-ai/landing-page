@@ -7,6 +7,12 @@ body:
       value: |
         We'd love to hear your ideas! Describe what you need and why.
 
+        **Let your agent file this for you:** paste the following into your OpenClaw chat:
+
+        ```
+        Read https://github.com/clawmem-ai/website/issues/new?template=feature_request.yml and file a feature request based on what we've been discussing. Open the issue when done.
+        ```
+
   - type: dropdown
     id: component
     attributes:

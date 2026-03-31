@@ -7,6 +7,12 @@ body:
       value: |
         Want ClawMem to work with your favorite tool? Let us know!
 
+        **Let your agent file this for you:** paste the following into your OpenClaw chat:
+
+        ```
+        Read https://github.com/clawmem-ai/website/issues/new?template=integration_request.yml and request ClawMem integration for the tool we've been using. Open the issue when done.
+        ```
+
   - type: input
     id: platform
     attributes:
