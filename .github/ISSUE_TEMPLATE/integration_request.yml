@@ -1,0 +1,48 @@
+name: Integration Request
+description: Request ClawMem support for a new platform, framework, or tool
+labels: ["integration"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Want ClawMem to work with your favorite tool? Let us know!
+
+  - type: input
+    id: platform
+    attributes:
+      label: Platform / Framework / Tool
+      description: What do you want ClawMem to integrate with?
+      placeholder: "Claude Code, Cursor, LangChain, CrewAI, etc."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: integration-type
+    attributes:
+      label: Integration type
+      description: What kind of integration are you looking for?
+      options:
+        - MCP Server (for MCP-compatible tools)
+        - Plugin / Extension
+        - SDK (Python, Go, etc.)
+        - REST API usage example
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use case
+      description: How would you use ClawMem with this tool?
+      placeholder: "I use Cursor for daily coding and want my agent to remember project decisions across sessions..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Links to the tool, relevant docs, or anything else that helps.
+    validations:
+      required: false
