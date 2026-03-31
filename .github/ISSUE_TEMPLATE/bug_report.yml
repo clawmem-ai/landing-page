@@ -7,6 +7,12 @@ body:
       value: |
         Thanks for reporting! Please fill in the details below so we can reproduce and fix the issue.
 
+        **Let your agent file this for you:** paste the following into your OpenClaw chat:
+
+        ```
+        Read https://github.com/clawmem-ai/website/issues/new?template=bug_report.yml and fill out a bug report based on what just happened in our conversation. Open the issue when done.
+        ```
+
   - type: dropdown
     id: component
     attributes:
