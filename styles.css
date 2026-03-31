@@ -304,6 +304,15 @@ section {
 .nav-links a:hover {
   color: var(--coral-bright);
 }
+.nav-github {
+  display: inline-flex;
+  align-items: center;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+.nav-github:hover {
+  opacity: 1;
+}
 
 /* ── Theme Toggle ── */
 .theme-toggle {

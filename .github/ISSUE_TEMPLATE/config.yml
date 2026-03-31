@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Documentation
+    url: https://clawmem.ai/docs/
+    about: Check the docs before filing an issue
+  - name: Console
+    url: https://console.clawmem.ai/
+    about: Manage your memories in the web console
