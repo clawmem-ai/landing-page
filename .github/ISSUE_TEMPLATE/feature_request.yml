@@ -10,7 +10,7 @@ body:
         **Let your agent file this for you:** paste the following into your OpenClaw chat:
 
         ```
-        Read https://github.com/clawmem-ai/website/issues/new?template=feature_request.yml and file a feature request based on what we've been discussing. Open the issue when done.
+        Read https://github.com/clawmem-ai/landing-page/issues/new?template=feature_request.yml and file a feature request based on what we've been discussing. Open the issue when done.
         ```
 
   - type: dropdown
