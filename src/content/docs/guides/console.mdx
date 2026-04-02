@@ -1,0 +1,230 @@
+---
+title: Console Guide
+description: Browse, search, and manage all your memories through the web console at console.clawmem.ai.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The ClawMem console is the web UI for inspecting and managing memories. It reads the same underlying memory data as the plugin, so any changes in the console are immediately reflected in agent recall, and vice versa.
+
+Open the console at **[https://console.clawmem.ai](https://console.clawmem.ai)**.
+
+---
+
+## Workspace overview
+
+When you log in, the console shows your workspace overview — a dashboard with key metrics, an activity feed, and a list of your most recent memories.
+
+The overview gives you a birds-eye view of what's happening:
+
+**Metrics:**
+- **Memories** — Total count of active memories in the workspace
+- **Active Sessions** — How many agent sessions are currently running
+- **Pending Approval** — Memories extracted by the AI that are waiting for human review (the approval workflow)
+- **Recall Rate** — Percentage of agent queries that matched at least one active memory, computed over the last 7 days
+
+**Activity feed:**
+The activity stream shows recent actions across the workspace: agent memories created, human approvals/rejections, session completions, team member changes. This helps you stay aware of what the workspace is doing without diving into details.
+
+**Recent memories:**
+The card list shows your most recent memories in reverse chronological order. Each card displays the type, title, and status. Click any card to see the full detail, edit it, or change its status.
+
+---
+
+## Memory browser
+
+Navigate to the Memory Browser to browse, search, and filter all memories.
+
+**URL:** `/w/{workspace}/memories`
+
+**Filters:**
+
+Use the filter panel on the left to narrow down memories:
+
+- **Type** — Filter by `fact`, `decision`, `lesson`, or `custom`. Select multiple types to combine them.
+- **Status** — Filter by `active`, `pending_approval`, `stale`, or `archived`. Active memories are the primary set; stale memories are closed and no longer recalled; archived memories are removed entirely.
+- **Full-text search** — Type a query to search memory titles and bodies. The search is fast and works across all memories in the workspace.
+
+**Memory cards:**
+
+Each memory card shows:
+- Type badge (fact, decision, lesson, or custom)
+- Title (clickable to open the full detail view)
+- Tags (topics and kinds)
+- Status indicator (active, pending approval, stale, archived)
+- Author and created date
+- A snippet of the body
+
+**Sorting:**
+
+Memories are sorted by most recently created first. You can sort in the detail view, but the browser always defaults to newest first to help you catch recent changes.
+
+---
+
+## Approval workflow
+
+When the ClawMem plugin extracts memories from a session, it stores them as `pending_approval` — not immediately active. This is the human-in-the-loop quality gate.
+
+**Review pending memories:**
+
+In the Memory Browser, filter by `Status: pending_approval` to see all memories waiting for review.
+
+**Approve a memory:**
+
+Click a pending memory to open its detail view. Review the extracted title and body. If it looks correct, click **Approve**. The memory transitions to `active` and will be recalled in future sessions.
+
+**Reject a memory:**
+
+If the extraction is wrong, click **Reject**. The memory transitions to `archived` and will not be recalled. You can still inspect it later via the browser by filtering on `archived`.
+
+<Aside type="tip">
+You can also manually archive active memories to stop them from being recalled, and reopen stale or archived memories if you change your mind.
+</Aside>
+
+---
+
+## Team view
+
+Navigate to the Team view to see who has access to your workspace and manage membership.
+
+**URL:** `/w/{workspace}/team`
+
+**Member list:**
+
+Shows all humans and AI agents in the workspace with their roles:
+- **Admin** — Full control. Can manage team membership, approve/reject memories, and change workspace settings.
+- **Member** — Can view and create memories, recall, and search. Cannot approve other people's extracted memories or change team settings.
+- **Viewer** — Read-only access. Can browse and search memories but cannot store or approve.
+
+**Contribution heatmap:**
+
+A visual grid showing recent activity by member — how many memories each person has created or contributed to in the last 30 days. Helps you see who's active and how distributed the memory-making is.
+
+**Invite new members:**
+
+Click **Invite** to send an invitation to a new user (human or agent). The invitee will receive a pending invitation they must accept to join the workspace.
+
+---
+
+## Knowledge graph
+
+Navigate to the Knowledge Graph to see visual relationships between memories.
+
+**URL:** `/w/{workspace}/graph`
+
+The graph is a D3-based visualization where:
+- **Nodes** represent individual memories
+- **Edges** (connecting lines) represent relationships — memories that reference each other, share tags, or were created in the same session
+- **Node size** corresponds to how often the memory is recalled
+- **Node color** corresponds to memory type (fact, decision, lesson, custom)
+- **Clusters** emerge automatically, grouping related memories
+
+Hover over a node to highlight its connections. Click a node to jump to that memory's detail view. This view is useful for discovering unexpected relationships and understanding how your memory base is organized.
+
+---
+
+## Conversations
+
+Navigate to Conversations to browse session transcripts that were mirrored by the plugin.
+
+**URL:** `/w/{workspace}/conversations`
+
+Each conversation is a record of a complete session from start to finish. You can:
+
+- **View the transcript** — Read the full conversation between you and the agent
+- **See extracted memories** — The memories that were extracted from this session are highlighted inline
+- **Trace back to source** — Click a memory to see the exact turn in the conversation where it came from
+
+This is helpful for auditing what memories were extracted and why, or reviewing the context where a memory was born.
+
+---
+
+## Audit log
+
+Navigate to the Audit Log to see a complete activity trace of the workspace.
+
+**URL:** `/w/{workspace}/audit`
+
+The audit log records every action: memory creation, approval, rejection, status changes, member additions, deletions, and edits. Each entry shows:
+
+- **Timestamp**
+- **Actor** — Who took the action (human, agent, or system)
+- **Action** — What happened (e.g., "Created memory", "Approved memory", "Added member")
+- **Resource** — Which memory, team member, or setting was affected
+- **Details** — Extra context (e.g., the old and new values for an edit)
+
+Use the audit log for compliance, debugging ("who approved this?"), and understanding the history of any memory or team change.
+
+---
+
+## Settings
+
+Navigate to Settings to configure workspace behavior.
+
+**URL:** `/w/{workspace}/settings`
+
+**Workspace configuration:**
+
+- **Workspace name** — The display name for this memory space
+- **Visibility** — Whether the workspace is private or shared
+- **Default recall limit** — How many memories the plugin injects before each session (default: 5). Higher limits give more context but can pollute the context window.
+- **Approval required** — Toggle whether extracted memories must be approved before becoming active (default: on). Turn this off only if you trust the AI extraction fully.
+- **Retention policy** — How long to keep stale and archived memories before auto-deletion (default: never delete)
+
+**Integrations:**
+
+Settings also shows which tools and systems are connected: the plugin version, the memory repo URL, and any external integrations like Slack notifications (if configured).
+
+---
+
+## Console and plugin sync
+
+The console and plugin read the same underlying data — memory repos stored in a GitHub-compatible backend. Changes sync bidirectionally:
+
+- **Plugin → Console:** When an agent stores a memory via `memory_store`, it appears in the console immediately
+- **Console → Plugin:** When you approve a pending memory or edit a detail in the console, the next agent session will see the updated state
+
+There's no delay or separate backend — both systems work against the same source of truth. This is what makes ClawMem inspectable: you can always open the console and see exactly what the agent knows.
+
+---
+
+## Common workflows
+
+**Audit what the agent stored:**
+
+1. Open Overview to see Pending Approval count
+2. Filter Memory Browser by `Status: pending_approval`
+3. Review each extracted memory
+4. Approve or reject batch-wise or one by one
+
+**Fix a bad memory:**
+
+1. Search the Memory Browser for the memory by keyword
+2. Open the memory detail
+3. Click Edit
+4. Update the title, body, or tags
+5. Save
+
+The next agent session will recall the corrected version.
+
+**Understand memory relationships:**
+
+1. Open the Knowledge Graph
+2. Hover nodes to see which memories are connected
+3. Click on a cluster to explore related memories
+4. Use this to spot gaps or redundancy in your memory base
+
+**Debug agent behavior:**
+
+1. Open Conversations
+2. Find the session where something went wrong
+3. Read the transcript and see which memories were extracted
+4. Open each memory to verify it matches the conversation context
+5. Go to Audit Log to see if memories were approved or edited since
+
+**Bulk invite a team:**
+
+1. Open Team view
+2. Click Invite for each member
+3. Members see pending invitations in their own workspace list
+4. Each member accepts to join

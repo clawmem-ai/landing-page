@@ -1,0 +1,63 @@
+---
+title: Introduction
+description: What is ClawMem and why does your AI agent need persistent memory?
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+ClawMem is an **inspectable, durable memory system** for OpenClaw AI agents. It gives your agent the ability to remember facts, preferences, decisions, and context across sessions — things that would otherwise vanish the moment a conversation ends.
+
+---
+
+## The problem: agents forget everything
+
+Every new session with an AI agent starts from zero. If you told your agent your preferred coding style last Tuesday, it has no idea today. If you made a key architecture decision in a previous session, you have to re-explain it. This is the default state for every AI agent without persistent memory.
+
+ClawMem changes that with a three-step loop that runs automatically on every session:
+
+1. **Capture** — every conversation is mirrored as a structured record, with key facts extracted into durable memory entries.
+2. **Store** — memories are saved as typed, labeled issues in a GitHub-compatible backend at `git.clawmem.ai`, organized by kind and topic.
+3. **Recall** — at the start of each session, relevant memories are searched and injected into context before the agent responds.
+
+The result: your agent accumulates knowledge over time instead of resetting constantly.
+
+---
+
+## How it works
+
+ClawMem runs as an OpenClaw plugin. Once installed, it operates through two complementary mechanisms:
+
+**Automatic recording.** Every session is saved as a `type:conversation` issue. During request-scoped maintenance, the plugin extracts durable facts — preferences, decisions, lessons, workflows — and stores each as a `type:memory` issue with structured labels (`kind:*`, `topic:*`).
+
+**Active recall.** When a new session starts, ClawMem searches active memories by relevance and injects the most pertinent ones into context. The agent also has mid-session tools — `memory_recall`, `memory_store`, `memory_update`, `memory_forget`, and others — to retrieve, save, and manage memories explicitly during a conversation.
+
+---
+
+## How ClawMem is different
+
+Most memory systems for AI agents are black boxes. They store your data as vector embeddings you cannot inspect, correct, or trace. ClawMem takes a different approach.
+
+**Inspectable records, not hidden embeddings.** Every memory is a structured issue with a title, body, labels, and metadata. You can read it, edit it, and delete it at any time through the console at [console.clawmem.ai](https://console.clawmem.ai) or through the agent's memory tools.
+
+**Git-backed with full history.** The backend is a GitHub-compatible API. Memories live as issues in a real repository, which means they have state (`open` for active, `closed` for stale), labels for schema, and a link back to the session that created them.
+
+**Collaborative by design.** Memory repositories support organizations, teams, and fine-grained access control. A personal agent uses a private default repo. A project team can share a repo so all agents on the team recall the same project context. Permissions are managed through standard collaborator and team flows.
+
+**Schema-aware.** Memories carry `kind:*` and `topic:*` labels that the agent uses to categorize and retrieve them consistently. The schema evolves deliberately — the agent reuses existing labels before inventing new ones, keeping the memory index clean and searchable.
+
+---
+
+## Next steps
+
+<CardGrid>
+  <Card title="Install ClawMem" icon="rocket">
+    One-step setup: install the plugin, provision your memory repo, and enable automatic recording.
+
+    [Installation guide →](/getting-started/installation/)
+  </Card>
+  <Card title="Quick Start" icon="puzzle">
+    Store your first memory and see recall in action within a single session.
+
+    [Quick start →](/getting-started/quickstart/)
+  </Card>
+</CardGrid>

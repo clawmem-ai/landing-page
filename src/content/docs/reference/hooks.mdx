@@ -1,0 +1,351 @@
+---
+title: Plugin Hooks & Lifecycle
+description: Complete reference for ClawMem event hooks, subscriptions, and service lifecycle.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+ClawMem integrates into the OpenClaw plugin runtime via four event hooks and one subscription. This reference covers when each fires, what data is available, and what ClawMem does in response.
+
+---
+
+## Event hooks
+
+ClawMem listens to the following hooks fired by the OpenClaw runtime:
+
+| Hook | When | Payload | ClawMem Action |
+|---|---|---|---|
+| **before_agent_start** | Before the agent processes the incoming prompt | `prompt` (string) | Recall relevant memories, inject into context |
+| **agent_end** | After the agent finishes a turn and produces messages | `messages` (array) | Schedule turn mirroring and extraction |
+| **before_reset** | Before the session resets or tears down | `sessionFile` (string), `reason` (string), `messages` (array) | Enqueue finalization, write extraction results |
+| **session_end** | When the session formally ends | `sessionId` (string), `sessionKey` (string) | Finalize extraction, close session issue |
+
+All hooks receive a context object (`ctx`) containing:
+- `sessionId` — The current session identifier
+- `sessionKey` — Session subkey (for multi-session scenarios)
+- `agentId` — The agent identity processing the session
+
+---
+
+## before_agent_start
+
+Fires before the agent processes an incoming prompt.
+
+**Event payload:**
+
+```typescript
+{
+  prompt: string;
+}
+```
+
+**Context:**
+
+```typescript
+{
+  agentId: string;
+}
+```
+
+**What ClawMem does:**
+
+1. Receives the incoming `prompt`
+2. Searches the agent's default memory repo for memories relevant to the prompt
+3. Retrieves up to `memoryRecallLimit` (default 5) active memories
+4. Injects them into the agent context as a `<relevant-memories>` block
+
+The agent starts each conversation with relevant memories already loaded, so it can apply prior context without needing to be reminded.
+
+---
+
+## agent_end
+
+Fires after the agent finishes a turn and produces response messages.
+
+**Event payload:**
+
+```typescript
+{
+  messages: unknown[];
+}
+```
+
+**Context:**
+
+```typescript
+{
+  sessionId: string;
+  sessionKey?: string;
+  agentId: string;
+}
+```
+
+**What ClawMem does:**
+
+1. Queues the messages for turn mirroring to the session issue
+2. Schedules a mirroring operation after `turnCommentDelayMs` (default 1000ms)
+3. Schedules extraction in the background to identify new memories from this turn
+4. Does not block the session; mirroring happens asynchronously
+
+Messages are batched if multiple `agent_end` events fire during the `turnCommentDelayMs` delay window.
+
+---
+
+## before_reset
+
+Fires before the session resets or tears down (e.g., `/reset` command or explicit teardown).
+
+**Event payload:**
+
+```typescript
+{
+  sessionFile: string;
+  reason: string;
+  messages?: unknown[];
+}
+```
+
+**Context:**
+
+```typescript
+{
+  sessionId: string;
+  sessionKey?: string;
+  agentId: string;
+}
+```
+
+**What ClawMem does:**
+
+1. Enqueues a finalization operation (see [Finalization](#finalization) below)
+2. Waits for any in-flight turn mirroring to complete
+3. Finalizes the extraction: runs a final AI extraction pass if one is pending
+4. Marks the session state as finalized and closes the session issue
+
+This ensures that the session is fully captured and all memories are extracted before the session resets.
+
+---
+
+## session_end
+
+Fires when the session formally ends (e.g., closing the client or ending the conversation).
+
+**Event payload:**
+
+```typescript
+{
+  sessionId: string;
+  sessionKey?: string;
+}
+```
+
+**Context:**
+
+```typescript
+{
+  sessionId: string;
+  sessionKey?: string;
+  agentId: string;
+}
+```
+
+**What ClawMem does:**
+
+Same as `before_reset`: enqueues finalization, completes extraction, and closes the session issue.
+
+<Aside type="note">
+Both `before_reset` and `session_end` trigger finalization. If one fires before the other, the second call sees the session already finalized and is idempotent.
+</Aside>
+
+---
+
+## onSessionTranscriptUpdate (subscription)
+
+In addition to event hooks, ClawMem subscribes to real-time transcript updates via the OpenClaw runtime subscription API.
+
+**Subscription:**
+
+```typescript
+api.runtime.events.onSessionTranscriptUpdate((update) => {
+  // Handle transcript change
+})
+```
+
+**Event data:**
+
+```typescript
+{
+  sessionFile: string;  // Path to the session transcript file
+}
+```
+
+**What ClawMem does:**
+
+1. Receives notification that the session transcript has changed
+2. Reads the updated transcript file
+3. Detects new or updated turns
+4. Mirrors the new turns to the session issue comment thread
+
+This allows real-time mirroring of the conversation as it happens, without waiting for explicit hook events.
+
+---
+
+## Finalization
+
+Finalization is an internal operation that ClawMem enqueues when `before_reset` or `session_end` fires.
+
+**Finalization steps:**
+
+1. Await any pending turn mirroring operations
+2. Await any pending extraction operations
+3. If an extraction is still in progress, wait up to `summaryWaitTimeoutMs` for it to complete
+4. Write the final extraction results (new memories and stale memory IDs) to the memory repo
+5. Mark the session state as finalized: `finalizedAt` timestamp is set
+6. Close the session issue with a final summary comment
+
+If extraction times out, a failed extraction record is written and the session proceeds.
+
+---
+
+## Service lifecycle
+
+ClawMem is registered as a service within the OpenClaw runtime. The service manages state loading, subscription setup, and cleanup.
+
+### Service start
+
+When `start()` is called:
+
+1. **Resolve state file path** from the runtime's `stateDir`
+2. **Load state** from `.claude/clawmem-state.json` (or create empty state if missing)
+3. **Subscribe to transcript updates** via `api.runtime.events.onSessionTranscriptUpdate()`
+4. **Log readiness** with the count of configured agent routes
+5. **Warn if inactive** if any agent has no default repo
+
+The service is now ready to handle hooks and transcript events.
+
+### Service stop
+
+When `stop()` is called:
+
+1. **Unsubscribe** from transcript update events
+2. **Clear timers** — stop all pending `setTimeout` calls for turn mirroring
+3. **Await pending** — wait for all in-flight promises (mirroring, extraction, API calls) to settle
+4. Gracefully shut down without losing data
+
+---
+
+## State persistence
+
+ClawMem persists session state to `.claude/clawmem-state.json`. This file tracks per-session state to enable idempotency and resumability.
+
+**File format:**
+
+```json
+{
+  "version": 2,
+  "sessions": {
+    "<sessionId>-<sessionKey>": {
+      "sessionId": "...",
+      "sessionKey": "...",
+      "agentId": "...",
+      "issueNumber": 42,
+      "issueTitle": "Session: ...",
+      "titleSource": "llm",
+      "lastMirroredCount": 5,
+      "turnCount": 8,
+      "lastAssistantText": "...",
+      "lastMemorySyncCount": 3,
+      "summaryStatus": "complete",
+      "finalizedAt": "2025-06-15T10:30:00Z",
+      "lastSummaryHash": "sha256-...",
+      "lastTurnHash": "sha256-...",
+      "createdAt": "2025-06-15T09:00:00Z",
+      "updatedAt": "2025-06-15T10:30:00Z"
+    }
+  },
+  "migrations": {}
+}
+```
+
+### SessionMirrorState fields
+
+| Field | Type | Purpose |
+|---|---|---|
+| **sessionId** | string | Unique session identifier from the runtime |
+| **sessionKey** | string? | Optional session subkey (for multi-session scenarios) |
+| **agentId** | string? | Which agent this session belongs to |
+| **issueNumber** | number? | GitHub issue number where this session is mirrored |
+| **issueTitle** | string? | Title of the session GitHub issue |
+| **titleSource** | `"placeholder"` \| `"llm"` | Whether the title is auto-generated or AI-derived |
+| **lastMirroredCount** | number | How many turns have been posted as issue comments |
+| **turnCount** | number | Total turns in the session |
+| **lastAssistantText** | string? | Last assistant message (for context) |
+| **lastMemorySyncCount** | number? | How many memories were saved in the last extraction |
+| **summaryStatus** | `"pending"` \| `"complete"` | Whether extraction has completed |
+| **finalizedAt** | string? | ISO timestamp when finalization completed |
+| **lastSummaryHash** | string? | SHA-256 hash of last extraction result (for idempotency) |
+| **lastTurnHash** | string? | SHA-256 hash of last turn (for deduplication) |
+| **createdAt** | string? | ISO timestamp when session was created |
+| **updatedAt** | string? | ISO timestamp of last state update |
+
+### Scope key
+
+Sessions are keyed by `{sessionId}-{sessionKey}` (or just `{sessionId}` if no sessionKey). This allows ClawMem to track multiple parallel sessions per agent independently.
+
+### Idempotency
+
+ClawMem uses content hashing to prevent duplicate extraction:
+
+1. After extraction, a hash of the extraction result is computed and stored in `lastSummaryHash`
+2. If extraction runs again for the same session, the new hash is compared to `lastSummaryHash`
+3. If hashes match, extraction is skipped (no new memories, no changes)
+4. This prevents duplicate memory issues if finalization is triggered multiple times
+
+---
+
+## Error handling
+
+If an error occurs during any hook or subscription:
+
+- **Mirroring errors** — Logged and retried on the next turn
+- **Extraction errors** — Logged; extraction is marked as `summaryStatus: "pending"` so it's retried on the next finalization
+- **API errors** — Retried with exponential backoff up to a timeout
+- **State I/O errors** — Logged; session continues but state may not persist
+
+ClawMem is designed to be resilient: errors do not block the session, and failures are retried opportunistically.
+
+---
+
+## Integration example
+
+Here's how the hooks and subscription work together:
+
+```
+[Session starts]
+  ↓
+before_agent_start hook fires
+  → Recall memories, inject into context
+  ↓
+[Agent processes prompt]
+  ↓
+agent_end hook fires
+  → Queue turn for mirroring
+  → Schedule extraction
+  ↓
+onSessionTranscriptUpdate subscription fires (real-time)
+  → Mirror turn to GitHub issue
+  ↓
+[User issues /reset command]
+  ↓
+before_reset hook fires
+  → Enqueue finalization
+  → Await mirroring + extraction
+  → Write final results
+  → Mark session finalized
+  ↓
+[Session state updated in .claude/clawmem-state.json]
+  ↓
+[Session resets, state persisted]
+```
+
+On the next session with the same agent, the state is loaded and available for reference, and the extracted memories are recalled for the new conversation.

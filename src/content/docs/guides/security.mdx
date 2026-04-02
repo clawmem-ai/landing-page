@@ -1,0 +1,243 @@
+---
+title: Security & Privacy
+description: Where your data lives, how it is stored and protected, and what controls you have over access and lifecycle.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+ClawMem stores memory data as issues in Git-compatible repositories. This guide covers data residency, storage architecture, access control, and lifecycle management.
+
+## Data residency
+
+All ClawMem data lives on `git.clawmem.ai`, a GitHub-compatible API server. This includes:
+
+- **Memory repos** — Your memory issues and issue comments
+- **Session records** — Transcript mirrors for each conversation
+- **Access logs** — Collaboration grants, invitations, and audit trails
+
+No memory data is stored elsewhere. Your agent's API token and repo configuration are stored locally in your OpenClaw config file, not on `git.clawmem.ai`.
+
+---
+
+## What gets stored
+
+ClawMem stores two types of issues in your memory repo:
+
+| Issue Type | Content | Lifecycle |
+|---|---|---|
+| **Memory** | Extracted facts, preferences, decisions, lessons | Marked `memory-status:active` or `memory-status:stale` |
+| **Session** | Full conversation transcript mirrored in real time | Marked `status:active` or `status:closed` |
+
+Both are stored as GitHub-compatible issues. Each issue carries labels (`type:*`, `kind:*`, `topic:*`) and a structured body in YAML format.
+
+---
+
+## Token storage and management
+
+Your API token is stored locally in your OpenClaw config under `plugins.entries.clawmem.config.agents.<agentId>.token`. Tokens are:
+
+- **Not transmitted to the cloud during provisioning** — Your token is created on `git.clawmem.ai`, returned to you once, and written to your local config
+- **Per-agent** — Each agent identity (local, OpenClaw, etc.) can have its own token
+- **Sensitive** — Treat your token like any other credential. Do not commit it to version control or share it over unencrypted channels
+- **Revocable** — You can rotate or invalidate a token at any time by revoking access on `git.clawmem.ai`
+
+If a token is compromised, any user with that token can read, write, and delete memories in your default repo. [Rotate it immediately](/guides/security/#revoking-access).
+
+---
+
+## Private by default
+
+All memory repos are **private by default**. When you create a repo with `memory_repo_create` or ClawMem provisions your first repo, it is created with `private: true`. Only you and users you explicitly grant access to can view or modify the repo.
+
+To share a memory repo, use the collaboration tools to invite specific users or org members. See [Collaboration](/guides/collaboration/) for full details.
+
+---
+
+## Access control layers
+
+ClawMem implements three-layer access control:
+
+**1. Direct collaborators** — Individual users invited to a repo with a specific permission (read, write, admin).
+
+**2. Teams** — Groups of org members granted repo access at team scope. Only org members can join teams.
+
+**3. Organizations** — Org-wide default permission that applies to all members unless a direct grant or team grant overrides it.
+
+Your effective permission to a repo is the **maximum** of all three layers. For example, if org default is `read` and your team has `write`, you have `write` access.
+
+For full access control documentation, see [Collaboration](/guides/collaboration/).
+
+---
+
+## Permission levels
+
+ClawMem normalizes permissions across different Git systems:
+
+| Permission | Effect | Tools Allowed |
+|---|---|---|
+| `read` | List and search memories. Recall. | `memory_list`, `memory_recall`, `memory_repos` |
+| `write` | Read, store, update, and delete memories. Cannot manage access. | All read tools plus `memory_store`, `memory_update`, `memory_forget` |
+| `admin` | Full control: write access plus manage collaborators and delete repo. | All write tools plus `collaboration_*` |
+
+---
+
+## Confirmation safety gate
+
+All tools that create, modify, or delete access grants require an explicit `confirmed=true` parameter to prevent accidental mutations.
+
+The pattern is always:
+
+**Step 1: Preview** (no confirmed flag) to see what will happen:
+
+```text
+collaboration_repo_collaborator_set(
+  username="alice",
+  permission="write"
+)
+```
+
+Response:
+```text
+Set confirmed=true to grant alice write permission on yourname/memories.
+```
+
+**Step 2: Execute** (with confirmed flag) after approval:
+
+```text
+collaboration_repo_collaborator_set(
+  username="alice",
+  permission="write",
+  confirmed=true
+)
+```
+
+This applies to all collaboration tools and all memory write operations. If you see a confirmation gate, review the action before confirming.
+
+---
+
+## Data lifecycle
+
+ClawMem treats memory lifecycle explicitly and leaves you in control:
+
+**Active memories** — Open issues in your repo. Included in search results and recalled before sessions. Updated when extraction runs, merged via deduplication hash.
+
+**Stale memories** — Closed issues in your repo. Not searched or recalled by default. Can be reopened if needed, inspected in history, or kept as audit trail.
+
+**Permanent deletion** — ClawMem never auto-deletes anything. Memories become stale (closed) when extraction marks them superseded or when you call `memory_forget`. To permanently delete a memory issue, you must manually delete it from `git.clawmem.ai` or use the `memory_issue_delete` tool with `confirmed=true`.
+
+Stale memories remain in your repo forever unless you delete them. This preserves audit trails and lets you revert decisions if needed.
+
+---
+
+## What extraction sees
+
+When ClawMem runs AI extraction at session end, the extraction prompt reads:
+
+- **Full conversation transcript** — Every message in the session, including your prompts and agent responses
+- **Existing active memories** — The current memory index so extraction can decide what to update
+- **Session context** — Session ID, agent ID, start/end timestamps
+
+The extraction does **not** see:
+
+- Tool call internals (e.g., function bodies, raw API responses)
+- Credentials or secrets (tokens, keys, passwords) — though the transcript may mention them
+- Other users' memories in shared repos
+- Collaboration access logs
+
+The extraction output is a JSON decision listing memories to save and memory IDs to mark stale. This decision is applied to your repo directly. You can always view what extraction decided by looking at the session issue and its comments.
+
+<Aside type="caution">
+If your conversations contain sensitive information (passwords, API keys, confidential data), that information could appear in memory extraction. Review extracted memories in the [Console](https://console.clawmem.ai) before they finalize, or use `memory_forget` to delete extracted memories you don't want to keep.
+</Aside>
+
+---
+
+## Console access and permissions
+
+The ClawMem Console at [console.clawmem.ai](https://console.clawmem.ai) provides a web UI for inspecting and managing memories. Your console access is controlled by the **same permission model** as the API:
+
+- If you have `read` permission on a repo, you can view its memories in the console
+- If you have `write` permission, you can edit and create memories in the console
+- If you have `admin` permission, you can manage collaborators in the console
+
+Console operations (storing, updating, deleting memories) require the same `confirmed=true` safety gate as API operations.
+
+---
+
+## Sensitive environments
+
+If your workload involves confidential data, follow these practices:
+
+### Use private repos
+
+All your memory repos default to private. Do not change this unless you have a specific reason to share.
+
+### Limit memory recall scope
+
+Set `memoryRecallLimit` to a low number (e.g., 3-5) in your plugin config. This limits the number of memories injected into each session context, reducing the chance of sensitive data leaking into unrelated conversations.
+
+```json5
+{
+  plugins: {
+    entries: {
+      clawmem: {
+        config: {
+          memoryRecallLimit: 3
+        }
+      }
+    }
+  }
+}
+```
+
+### Review pending memories
+
+Before ending a session, ask your agent to list pending memories:
+
+```text
+memory_list(status="active", limit=50)
+```
+
+Review the list in the console. Use `memory_forget` to delete any memories that contain sensitive data you don't want persisted.
+
+### Isolate by project
+
+Create a separate memory repo for each confidential project. Use team-based access control to limit who can recall from each repo. See [Collaboration](/guides/collaboration/) for team setup patterns.
+
+### Disable extraction for sessions
+
+If a session contains highly sensitive information, ask your agent to not save memories from that session:
+
+```text
+memory_store(detail="Example: API key xyz", confirmed=true)
+```
+
+Then manually delete the session issue from `git.clawmem.ai` to prevent extraction from processing it.
+
+---
+
+## Revoking access
+
+To revoke a user's access to a memory repo:
+
+```text
+collaboration_repo_collaborator_remove(
+  username="alice",
+  confirmed=true
+)
+```
+
+Revocation is immediate. The user loses access to the repo right away. Any active sessions they have with recalled memories remain valid (memories are injected into context at session start), but they cannot store new memories or access the repo going forward.
+
+---
+
+## Audit and compliance
+
+Every memory and collaboration action is recorded as an issue or comment in `git.clawmem.ai`. You can:
+
+- View all memories with `memory_list(status="all")`
+- Inspect session transcripts by listing issues with `type:conversation`
+- Export your entire memory repo by cloning it from `git.clawmem.ai`
+- Archive or delete your repo at any time
+
+ClawMem does not log authentication attempts, API calls, or collaboration changes separately. The Git issue history is your audit trail.

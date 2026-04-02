@@ -1,0 +1,614 @@
+---
+title: Plugin Tools API
+description: Complete reference for all ClawMem tool registrations available inside OpenClaw agents.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+ClawMem registers tools directly into the OpenClaw plugin runtime. Every tool is available automatically once the plugin is installed and an agent identity is configured. Tools operate against a GitHub-compatible API (default: `https://git.clawmem.ai`) and store memories as issues in a designated memory repository.
+
+All tools return plain text responses. Write operations that modify shared state require `confirmed: true` as an explicit safety gate.
+
+---
+
+## Memory tools
+
+### `memory_recall`
+
+Search active memories for facts, decisions, conventions, and lessons that are relevant to the current query. The plugin first attempts a backend search via the GitHub issue search API; on failure it falls back to a local lexical ranking algorithm.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `query` | `string` | Yes | Natural-language or keyword query describing what to recall. |
+| `limit` | `integer` | No | Maximum number of memories to return. Range: 1–20. Defaults to the configured `memoryRecallLimit` (default 5). |
+| `repo` | `string` | No | Memory repo override in `owner/repo` form. Defaults to the agent's `defaultRepo`. |
+| `agentId` | `string` | No | Agent identity override. Defaults to the current agent when available. |
+
+**Returns:** A list of matching active memory entries, each rendered as `[id] kind=… topic=… | detail`, or a message that no memories matched.
+
+**Example:**
+
+```text
+memory_recall(query="preferred TypeScript style", limit=5)
+```
+
+```text
+Found 2 active memories for "preferred TypeScript style" in acme/agent-memory:
+- [42] kind=convention topic=typescript | Prefer explicit return types on all exported functions
+- [38] kind=convention topic=typescript | Use single quotes for string literals
+```
+
+---
+
+### `memory_store`
+
+Immediately persist a durable memory to the repository, bypassing the automatic end-of-session extraction. Use this when you know right now that a fact is worth remembering, rather than waiting for the session finalizer to decide.
+
+Duplicate detection is performed via SHA-256 hash of the normalized detail text. If an identical memory already exists it is not re-created; instead its `kind` and `topics` labels are merged with the new values.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `detail` | `string` | Yes | The durable fact, decision, lesson, or preference to remember. |
+| `kind` | `string` | No | Schema kind label (e.g. `lesson`, `convention`, `core-fact`, `skill`, `task`). Omit the `kind:` prefix. |
+| `topics` | `string[]` | No | Topic labels to improve future retrieval. 1–10 items. Omit the `topic:` prefix. |
+| `repo` | `string` | No | Memory repo override in `owner/repo` form. Defaults to the agent's `defaultRepo`. |
+| `agentId` | `string` | No | Agent identity override. Defaults to the current agent when available. |
+
+**Returns:** Confirmation that the memory was stored (or already existed), with the full rendered memory block.
+
+**Example:**
+
+```text
+memory_store(
+  detail="The project uses pnpm workspaces; never use npm or yarn at the root",
+  kind="convention",
+  topics=["pnpm", "monorepo"]
+)
+```
+
+```text
+Stored memory in acme/agent-memory.
+[47] kind=convention | topics: monorepo, pnpm
+The project uses pnpm workspaces; never use npm or yarn at the root
+```
+
+---
+
+### `memory_update`
+
+Update an existing memory record in place when the underlying fact has evolved. At least one of `detail`, `kind`, or `topics` must be provided. The `topics` parameter replaces the existing topic set (it does not append). Updating `detail` recomputes the deduplication hash; if the new text would collide with another active memory, the call is rejected.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `memoryId` | `string` | Yes | The memory id or GitHub issue number to update. |
+| `detail` | `string` | No | Replacement detail text for the same memory record. |
+| `kind` | `string` | No | Replacement kind label. Omit the `kind:` prefix. |
+| `topics` | `string[]` | No | Replacement topic labels (replaces existing set). 1–10 items. |
+| `repo` | `string` | No | Memory repo override in `owner/repo` form. Defaults to the agent's `defaultRepo`. |
+| `agentId` | `string` | No | Agent identity override. Defaults to the current agent when available. |
+
+**Returns:** The updated memory record, or an error message if the id was not found or the update would create a duplicate.
+
+**Example:**
+
+```text
+memory_update(
+  memoryId="47",
+  detail="The project uses pnpm workspaces; never use npm, yarn, or bun at the root",
+  topics=["pnpm", "monorepo", "package-manager"]
+)
+```
+
+---
+
+### `memory_forget`
+
+Mark an active memory as stale by closing the underlying GitHub issue. The memory is not deleted; it remains queryable with `status=stale` for audit purposes. Use this when a previous fact has been superseded, corrected, or is no longer relevant.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `memoryId` | `string` | Yes | The memory id or GitHub issue number to mark stale. |
+| `repo` | `string` | No | Memory repo override in `owner/repo` form. Defaults to the agent's `defaultRepo`. |
+| `agentId` | `string` | No | Agent identity override. Defaults to the current agent when available. |
+
+**Returns:** Confirmation that the memory was marked stale, or a message that no active memory matched the id.
+
+**Example:**
+
+```text
+memory_forget(memoryId="38")
+```
+
+```text
+Marked memory [38] stale in acme/agent-memory: Use single quotes for string literals
+```
+
+---
+
+### `memory_list`
+
+List memories filtered by status, kind, and/or topic. Useful for inspecting the full memory index before deduplicating, storing, or updating entries. Results are sorted by issue number descending (most recent first).
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `status` | `"active" \| "stale" \| "all"` | No | Which memories to list. Defaults to `active`. |
+| `kind` | `string` | No | Filter by kind (e.g. `lesson`, `task`). Omit the `kind:` prefix. |
+| `topic` | `string` | No | Filter by topic. Omit the `topic:` prefix. |
+| `limit` | `integer` | No | Maximum number of memories to return. Range: 1–200. Defaults to 20. |
+| `repo` | `string` | No | Memory repo override in `owner/repo` form. Defaults to the agent's `defaultRepo`. |
+| `agentId` | `string` | No | Agent identity override. Defaults to the current agent when available. |
+
+**Returns:** A formatted list of memory entries matching the filters.
+
+**Example:**
+
+```text
+memory_list(kind="task", limit=10)
+```
+
+```text
+Found 2 active memories in acme/agent-memory:
+- [51] kind=task | topic: onboarding | Set up staging environment access for new engineers
+- [44] kind=task | topic: infra | Migrate legacy cron jobs to the new scheduler
+```
+
+---
+
+### `memory_labels`
+
+List all `kind:*` and `topic:*` labels currently defined in the memory repository. Call this before inventing a new kind or topic — reuse existing schema whenever it fits.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `repo` | `string` | No | Memory repo override in `owner/repo` form. Defaults to the agent's `defaultRepo`. |
+| `agentId` | `string` | No | Agent identity override. Defaults to the current agent when available. |
+| `limitTopics` | `integer` | No | Maximum number of topic labels to display. Range: 1–200. Defaults to 50. |
+
+**Returns:** The complete set of `kind:*` and `topic:*` labels in the repository.
+
+**Example:**
+
+```text
+memory_labels()
+```
+
+```text
+Current ClawMem schema labels in acme/agent-memory:
+
+Kinds:
+- kind:convention
+- kind:core-fact
+- kind:lesson
+- kind:skill
+- kind:task
+
+Topics:
+- topic:auth
+- topic:infra
+- topic:monorepo
+- topic:pnpm
+- topic:typescript
+```
+
+---
+
+### `memory_get`
+
+Fetch a single memory record by id or GitHub issue number to verify its exact content before updating or referencing it.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `memoryId` | `string` | Yes | The memory id or GitHub issue number to retrieve. |
+| `status` | `"active" \| "stale" \| "all"` | No | Status bucket to search. Defaults to `all`. |
+| `repo` | `string` | No | Memory repo override in `owner/repo` form. Defaults to the agent's `defaultRepo`. |
+| `agentId` | `string` | No | Agent identity override. Defaults to the current agent when available. |
+
+**Returns:** Full memory block for the matched record, or a message that no memory matched.
+
+**Example:**
+
+```text
+memory_get(memoryId="42")
+```
+
+```text
+Repo: acme/agent-memory
+[42] kind=convention | topics: typescript
+Prefer explicit return types on all exported functions
+Date: 2025-11-04
+```
+
+---
+
+## Repository management tools
+
+### `memory_repos`
+
+List all memory repositories accessible to the current ClawMem agent identity. Use this to choose the right memory space before reading or writing, or to confirm that a shared repo grant has taken effect.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `agentId` | `string` | No | Agent identity override. Defaults to the current agent when available. |
+
+**Returns:** A formatted list of accessible repos with visibility flags and the `[default]` marker on the active default repo.
+
+**Example:**
+
+```text
+memory_repos()
+```
+
+```text
+Accessible ClawMem repos for agent "claude":
+- acme/agent-memory [default, private]
+- acme/shared-memory [private] - Shared team memory space
+```
+
+---
+
+### `memory_repo_create`
+
+Create a new memory repository under the current agent identity. Repositories are private by default. If the agent has no `defaultRepo` yet, or if `setDefault=true`, the new repo is automatically set as the default.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `name` | `string` | Yes | Repository name only, without the owner prefix. |
+| `description` | `string` | No | Optional repository description. |
+| `private` | `boolean` | No | Whether the repository should be private. Defaults to `true`. |
+| `setDefault` | `boolean` | No | Whether to make this the agent's default memory repo. Automatically `true` when no default exists. |
+| `agentId` | `string` | No | Agent identity override. Defaults to the current agent when available. |
+
+**Returns:** Confirmation that the repository was created, with the full name and a note if it was set as the default.
+
+**Example:**
+
+```text
+memory_repo_create(name="project-alpha-memory", description="Memory for Project Alpha")
+```
+
+```text
+Created memory repo acme/project-alpha-memory.
+Set as default repo for this agent.
+```
+
+---
+
+## Collaboration tools
+
+Collaboration tools manage access to memory repositories through organizations, teams, and direct collaborators. Write operations require `confirmed: true` to prevent accidental mutations.
+
+<Aside type="caution">
+All tools that create, modify, or remove access (marked "requires confirmation") will return an error if `confirmed` is not explicitly set to `true`. The pattern is: call the tool without `confirmed` first to preview the action, then call again with `confirmed: true` once the user approves.
+</Aside>
+
+---
+
+### `collaboration_orgs`
+
+List organizations visible to the current ClawMem identity.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `agentId` | `string` | No | Agent identity override. Defaults to the current agent when available. |
+
+**Returns:** A list of visible organizations with their slugs and descriptions.
+
+---
+
+### `collaboration_org_create`
+
+Create a new organization for shared ClawMem collaboration. Requires confirmation.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `login` | `string` | Yes | Organization login / slug. |
+| `name` | `string` | No | Human-readable organization name. |
+| `defaultPermission` | `"none" \| "read" \| "write" \| "admin"` | No | Default repository permission for org members. Defaults to `read`. |
+| `confirmed` | `boolean` | No | Must be `true` after explicit user approval. |
+| `agentId` | `string` | No | Agent identity override. |
+
+---
+
+### `collaboration_teams`
+
+List teams in an organization before granting repo access or managing membership.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `org` | `string` | Yes | Organization login. |
+| `agentId` | `string` | No | Agent identity override. |
+
+**Returns:** Teams in the organization with slugs, privacy, and permission info.
+
+---
+
+### `collaboration_team_create`
+
+Create a team inside an organization. Requires confirmation.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `org` | `string` | Yes | Organization login. |
+| `name` | `string` | Yes | Team display name. |
+| `description` | `string` | No | Optional team description. |
+| `privacy` | `"closed" \| "secret"` | No | Team visibility. Defaults to `closed`. |
+| `confirmed` | `boolean` | No | Must be `true` after explicit user approval. |
+| `agentId` | `string` | No | Agent identity override. |
+
+---
+
+### `collaboration_team_membership_set`
+
+Add or update a user's membership in an organization team. Requires confirmation.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `org` | `string` | Yes | Organization login. |
+| `teamSlug` | `string` | Yes | Team slug. |
+| `username` | `string` | Yes | Username to add or update. |
+| `role` | `"member" \| "maintainer"` | No | Membership role. Defaults to `member`. |
+| `confirmed` | `boolean` | No | Must be `true` after explicit user approval. |
+| `agentId` | `string` | No | Agent identity override. |
+
+---
+
+### `collaboration_team_membership_remove`
+
+Remove a user from an organization team. Requires confirmation.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `org` | `string` | Yes | Organization login. |
+| `teamSlug` | `string` | Yes | Team slug. |
+| `username` | `string` | Yes | Username to remove. |
+| `confirmed` | `boolean` | No | Must be `true` after explicit user approval. |
+| `agentId` | `string` | No | Agent identity override. |
+
+---
+
+### `collaboration_team_repos`
+
+List repositories currently granted to an organization team.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `org` | `string` | Yes | Organization login. |
+| `teamSlug` | `string` | Yes | Team slug. |
+| `agentId` | `string` | No | Agent identity override. |
+
+---
+
+### `collaboration_team_repo_set`
+
+Grant an organization team access to a memory repo. Requires confirmation.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `org` | `string` | Yes | Organization login. |
+| `teamSlug` | `string` | Yes | Team slug. |
+| `repo` | `string` | No | Target repo in `owner/repo` form. Defaults to the agent's `defaultRepo`. |
+| `permission` | `"read" \| "write" \| "admin"` | No | Repo permission level. Defaults to `write`. |
+| `confirmed` | `boolean` | No | Must be `true` after explicit user approval. |
+| `agentId` | `string` | No | Agent identity override. |
+
+---
+
+### `collaboration_team_repo_remove`
+
+Remove an organization team's access grant from a repo. Requires confirmation.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `org` | `string` | Yes | Organization login. |
+| `teamSlug` | `string` | Yes | Team slug. |
+| `repo` | `string` | No | Target repo in `owner/repo` form. Defaults to the agent's `defaultRepo`. |
+| `confirmed` | `boolean` | No | Must be `true` after explicit user approval. |
+| `agentId` | `string` | No | Agent identity override. |
+
+---
+
+### `collaboration_repo_collaborators`
+
+List explicit non-owner collaborators on a memory repo. Shows only direct (non-team) grants, excluding the repo owner.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `repo` | `string` | No | Target repo in `owner/repo` form. Defaults to the agent's `defaultRepo`. |
+| `agentId` | `string` | No | Agent identity override. |
+
+---
+
+### `collaboration_repo_invitations`
+
+List pending repository invitations on a repo. Check this before assuming a collaborator grant is active — invitations must be accepted before access takes effect.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `repo` | `string` | No | Target repo in `owner/repo` form. Defaults to the agent's `defaultRepo`. |
+| `agentId` | `string` | No | Agent identity override. |
+
+---
+
+### `collaboration_repo_collaborator_set`
+
+Add or update a direct collaborator on a repo. Creates a pending invitation that the user must accept. Requires confirmation.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `username` | `string` | Yes | Username to grant direct access. |
+| `repo` | `string` | No | Target repo in `owner/repo` form. Defaults to the agent's `defaultRepo`. |
+| `permission` | `"read" \| "write" \| "admin"` | No | Repo permission level. Defaults to `read`. |
+| `confirmed` | `boolean` | No | Must be `true` after explicit user approval. |
+| `agentId` | `string` | No | Agent identity override. |
+
+**Returns:** Confirmation with the pending invitation id if a new invitation was created, or a note that the existing collaborator record was updated.
+
+---
+
+### `collaboration_repo_collaborator_remove`
+
+Remove a repo collaborator or revoke a pending direct-share invitation. Requires confirmation.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `username` | `string` | Yes | Username to remove. |
+| `repo` | `string` | No | Target repo in `owner/repo` form. Defaults to the agent's `defaultRepo`. |
+| `confirmed` | `boolean` | No | Must be `true` after explicit user approval. |
+| `agentId` | `string` | No | Agent identity override. |
+
+---
+
+### `collaboration_user_repo_invitations`
+
+List pending repository invitations visible to the current ClawMem identity. Use this before concluding that no shared repo is available — the invitation may exist but not yet be accepted.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `repo` | `string` | No | Optional `owner/repo` filter. |
+| `agentId` | `string` | No | Agent identity override. |
+
+---
+
+### `collaboration_user_repo_invitation_accept`
+
+Accept a pending repository invitation for the current ClawMem identity. Requires confirmation.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `invitationId` | `integer` | Yes | Pending repository invitation id (from `collaboration_user_repo_invitations` or `collaboration_repo_invitations`). |
+| `confirmed` | `boolean` | No | Must be `true` after explicit user approval. |
+| `agentId` | `string` | No | Agent identity override. |
+
+---
+
+### `collaboration_user_repo_invitation_decline`
+
+Decline a pending repository invitation for the current ClawMem identity. Requires confirmation.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `invitationId` | `integer` | Yes | Pending repository invitation id. |
+| `confirmed` | `boolean` | No | Must be `true` after explicit user approval. |
+| `agentId` | `string` | No | Agent identity override. |
+
+---
+
+### `collaboration_org_invitations`
+
+List pending organization invitations before issuing or debugging membership changes.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `org` | `string` | Yes | Organization login. |
+| `agentId` | `string` | No | Agent identity override. |
+
+---
+
+### `collaboration_org_invitation_create`
+
+Create an organization invitation, optionally pre-assigning team ids. Requires confirmation.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `org` | `string` | Yes | Organization login. |
+| `inviteeLogin` | `string` | Yes | Username to invite. |
+| `role` | `"member" \| "owner"` | No | Org role for the invitation. Defaults to `member`. |
+| `teamIds` | `integer[]` | No | Optional numeric team ids to pre-assign on acceptance. 1–20 items. |
+| `expiresInDays` | `integer` | No | Optional invitation expiry in days. Range: 1–365. |
+| `confirmed` | `boolean` | No | Must be `true` after explicit user approval. |
+| `agentId` | `string` | No | Agent identity override. |
+
+---
+
+### `collaboration_user_org_invitations`
+
+List pending organization invitations visible to the current ClawMem identity.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `org` | `string` | No | Optional organization login filter. |
+| `agentId` | `string` | No | Agent identity override. |
+
+---
+
+### `collaboration_user_org_invitation_accept`
+
+Accept a pending organization invitation for the current ClawMem identity. Requires confirmation.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `invitationId` | `integer` | Yes | Pending organization invitation id. |
+| `confirmed` | `boolean` | No | Must be `true` after explicit user approval. |
+| `agentId` | `string` | No | Agent identity override. |
+
+---
+
+### `collaboration_user_org_invitation_decline`
+
+Decline a pending organization invitation for the current ClawMem identity. Requires confirmation.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `invitationId` | `integer` | Yes | Pending organization invitation id. |
+| `confirmed` | `boolean` | No | Must be `true` after explicit user approval. |
+| `agentId` | `string` | No | Agent identity override. |
+
+---
+
+### `collaboration_outside_collaborators`
+
+List outside collaborators in an organization — users who have repo access but are not org members.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `org` | `string` | Yes | Organization login. |
+| `agentId` | `string` | No | Agent identity override. |
+
+---
+
+### `collaboration_repo_access_inspect`
+
+Inspect all access paths for a memory repo in one call: repo visibility, direct collaborators, pending invitations, team grants, org-level defaults, and outside collaborators. Use this for comprehensive access debugging.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `repo` | `string` | No | Target repo in `owner/repo` form. Defaults to the agent's `defaultRepo`. |
+| `agentId` | `string` | No | Agent identity override. |
+
+**Returns:** A structured summary covering visibility, explicit collaborators, pending invitations, teams with repo access, org default permissions, and outside collaborators.
+
+---
+
+## Common patterns
+
+### Checking before storing
+
+Always call `memory_labels` before storing a memory with a new kind or topic. This prevents schema fragmentation.
+
+```text
+# 1. Check existing schema
+memory_labels()
+
+# 2. Store with existing or new labels
+memory_store(detail="...", kind="lesson", topics=["auth"])
+```
+
+### Deduplication behavior
+
+`memory_store` computes a SHA-256 hash of the normalized detail text. If an identical memory already exists, the call returns the existing record and merges any new `kind` or `topics` labels into it without creating a duplicate issue.
+
+### Confirmed write pattern
+
+```text
+# Step 1: Preview (no confirmed flag)
+collaboration_repo_collaborator_set(username="alice", permission="write")
+# → "Must set confirmed=true to change a direct collaborator."
+
+# Step 2: Execute after user approves
+collaboration_repo_collaborator_set(username="alice", permission="write", confirmed=true)
+# → "Created pending invitation 9821 for alice on acme/agent-memory with write permission."
+```
+
+### Cross-agent memory sharing
+
+Each agent has its own identity and can maintain separate memory repos. To share memory between agents, add the second agent as a collaborator on the first agent's repo, or use an organization team to grant access to a shared repo.

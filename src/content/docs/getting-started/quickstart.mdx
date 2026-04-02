@@ -1,0 +1,128 @@
+---
+title: Quick Start
+description: Store your first memory, see recall in action, and browse your memories in the console.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+This guide walks through the core ClawMem loop in a single session: store a memory, verify it was saved, and confirm recall works in a new session. The whole flow takes about 5 minutes.
+
+Before starting, make sure [ClawMem is installed and active](/getting-started/installation/).
+
+## Step 1: Have a conversation and mention a preference
+
+Start a new chat session with your OpenClaw agent. Say something concrete that ClawMem should remember — a preference, a decision, or a fact about your work:
+
+```text
+I prefer TypeScript over JavaScript for all new projects. Always use strict mode and avoid `any` types.
+```
+
+The agent will acknowledge the preference. ClawMem captures every turn automatically. At the end of the session, the plugin extracts durable facts from the conversation and stores them as structured memory entries.
+
+<Aside type="tip">
+You can also ask the agent to save a memory explicitly mid-session. This is useful for decisions you want stored immediately, without waiting for end-of-session extraction.
+
+```text
+Remember that we decided to use Postgres for the database, not MySQL.
+```
+
+The agent will call `memory_store` and confirm the memory was saved, including a brief description in your current language.
+</Aside>
+
+## Step 2: Check what was stored
+
+Ask the agent to list your current memories:
+
+```text
+Show me my stored memories using memory_list.
+```
+
+The agent calls `memory_list` and returns a summary of active `type:memory` issues in your default repo. You should see an entry for the TypeScript preference you mentioned, with labels indicating its kind and topic (for example, `kind:preference` and `topic:typescript`).
+
+To fetch the full detail of a specific memory by its ID:
+
+```text
+Get memory #12 using memory_get.
+```
+
+To search by meaning rather than browsing the full list:
+
+```text
+Recall anything about my language preferences.
+```
+
+The agent calls `memory_recall` with your query and returns the most relevant active memories ranked by relevance.
+
+## Step 3: See recall in a new session
+
+Close the current session and start a completely fresh one. When the new session begins, ClawMem automatically searches your active memories for relevant context and injects the top matches before the agent responds to your first message.
+
+Ask something that should trigger that memory:
+
+```text
+Start a new Node.js project for me. What are the conventions I use?
+```
+
+The agent will surface your TypeScript preference in its response and note that it came from a stored memory. You will see something like:
+
+> Based on your stored preferences, you use TypeScript with strict mode enabled and avoid `any` types for all new projects.
+
+If the automatically recalled context is not surfaced, you can trigger explicit recall:
+
+```text
+What do you remember about my coding preferences?
+```
+
+<Aside type="note">
+Automatic recall at session start is a best-effort bootstrap — it injects up to the configured `memoryRecallLimit` (default: 5) most relevant memories. For queries where memory matters, the agent also runs `memory_recall` explicitly before answering. You can always ask for a targeted recall if the automatic injection missed something.
+</Aside>
+
+## Step 4: Browse memories in the console
+
+ClawMem exposes all your memories as issues in a GitHub-compatible repository. You can browse, search, edit, and delete them in the console at:
+
+**[console.clawmem.ai](https://console.clawmem.ai)**
+
+In the console you can:
+
+- **Browse** all your memory repos and switch between them
+- **Search** memories by label, keyword, or full-text
+- **Inspect** the full body and metadata of any memory entry
+- **Edit** a memory to correct a fact or update stale information
+- **Close** a memory to mark it stale so it is no longer recalled
+- **Trace** a memory back to the session that created it
+
+The console is the fastest way to audit what your agent knows and clean up anything that is wrong or outdated.
+
+## Step 5: Manage memories mid-session
+
+Beyond automatic capture, the agent has a full set of memory tools available at any point during a conversation:
+
+| Tool | What it does |
+|---|---|
+| `memory_recall` | Search active memories by meaning or keyword |
+| `memory_list` | List all active memories in a repo |
+| `memory_get` | Fetch a specific memory by ID |
+| `memory_store` | Save a new memory explicitly |
+| `memory_update` | Update an existing memory in place |
+| `memory_forget` | Close a stale or incorrect memory |
+| `memory_repos` | List all memory repositories you have access to |
+| `memory_repo_create` | Create a new memory repository |
+| `memory_labels` | Inspect the current label schema |
+
+Ask your agent to use any of these by name. For example:
+
+```text
+Forget the memory about MySQL — we switched to Postgres.
+```
+
+The agent will call `memory_forget` on the relevant entry and confirm it has been closed.
+
+## Next steps
+
+Now that the core loop is working, explore these topics:
+
+- **[Memory Concepts](/guides/concepts/)** — understand how ClawMem organizes memories with kinds, topics, and labels; when to use `memory_update` vs `memory_store`; and how session linkage works.
+- **[Collaboration](/guides/collaboration/)** — set up shared memory repositories for teams, manage org and team permissions, and invite collaborators to a memory space.
+- **[Console Guide](/guides/console/)** — deeper walkthrough of browsing, searching, and editing memories in the web console.
+- **[Tools API Reference](/reference/tools-api/)** — full parameter documentation for all nine memory tools.

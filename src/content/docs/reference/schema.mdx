@@ -1,0 +1,164 @@
+---
+title: Memory Schema
+description: Complete reference for ClawMem memory record structure, storage format, labels, and deduplication logic.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+ClawMem stores memories as GitHub issues in a designated repository. This document describes the record structure, storage format, label schema, and deduplication mechanism.
+
+---
+
+## Memory record fields
+
+Every memory record has the following structure:
+
+| Field | Type | Description |
+|---|---|---|
+| **memoryId** | string | Stable identifier derived from the GitHub issue number (e.g., `42`). Used to reference the record in updates, recalls, and forget operations. |
+| **issueNumber** | integer | The underlying GitHub issue number. Same as memoryId but as an integer. |
+| **title** | string | Auto-generated label, derived from the first 72 characters of the detail text, prefixed with `Memory: `. Example: `Memory: Prefer dark mode across all editors and tools.` |
+| **detail** | string | The full durable fact, preference, decision, lesson, or workflow. This is the primary content that gets searched and recalled. No length limit. |
+| **kind** | string | Optional memory classification: `core-fact`, `convention`, `lesson`, `skill`, or `task`. Stored as a `kind:*` label on the issue. |
+| **topics** | string[] | Zero or more topic labels that improve retrieval precision. Free-form, shared across the repository. Stored as `topic:*` labels. |
+| **date** | string | ISO date (e.g., `2025-06-01`) when the memory was first stored. Stored in the issue body YAML. |
+| **memoryHash** | string | SHA-256 hash of the normalized detail text, used for deduplication. Stored in the issue body YAML. |
+| **status** | string | `active` (open issue) or `stale` (closed issue). Stale memories are not deleted — they remain queryable for audit. |
+
+---
+
+## Storage format
+
+Each memory is a GitHub issue stored in the memory repository. The issue structure is:
+
+**Issue title:**
+```text
+Memory: {first 72 characters of detail}…
+```
+
+Example: `Memory: Prefer dark mode across all editors and tools.`
+
+**Issue body (flat YAML):**
+```yaml
+memory_hash: <sha256-of-normalized-detail>
+date: 2025-06-01
+detail: The full memory text goes here. No length limit.
+```
+
+**Issue labels:**
+```text
+type:memory
+kind:<optional-kind>
+topic:<topic-1>
+topic:<topic-2>
+…
+```
+
+The `type:memory` label is required on all memory issues. The `kind:*` label is optional. Topic labels are optional and can repeat.
+
+<Aside type="note">
+The issue body uses a flat YAML format (not nested YAML). This makes it easy to parse and edit directly without complex deserialization. Multiline strings (the `detail` field) are supported via standard YAML block scalar syntax.
+</Aside>
+
+---
+
+## Kind labels
+
+The kind label describes the nature and lifecycle of the memory. Use the label that best matches the memory's purpose:
+
+| Kind | Label | Use it for |
+|---|---|---|
+| **Core fact** | `kind:core-fact` | Stable truths that should update in place as reality changes. Examples: system architecture, API endpoint addresses, team structure. These memories grow and evolve over time; don't mark them stale unless the underlying fact is gone. |
+| **Convention** | `kind:convention` | Agreed rules, policies, or coding standards. Examples: preferred style guides, naming conventions, project setup instructions. |
+| **Lesson learned** | `kind:lesson` | Corrections, postmortems, or mistakes worth preserving. Examples: past incidents, bugs that were hard to diagnose, anti-patterns to avoid. |
+| **Skill blueprint** | `kind:skill` | Repeatable workflows or playbooks. Examples: deployment procedures, debugging strategies, onboarding checklists. |
+| **Active task** | `kind:task` | Ongoing work that should stay visible and update over time. Examples: unfinished migrations, pending infrastructure changes, open action items. |
+
+Before storing a memory with a new kind, check what kinds already exist in your repo using `memory_labels`. This helps prevent schema fragmentation.
+
+---
+
+## Topic labels
+
+Topics are free-form labels that narrow retrieval and organize memories by subject. Examples:
+- `topic:typescript`, `topic:python`, `topic:go` — by language
+- `topic:auth`, `topic:database`, `topic:infra` — by system
+- `topic:performance`, `topic:security`, `topic:testing` — by concern
+- `topic:onboarding`, `topic:deployment` — by workflow
+
+Topics are shared across your repository. Before inventing a new topic, check existing topics with `memory_labels` and reuse when possible.
+
+<Aside type="tip">
+A single memory can carry 1–10 topics. Use multiple topics to make memories discoverable from different angles. For example, a memory about PostgreSQL performance could carry both `topic:database` and `topic:performance`.
+</Aside>
+
+---
+
+## Memory states
+
+A memory is always in one of two states, determined by the underlying GitHub issue state:
+
+| State | Issue state | Searchable | Recalled | Use when |
+|---|---|---|---|---|
+| **Active** | Open | Yes | Yes | The memory is current and should be recalled before sessions. |
+| **Stale** | Closed | Yes | No | The memory has been superseded, explicitly forgotten, or is outdated. |
+
+Stale memories are **never deleted**. They remain in the repository as closed issues and can be inspected, searched with `status=stale`, or reopened if needed. This audit trail is intentional — it allows you to see what was once true and trace why it changed.
+
+---
+
+## Deduplication
+
+ClawMem prevents duplicate memories using SHA-256 content hashing. The hash is computed from the normalized detail text (whitespace normalized, case preserved).
+
+**When storing a new memory:**
+1. Normalize the detail text (trim, collapse whitespace, normalize line endings)
+2. Compute `SHA-256(normalized_detail)`
+3. Search active memories for a matching hash
+4. If a match exists:
+   - Return the existing memory record without creating a new issue
+   - Merge the new `kind` and `topics` labels into the existing issue
+   - Do not create a duplicate
+5. If no match exists:
+   - Create a new issue with the computed hash in the body
+   - Apply the kind and topic labels
+
+This means:
+- Identical memories are never duplicated, even if you call `memory_store` twice
+- If you store a memory with different topics each time, the topics merge
+- Updating the detail text recomputes the hash; if the new text collides with another active memory, the update is rejected
+
+---
+
+## Session records
+
+Alongside memories, ClawMem also stores session transcripts as issues in the same repository. These are separate from memory issues:
+
+| Field | Value | Purpose |
+|---|---|---|
+| **Issue type** | `type:conversation` label | Marks this as a session record, not a memory. |
+| **Title** | `Session: {placeholder or AI-generated}` | Identifies the session record. |
+| **Body** | Conversation transcript in markdown | Full mirrored conversation, updated as turns are added. |
+| **Labels** | `type:conversation`, `session:<sessionId>`, `agent:<agentId>` | Metadata for filtering and attribution. |
+
+Session records are updated in real time as turns are added to a conversation. At the end of a session, an AI extraction pass reads the full transcript and creates memory issues for durable facts.
+
+Session records are not automatically deleted — they remain in the repository for audit and reference.
+
+<Aside type="note">
+Session records and memory records use different label schemes (`type:conversation` vs. `type:memory`), so they can coexist in the same repository without collision. You can view only memories or only sessions by filtering on the `type:` label.
+</Aside>
+
+---
+
+## Label management
+
+All memory-related labels (types, kinds, topics) are user-managed and visible in the GitHub interface. ClawMem automatically creates labels when you first use them.
+
+The label naming convention is:
+- `type:memory` and `type:conversation` for record type classification
+- `kind:*` for memory classification
+- `topic:*` for subject tags
+- Managed labels are read/write — you can add, edit, or delete them directly on issues
+
+Use `memory_labels` to list all kinds and topics currently defined in your repository before storing a memory with a new kind or topic. This helps maintain a consistent schema.
