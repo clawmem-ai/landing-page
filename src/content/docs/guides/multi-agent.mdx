@@ -1,0 +1,231 @@
+---
+title: Multi-Agent Setup
+description: Configure multiple ClawMem agent identities for different tasks, projects, and workflows.
+---
+
+ClawMem supports multiple agent identities within a single OpenClaw configuration. Each agent can have its own identity, API token, and memory repository. This guide covers when to use multiple agents and how to set them up.
+
+## Why multiple agents
+
+Different agents are useful when:
+
+- **Task isolation** — A research agent, a development agent, and a deployment agent each maintain separate memory spaces without contaminating each other.
+- **Project separation** — Personal projects, client projects, and internal projects each have their own agent and memory repo.
+- **Permission boundaries** — Different agents can have different API tokens with different access levels.
+- **Memory scope** — An agent focused on DevOps doesn't need to recall memories from frontend development work.
+- **Multi-team workflows** — Each team or discipline can have its own agent identity with access to shared repos via collaboration.
+
+---
+
+## Per-agent routing
+
+Agent identities are configured under `agents.<agentId>` in your ClawMem config. Each agent ID becomes available for routing at runtime.
+
+**Key concept:** When an agent runs and makes a memory call, ClawMem resolves the current `agentId` and looks up configuration under `agents.<agentId>`. If no per-agent config is found, it falls back to global defaults.
+
+**Configuration resolution order:**
+
+1. Per-agent config (`agents.<agentId>.field`) — highest priority
+2. Global config (root-level field) — fallback
+3. Default value — final fallback
+
+Example: If `agents.research.defaultRepo` is set, it takes precedence over the global `defaultRepo` for the research agent. If neither is set, auto-provisioning creates a new repo.
+
+---
+
+## Agent identity and configuration
+
+Each agent has its own:
+
+- **Identity** — A stable agent ID (e.g., `main`, `research`, `debug`)
+- **API token** — Credentials to access the ClawMem backend
+- **Default repo** — The memory repository where the agent stores and recalls memories by default
+- **Base URL** — The API endpoint (usually shared globally, but can be overridden per-agent)
+- **Auth scheme** — Token type (`token` or `bearer`, defaults to `token`)
+
+When an agent first runs, ClawMem attempts to resolve its configuration. If missing, auto-provisioning creates a new identity and repo on the configured API endpoint.
+
+---
+
+## Auto-provisioning
+
+On first use, if an agent has no configured token or defaultRepo, ClawMem automatically provisions an identity:
+
+1. Call `POST /api/v3/agents` on the configured `baseUrl`
+2. Receive back a `token` and `repo_full_name` (e.g., `yourname/main-memory`)
+3. Save these to `agents.<agentId>` in the config
+4. Resume operation with the new identity
+
+This happens once per agent. After provisioning, the config is persisted and future runs use the same identity.
+
+**Caution:** If provisioning fails (no network, invalid baseUrl, rate limited), the agent will have no memory space and memory operations will fail. Check that `baseUrl` is reachable and correctly configured.
+
+---
+
+## Cross-agent memory sharing
+
+By default, each agent has an isolated memory repo. To share memory across agents:
+
+### Pattern 1: Direct collaborator
+
+Add one agent as a collaborator on another agent's repo:
+
+```text
+collaboration_repo_collaborator_set(
+  username="second-agent-username",
+  repo="first-agent/memory-repo",
+  permission="write",
+  confirmed=true
+)
+```
+
+The second agent can then:
+- Read and recall memories from the first agent's repo
+- Write new memories to it if permission is `write` or `admin`
+
+### Pattern 2: Organization team
+
+Create a shared org and team, then grant the team access to a shared memory repo:
+
+```text
+# 1. Create org (both agents join)
+collaboration_org_create(login="my-org", confirmed=true)
+
+# 2. Create team in org
+collaboration_team_create(org="my-org", name="core-team", confirmed=true)
+
+# 3. Add agents to team
+collaboration_team_membership_set(org="my-org", teamSlug="core-team", username="agent-1", confirmed=true)
+collaboration_team_membership_set(org="my-org", teamSlug="core-team", username="agent-2", confirmed=true)
+
+# 4. Grant team access to shared repo
+collaboration_team_repo_set(org="my-org", teamSlug="core-team", repo="my-org/shared-memory", permission="write", confirmed=true)
+```
+
+Once granted, both agents can recall and store memories in the shared repo.
+
+---
+
+## Common patterns
+
+### Personal agent + project agent
+
+Use one agent for personal memories and workflows, another for a specific project:
+
+```json5
+{
+  agents: {
+    personal: {
+      defaultRepo: "yourname/personal-memory",
+      token: "<token-1>"
+    },
+    project_alpha: {
+      defaultRepo: "yourname/project-alpha-memory",
+      token: "<token-2>"
+    }
+  }
+}
+```
+
+Each agent maintains separate memories. If project-alpha needs to reference personal memories, add project_alpha as a collaborator on personal-memory.
+
+### Dev agent + ops agent
+
+Separate development and operations workflows:
+
+```json5
+{
+  agents: {
+    dev: {
+      defaultRepo: "yourname/dev-memory",
+      token: "<dev-token>"
+    },
+    ops: {
+      defaultRepo: "yourname/ops-memory",
+      token: "<ops-token>"
+    }
+  }
+}
+```
+
+The dev agent recalls patterns for code organization and debugging. The ops agent recalls deployment procedures, runbooks, and incident response patterns. Share a common repo if both need access to incident histories or architectural decisions.
+
+---
+
+## Example: Two-agent setup
+
+Here's a minimal config with two agents, each with its own memory repo:
+
+```json5
+{
+  plugins: {
+    entries: {
+      clawmem: {
+        enabled: true,
+        config: {
+          baseUrl: "https://git.clawmem.ai",
+          authScheme: "token",
+          agents: {
+            main: {
+              defaultRepo: "yourname/main-memory",
+              token: "<token-for-main>"
+            },
+            research: {
+              defaultRepo: "yourname/research-memory",
+              token: "<token-for-research>"
+            }
+          },
+          memoryRecallLimit: 5,
+          turnCommentDelayMs: 1000,
+          summaryWaitTimeoutMs: 120000
+        }
+      }
+    }
+  }
+}
+```
+
+**When the main agent runs:**
+- Memory tools operate on `yourname/main-memory`
+- The token used is `<token-for-main>`
+
+**When the research agent runs:**
+- Memory tools operate on `yourname/research-memory`
+- The token used is `<token-for-research>`
+
+Both agents use the same `baseUrl` but different credentials and memory spaces, keeping their memories isolated.
+
+---
+
+## Migrating to multi-agent
+
+If you have existing memories in a single agent's repo and want to set up multiple agents:
+
+1. Create new agent entries in the `agents` config
+2. Let new agents auto-provision their own repos on first run
+3. If a new agent needs access to existing memories, use `collaboration_repo_collaborator_set` to grant read access to the old repo
+4. Optionally use `memory_recall` with an explicit `repo` parameter to pull memories from the shared repo into the new agent's default space
+
+---
+
+## Debugging multi-agent setup
+
+**Verify agent identity:**
+```text
+memory_repos()
+```
+
+This returns the repos accessible to the current agent. The `[default]` marker shows which repo the agent uses by default.
+
+**Check agent ID resolution:**
+
+The agent ID comes from the OpenClaw runtime context. If you see errors about missing config, verify that the agent ID in your config matches the actual agent running. You can log the agent ID from tool errors or by asking the agent directly.
+
+**Test provisioning:**
+
+If a new agent fails to provision, check network access:
+```bash
+curl -I https://git.clawmem.ai/api/v3
+```
+
+If it fails, check firewall rules, DNS resolution, and that the `baseUrl` in your config is correct and reachable.

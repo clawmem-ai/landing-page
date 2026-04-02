@@ -1,0 +1,433 @@
+---
+title: Collaboration
+description: Share memories with teams and organizations — invite collaborators, set permissions, and manage org-wide conventions.
+---
+
+import { Steps, Aside } from '@astrojs/starlight/components';
+
+ClawMem memories don't have to stay private. You can share a memory repo with collaborators, teams, and entire organizations. This is how teams encode shared knowledge and maintain consistent conventions across projects.
+
+## Why share memories
+
+A shared memory repo becomes a durable record of your team's agreements: API design patterns, deployment procedures, common pitfalls, and lessons learned. When a new agent joins your team, it can recall these shared memories from day one.
+
+Shared memories solve three problems:
+
+- **Team knowledge** — decisions and lessons are preserved across projects and team transitions
+- **Cross-agent consistency** — every agent in your organization works from the same conventions
+- **Org-wide conventions** — encode style guides, approval workflows, and best practices in a searchable, inspectable repo
+
+---
+
+## Three-layer sharing model
+
+ClawMem provides three layers of access control: direct collaborators, teams within organizations, and org-wide defaults.
+
+**1. Direct sharing** — Invite a single user to your memory repo with a specific permission level (read, write, or admin). The invitee receives a pending invitation they must accept.
+
+**2. Teams** — Create teams inside an organization and grant teams access to repos. Manage team membership with roles (member or maintainer). Useful for stable groups like "backend" or "infra".
+
+**3. Organizations** — Create an organization, set a default permission level for all members, and manage org-wide governance. Members inherit the default permission unless a direct grant or team grant overrides it.
+
+Your effective access to a repo is the *maximum* of all three: org default, direct grant, and any team grant you belong to.
+
+---
+
+## Direct sharing: invite collaborators
+
+To share your repo with a specific user, invite them as a direct collaborator.
+
+**Step 1: Send an invitation**
+
+Use `collaboration_repo_collaborator_set` to create a pending invitation. The invitee will see it in their `collaboration_user_repo_invitations` list.
+
+```text
+collaboration_repo_collaborator_set(
+  username="alice",
+  permission="write"
+)
+```
+
+The tool will preview the action and ask for confirmation:
+
+```text
+collaboration_repo_collaborator_set(
+  username="alice",
+  permission="write",
+  confirmed=true
+)
+```
+
+Response:
+
+```text
+Created pending invitation for alice on acme/agent-memory with write permission.
+Invitation ID: 9821
+```
+
+**Step 2: Recipient accepts the invitation**
+
+Alice receives the invitation and lists her pending invitations:
+
+```text
+collaboration_user_repo_invitations()
+```
+
+```text
+Pending repo invitations for alice:
+- [9821] acme/agent-memory (write) — invited by claude
+```
+
+Alice accepts the invitation:
+
+```text
+collaboration_user_repo_invitation_accept(invitationId=9821, confirmed=true)
+```
+
+```text
+Accepted invitation 9821 for acme/agent-memory with write permission.
+```
+
+**Permission levels for direct shares:**
+
+| Permission | Effect |
+|---|---|
+| `read` | List memories, search, recall. Cannot store or update. |
+| `write` | Read all memories, store and update memories, but cannot manage access grants. |
+| `admin` | Write access plus manage other collaborators and delete the repo. |
+
+---
+
+## Organizations: org-wide access
+
+For larger teams or persistent structures, create an organization. Org members automatically inherit a default permission level, and you can use teams within the org to grant finer-grained access.
+
+**Create an organization**
+
+```text
+collaboration_org_create(
+  login="acme-infra",
+  name="ACME Infrastructure Team",
+  defaultPermission="read"
+)
+```
+
+Preview the action. Then confirm:
+
+```text
+collaboration_org_create(
+  login="acme-infra",
+  name="ACME Infrastructure Team",
+  defaultPermission="read",
+  confirmed=true
+)
+```
+
+All members of `acme-infra` org will have `read` access to any repo that hasn't granted them a more specific permission.
+
+**Invite users to an organization**
+
+```text
+collaboration_org_invitation_create(
+  org="acme-infra",
+  inviteeLogin="alice",
+  role="member"
+)
+```
+
+Confirm the invitation:
+
+```text
+collaboration_org_invitation_create(
+  org="acme-infra",
+  inviteeLogin="alice",
+  role="member",
+  confirmed=true
+)
+```
+
+Alice will see this in her pending org invitations and can accept:
+
+```text
+collaboration_user_org_invitation_accept(invitationId=1, confirmed=true)
+```
+
+**Org roles:**
+
+| Role | Effect |
+|---|---|
+| `member` | Subject to org's default permission on all repos. Can join teams. Cannot manage org settings. |
+| `owner` | Full control over org membership, teams, repo grants, and settings. |
+
+---
+
+## Teams: permission scope within organizations
+
+Teams let you grant repo access to groups of org members without making it global. A common pattern: create "backend", "frontend", and "infra" teams. Grant each team read or write access to their domain's shared repos.
+
+**Create a team**
+
+```text
+collaboration_team_create(
+  org="acme-infra",
+  name="Kubernetes Team",
+  description="Deploy and maintain Kubernetes infrastructure",
+  privacy="closed"
+)
+```
+
+Confirm:
+
+```text
+collaboration_team_create(
+  org="acme-infra",
+  name="Kubernetes Team",
+  privacy="closed",
+  confirmed=true
+)
+```
+
+Response:
+
+```text
+Created team k8s-team in acme-infra org.
+```
+
+**Team privacy:**
+
+- `closed` — Team members are visible to org members. Default choice for internal teams.
+- `secret` — Team membership is hidden from non-members. Use for sensitive groups (security, compliance, etc).
+
+**Add members to a team**
+
+```text
+collaboration_team_membership_set(
+  org="acme-infra",
+  teamSlug="k8s-team",
+  username="alice",
+  role="maintainer"
+)
+```
+
+Confirm:
+
+```text
+collaboration_team_membership_set(
+  org="acme-infra",
+  teamSlug="k8s-team",
+  username="alice",
+  role="maintainer",
+  confirmed=true
+)
+```
+
+**Team roles:**
+
+| Role | Effect |
+|---|---|
+| `member` | Can view team repos and content. Cannot add/remove members or adjust repo access. |
+| `maintainer` | Manage team membership and adjust which repos the team can access. |
+
+**Grant team access to a repo**
+
+```text
+collaboration_team_repo_set(
+  org="acme-infra",
+  teamSlug="k8s-team",
+  repo="acme-infra/k8s-memory",
+  permission="write"
+)
+```
+
+Confirm:
+
+```text
+collaboration_team_repo_set(
+  org="acme-infra",
+  teamSlug="k8s-team",
+  repo="acme-infra/k8s-memory",
+  permission="write",
+  confirmed=true
+)
+```
+
+Now all members of the k8s-team have `write` access to `acme-infra/k8s-memory`, even if the org's default permission is `read`.
+
+---
+
+## Permission model: how access resolves
+
+When you try to access a repo, ClawMem computes your effective permission as the **maximum** of:
+
+1. Your org's default permission (if you're an org member)
+2. Any direct collaborator grant on the repo
+3. Any team grant for a team you belong to
+
+For example, if:
+- Org default is `read`
+- You have a direct grant of `write`
+- Your team has `admin` access
+
+Your effective permission is `admin` (the highest).
+
+**Permission aliases:**
+
+Some systems use different names for the same permission level. ClawMem normalizes these:
+
+| Alias | Maps to |
+|---|---|
+| `pull` | `read` |
+| `triage` | `read` |
+| `push` | `write` |
+| `maintain` | `write` |
+| `admin` | `admin` |
+
+If you see a permission name from another system, ClawMem will understand it.
+
+---
+
+## Invitation workflow: the full flow
+
+All access grants start with an invitation. This two-step process prevents accidental permissions and gives the invitee control.
+
+<Steps>
+
+1. **Invite** — The repo owner or org maintainer sends an invitation using `collaboration_repo_collaborator_set` (for direct shares) or `collaboration_org_invitation_create` (for org membership).
+
+2. **Preview** — The invitation appears as pending. The recipient can view it via `collaboration_user_repo_invitations` or `collaboration_user_org_invitations` without committing.
+
+3. **Accept or decline** — The recipient calls `collaboration_user_repo_invitation_accept` or `collaboration_user_org_invitation_accept` to activate access, or `decline` to reject it.
+
+4. **Active** — Once accepted, the recipient immediately has the granted permission level. They can now recall from shared repos, store memories, or manage access (depending on the permission).
+
+5. **Revoke** — The repo owner or org admin can revoke access at any time with `collaboration_repo_collaborator_remove`.
+
+</Steps>
+
+---
+
+## Cross-agent sharing
+
+Every ClawMem agent has its own identity (a unique agent ID). To share memories between agents, add the second agent as a collaborator on the first agent's repo.
+
+For example, your local agent has a repo `claude/personal-memory`. You want your OpenClaw agent to share from it:
+
+```text
+collaboration_repo_collaborator_set(
+  username="openClaw",
+  permission="read"
+)
+```
+
+Now both agents can recall from `claude/personal-memory`:
+
+- Your local agent recalls from it by default
+- OpenClaw recalls from it when you explicitly pass `repo="claude/personal-memory"` to a memory tool
+
+Similarly, agents can be members of organizations. If your OpenClaw agent is invited to the `acme-infra` org, it inherits access to all repos granted to its org and teams.
+
+---
+
+## Common patterns
+
+### Pattern 1: Personal repo + shared team repo
+
+Keep your personal preferences in a private repo (`claude/personal-memory`). Create a separate shared repo for team knowledge (`acme-infra/team-memory`). Agents can then recall from both, with team conventions overriding personal preferences when both are relevant.
+
+### Pattern 2: Project-specific repos
+
+For large projects, create a repo per domain: `acme-infra/k8s-memory`, `acme-infra/postgres-memory`, etc. Grant each project team access to their domain repo. This keeps knowledge organized and makes it easier to add or remove people from a project without touching unrelated memories.
+
+### Pattern 3: Read-only audit repos
+
+Create a repo with `defaultPermission="read"` and add auditors as org members. They can inspect and search all memories but cannot store or modify, creating an audit trail.
+
+### Pattern 4: Invitation pre-assignment
+
+When you know you'll add someone to multiple teams, use `collaboration_org_invitation_create` with `teamIds` to pre-assign teams on acceptance:
+
+```text
+collaboration_org_invitation_create(
+  org="acme-infra",
+  inviteeLogin="bob",
+  role="member",
+  teamIds=[1, 2, 3],
+  confirmed=true
+)
+```
+
+When Bob accepts, he's immediately added to teams 1, 2, and 3.
+
+---
+
+## Confirmation safety gate
+
+All tools that create, modify, or remove access require an explicit `confirmed: true` parameter. This prevents accidental mutations.
+
+The pattern is always:
+
+1. **Preview** (no confirmed flag) to see what will happen:
+
+```text
+collaboration_repo_collaborator_set(username="alice", permission="admin")
+```
+
+```text
+Set confirmed=true to grant alice admin permission on acme/agent-memory.
+```
+
+2. **Execute** (with confirmed flag) after the user approves:
+
+```text
+collaboration_repo_collaborator_set(username="alice", permission="admin", confirmed=true)
+```
+
+This two-step pattern applies to:
+
+- `collaboration_org_create`
+- `collaboration_team_create`
+- `collaboration_team_membership_set`
+- `collaboration_team_membership_remove`
+- `collaboration_team_repo_set`
+- `collaboration_team_repo_remove`
+- `collaboration_repo_collaborator_set`
+- `collaboration_repo_collaborator_remove`
+- `collaboration_org_invitation_create`
+- `collaboration_user_repo_invitation_accept`
+- `collaboration_user_repo_invitation_decline`
+- `collaboration_user_org_invitation_accept`
+- `collaboration_user_org_invitation_decline`
+
+---
+
+## Debugging access
+
+Use `collaboration_repo_access_inspect` to see all access paths for a repo in one call:
+
+```text
+collaboration_repo_access_inspect(repo="acme-infra/k8s-memory")
+```
+
+```text
+Access to acme-infra/k8s-memory:
+
+Visibility: private
+Owner: acme-infra
+
+Direct collaborators:
+- alice (write)
+- bob (read)
+
+Pending invitations:
+- [9821] charlie (write)
+
+Teams with access:
+- k8s-team (write)
+- devops-team (read)
+
+Org-level default: read
+
+Outside collaborators: 0
+```
+
+This view helps you audit who has what access and surface unexpected grants.

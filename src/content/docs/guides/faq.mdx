@@ -1,0 +1,296 @@
+---
+title: FAQ
+description: Frequently asked questions about ClawMem installation, usage, data storage, and collaboration.
+---
+
+## Installation & Setup
+
+### How do I install ClawMem?
+
+ClawMem installs as an OpenClaw plugin. Run four commands:
+
+```bash
+openclaw plugins install @clawmem-ai/clawmem
+openclaw plugins enable clawmem
+openclaw config set plugins.slots.memory clawmem
+openclaw gateway restart
+```
+
+On first use, ClawMem automatically provisions your agent identity and default memory repo on `git.clawmem.ai`. See [Installation](/getting-started/installation/) for full details.
+
+### Do I need a separate ClawMem account?
+
+No. Your identity is provisioned automatically when the plugin first runs. You log in with the same credentials you use for `git.clawmem.ai` (which is GitHub-compatible).
+
+### What if installation fails?
+
+Check network access to `registry.npmjs.org` and `git.clawmem.ai`. If you're behind a proxy, configure npm proxy settings. See [Installation troubleshooting](/getting-started/installation/#troubleshooting).
+
+---
+
+## Data Storage
+
+### Where are my memories stored?
+
+In a Git-compatible repository on `git.clawmem.ai`, under your account. Each memory is a GitHub-compatible issue with labels and a structured body. Session transcripts are also stored as issues.
+
+You own the repo. You can clone it, export it, delete it, or share it with collaborators. See [Security](/guides/security/#data-residency).
+
+### Is my data private?
+
+Yes. All memory repos are **private by default**. Only you and users you explicitly invite can view or modify your memories. See [Security](/guides/security/#private-by-default).
+
+### Can I export my memories?
+
+Yes. Your memory repo is just a Git repo. Clone it:
+
+```bash
+git clone https://git.clawmem.ai/owner/repo.git
+```
+
+You get all memories, session transcripts, and history. Convert memories to other formats if needed (they're stored as YAML in issue bodies).
+
+### What if I delete my repo?
+
+All memories are permanently deleted. There is no backup. Deletion is irreversible. Use this only if you're certain you want to discard all data.
+
+---
+
+## Memory Lifecycle
+
+### How do memories get stored?
+
+ClawMem mirrors your conversation in real time and extracts durable memories at session end. At the end of each session, the AI reads your full transcript and existing memories, then decides what's worth keeping. Extracted memories are stored as issues in your repo. See [Concepts](/guides/concepts/#the-memory-lifecycle).
+
+### Can I edit memories directly?
+
+Yes. In two ways:
+
+**Console** — Visit [console.clawmem.ai](https://console.clawmem.ai) and edit memory details, kinds, and topics directly.
+
+**API** — Use `memory_update` to change the detail, kind, or topics of any memory:
+
+```text
+memory_update(memoryId="42", detail="Updated fact", topics=["project"])
+```
+
+Changes are reflected immediately. See [Concepts](/guides/concepts/#inspectable-not-mystical).
+
+### How long does extraction take?
+
+Extraction happens at the end of a session, usually within 5-10 seconds. It is intentionally delayed to let the transcript settle. After the session ends, wait a moment, then run `memory_list` to check for new memories.
+
+### What happens when I close a session?
+
+The session issue is marked closed. Extraction runs over the full transcript and stores new memories as active issues, or marks existing memories stale if they've been superseded.
+
+---
+
+## Memory Recall
+
+### How does recall decide what's relevant?
+
+Before each new session, ClawMem searches your active memories for anything matching the incoming prompt. The backend uses semantic search if available, with fallback to local lexical ranking. Up to `memoryRecallLimit` memories (default: 5) are injected into context before the agent starts.
+
+You can control recall with:
+- **`memoryRecallLimit`** — Max memories injected per session (1-20, default 5)
+- **`memory_recall(query="...")`** — Manual recall with an explicit query
+
+See [Concepts](/guides/concepts/#how-recall-works).
+
+### Can I control what memories are recalled?
+
+Yes. Use topics and kinds to organize memories:
+
+```text
+memory_list(kind="lesson", topic="python")
+```
+
+Topics are searchable labels you add to memories. Only active (open) memories are recalled.
+
+### What if the wrong memories are recalled?
+
+Revise the memories with `memory_update` to add better keywords and topics. Or mark them stale with `memory_forget` if they're no longer relevant.
+
+---
+
+## Collaboration
+
+### Can multiple agents share memory?
+
+Yes. Every agent has its own identity. To share memories between agents, add the second agent as a collaborator on the first agent's repo:
+
+```text
+collaboration_repo_collaborator_set(
+  username="openClaw",
+  permission="read"
+)
+```
+
+Now both agents can recall from the repo. See [Collaboration](/guides/collaboration/#cross-agent-sharing).
+
+### How do I share memories with my team?
+
+Create a shared memory repo and invite team members:
+
+```text
+collaboration_repo_collaborator_set(
+  username="alice",
+  permission="write",
+  confirmed=true
+)
+```
+
+For larger teams, use organizations and teams:
+
+```text
+collaboration_org_create(
+  login="my-team",
+  defaultPermission="read",
+  confirmed=true
+)
+```
+
+See [Collaboration](/guides/collaboration/) for full details.
+
+### What permissions can I grant?
+
+| Permission | Can do |
+|---|---|
+| `read` | List, search, and recall memories. Cannot store or delete. |
+| `write` | Read plus store, update, and delete memories. Cannot manage access. |
+| `admin` | Write plus invite collaborators, remove users, and delete repo. |
+
+---
+
+## Data Management
+
+### How do I delete a memory permanently?
+
+Calling `memory_forget` marks a memory as stale by closing the underlying issue. Stale memories remain in the repo for audit purposes but are excluded from recall.
+
+To permanently remove a memory, delete the issue directly on `git.clawmem.ai` or through the [Console](https://console.clawmem.ai). There is no bulk-delete tool — permanent deletion is intentionally manual.
+
+### What if the AI extracts something wrong?
+
+Review the extracted memory in the [Console](https://console.clawmem.ai). If it's wrong or sensitive, mark it stale with `memory_forget`:
+
+```text
+memory_forget(memoryId="123")
+```
+
+Or correct it with `memory_update` to fix the detail text.
+
+### Can I prevent extraction for a session?
+
+No, extraction runs automatically at session end. However, you can delete extracted memories after the fact with `memory_forget`. Or, delete the session issue from `git.clawmem.ai` before extraction reads it (this rarely works since extraction runs very quickly).
+
+For highly sensitive sessions, review and delete memories afterward. See [Security](/guides/security/#sensitive-environments).
+
+---
+
+## Technical
+
+### Does ClawMem work offline?
+
+No. ClawMem requires network access to `git.clawmem.ai` at session start (for recall) and session end (for storage and extraction). Without access, memory operations will fail.
+
+### How many memories can I store?
+
+There is no hard limit. However, memory recall is capped at `memoryRecallLimit` (default: 5, max: 20) to keep context manageable. Store as many memories as you need; only the most relevant ones are injected into each session.
+
+### What happens to my token if I share my config?
+
+**Never commit your config to version control.** Your token is in `plugins.entries.clawmem.config.agents.<agentId>.token`. If leaked, anyone with the token can read, write, and delete memories in your default repo. Rotate your token immediately by creating a new one on `git.clawmem.ai`. See [Security](/guides/security/#token-storage-and-management).
+
+### Can I use multiple agents with different repos?
+
+Yes. Each agent can have its own identity and default repo. Configure them in your plugin config:
+
+```json5
+{
+  plugins: {
+    entries: {
+      clawmem: {
+        config: {
+          agents: {
+            local: {
+              defaultRepo: "me/personal-memory",
+              token: "token-1"
+            },
+            openClaw: {
+              defaultRepo: "me/openclaw-memory",
+              token: "token-2"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Each agent uses its own tokens and repos.
+
+---
+
+## Troubleshooting
+
+### Memories are not being saved
+
+After a session ends, wait 5-10 seconds for extraction to run. Then run `memory_list` to check. If still empty, verify you have write access:
+
+```text
+memory_store(detail="Test", confirmed=true)
+```
+
+See [Troubleshooting](/guides/troubleshooting/#memories-not-being-saved).
+
+### Memories are not being recalled
+
+Verify memories are active:
+
+```text
+memory_list(status="active")
+```
+
+Then test manual recall:
+
+```text
+memory_recall(query="your topic")
+```
+
+If manual recall works but automatic doesn't, your incoming prompts don't match any active memories. See [Troubleshooting](/guides/troubleshooting/#memories-not-being-recalled).
+
+### Agent not provisioned
+
+After installing ClawMem, the agent should provision automatically on first use. If not:
+
+```bash
+openclaw gateway restart
+```
+
+Then start a new session. If still failing, check network access to `git.clawmem.ai`:
+
+```bash
+curl https://git.clawmem.ai/api/v3/
+```
+
+See [Troubleshooting](/guides/troubleshooting/#agent-not-provisioned).
+
+### Where can I report bugs or get help?
+
+- Check [Troubleshooting](/guides/troubleshooting/) — most issues are covered.
+- Review [Concepts](/guides/concepts/) and [Security](/guides/security/) — foundational guides.
+- Inspect your repo directly on `git.clawmem.ai` — look at issue history for clues.
+- Check OpenClaw logs — run `openclaw logs | grep clawmem`.
+
+---
+
+## More Information
+
+- **[Installation](/getting-started/installation/)** — Step-by-step setup guide.
+- **[Concepts](/guides/concepts/)** — How ClawMem organizes and recalls memories.
+- **[Security](/guides/security/)** — Data residency, privacy, and access control.
+- **[Collaboration](/guides/collaboration/)** — Share memories with teams and organizations.
+- **[Troubleshooting](/guides/troubleshooting/)** — Diagnosis and fixes for common issues.

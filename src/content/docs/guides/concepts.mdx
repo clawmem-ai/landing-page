@@ -1,0 +1,131 @@
+---
+title: Memory Concepts
+description: How ClawMem organizes, stores, and retrieves your memories — from raw conversation to structured, searchable records.
+---
+
+ClawMem turns ephemeral conversations into a durable, inspectable memory graph. This guide explains the core ideas behind how memories are captured, structured, stored, and recalled.
+
+## The memory lifecycle
+
+Every memory follows a predictable path from conversation to recall.
+
+**1. Conversation mirroring**
+
+As you talk to an AI agent, ClawMem mirrors the conversation into a session record in real time. Each session becomes a tracked issue in your memory repo. ClawMem keeps a running count of how many messages have been mirrored and appends new turns as they arrive.
+
+**2. AI extraction**
+
+At the end of a session — and again at the start of your next one — ClawMem runs an AI extraction pass over the conversation. The AI reads the full transcript alongside your existing memories and decides what is worth keeping as a durable record.
+
+The extraction prompt asks for two things:
+
+- **save** — stable, reusable facts, preferences, decisions, constraints, workflows, and ongoing context worth remembering later
+- **stale** — IDs of existing memories that the current conversation clearly supersedes or invalidates
+
+The result is a structured JSON decision that ClawMem applies to your memory repo.
+
+**3. Structured record**
+
+Each extracted memory becomes an issue in your memory repo. The issue body stores the memory in a flat YAML format:
+
+```yaml
+memory_hash: <sha256>
+date: 2025-06-01
+detail: Prefers dark mode across all editors and tools.
+```
+
+Labels carry the schema: `type:memory`, one optional `kind:*` label, and zero or more `topic:*` labels.
+
+**4. Recall**
+
+Before each new session starts, ClawMem searches your active memories for anything relevant to the incoming prompt. Matching memories are injected into the agent's context window as a `<relevant-memories>` block — so the agent starts each conversation already knowing what it should know about you.
+
+---
+
+## Memory record anatomy
+
+Every memory record has the following fields:
+
+| Field | Description |
+|---|---|
+| **Memory ID** | A stable identifier derived from the issue number (e.g. `42`). Used to reference the record in updates and forget operations. |
+| **Title** | A short auto-generated label, derived from the first 72 characters of the detail text. |
+| **Detail** | The full durable fact, preference, decision, or lesson. This is the primary content that gets searched and recalled. |
+| **Kind** | A `kind:*` label that classifies the memory. See below for the standard kinds. |
+| **Topics** | Zero or more `topic:*` labels that improve retrieval precision. |
+| **Date** | The local date the memory was first stored. |
+| **Memory hash** | A SHA-256 hash of the normalized detail text, used for deduplication. |
+| **Status** | `active` (open issue) or `stale` (closed issue). |
+
+### Kind labels
+
+The kind label describes the nature of the memory:
+
+| Kind | Label | Use it for |
+|---|---|---|
+| Core fact | `kind:core-fact` | Stable truths that should update in place as reality changes |
+| Convention | `kind:convention` | Agreed rules or policies |
+| Lesson learned | `kind:lesson` | Corrections, postmortems, or mistakes worth preserving |
+| Skill blueprint | `kind:skill` | Repeatable workflows or playbooks |
+| Active task | `kind:task` | Ongoing work that should stay visible and update over time |
+
+### Topic labels
+
+Topics are free-form labels that narrow retrieval. For example, a memory about a code style preference might carry `topic:typescript` and `topic:formatting`. Topics are shared across your repo — before creating a new one, ClawMem will consult the existing schema to encourage reuse.
+
+---
+
+## Memory states
+
+A memory is always in one of two states, carried by the underlying issue state:
+
+- **Active** — the issue is open. Active memories are included in search results and recalled before sessions.
+- **Stale** — the issue is closed. A memory becomes stale when it is superseded by a newer fact, explicitly forgotten via `memory_forget`, or marked outdated by the AI extraction pass.
+
+Stale memories are not deleted — they remain in the repo as closed issues and can be inspected, searched with `status=stale`, or reopened if needed.
+
+---
+
+## Memory deduplication
+
+ClawMem prevents duplicate memories using SHA-256 content hashing.
+
+When a new memory is about to be stored, ClawMem normalizes the detail text and computes its hash. If any active memory already carries that hash, the store operation is skipped and the existing memory is returned instead. If the kind or topic labels differ, ClawMem merges the new labels into the existing record rather than creating a duplicate.
+
+The same deduplication check runs during AI extraction: if the extracted detail matches an active memory's hash, the record is updated in place rather than duplicated.
+
+---
+
+## Memory repos
+
+Every agent has a **default repo** — the memory space where memories are stored and recalled by default. A repo is like a workspace: it holds your memory issues, labels, and session records.
+
+You can have multiple repos. Common patterns:
+
+- A private personal repo for individual preferences and context
+- A shared repo for a team or project (see [Collaboration](/guides/collaboration/))
+- A project-specific repo scoped to a particular codebase or domain
+
+Use `memory_repos` to list all repos accessible to your agent. When reading or writing memory, you can pass an explicit `repo` parameter (in `owner/repo` form) to target any accessible repo instead of the default.
+
+Creating a new repo is done via `memory_repo_create`. The first repo created for an agent automatically becomes its default.
+
+---
+
+## How recall works
+
+Before each session, ClawMem runs a semantic search over your active memories using the incoming prompt as the query. The backend uses a search index for efficient retrieval; if the backend search is unavailable, ClawMem falls back to local lexical ranking.
+
+Up to a configured number of results are returned and prepended to the agent's context. Recall is intentionally narrow — only active memories are searched, and results are capped to avoid polluting the context with irrelevant noise.
+
+You can also trigger recall manually at any point in a conversation using `memory_recall` with an explicit query string.
+
+---
+
+## Inspectable, not mystical
+
+Most memory systems hide their state inside opaque embedding databases. ClawMem takes the opposite approach: every memory is a readable issue in a Git-compatible repo. You can browse them in the [Console](https://console.clawmem.ai), inspect them with standard tools, edit them directly, and delete them if something is wrong.
+
+The schema is also explicit. Kinds and topics are visible labels, not hidden embeddings. When the AI gets something wrong, you can see exactly what it stored and correct it — rather than guessing why the model's behavior changed.
+
+This makes memory a first-class engineering artifact, not a black box.

@@ -1,0 +1,388 @@
+---
+title: Troubleshooting
+description: Diagnose and fix common ClawMem issues with symptom-based troubleshooting steps.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+This guide organizes troubleshooting by symptom. For each problem, follow the diagnosis steps, identify the root cause, and apply the solution.
+
+---
+
+## Memories not being saved
+
+**Symptom:** You ask your agent to store a memory, it confirms the operation, but the memory doesn't appear in `memory_list`.
+
+### Diagnosis steps
+
+1. Check the extraction timing:
+```text
+memory_list(status="active", limit=100)
+```
+Memory extraction happens at session end, not in real time. Wait for the session to finalize (usually 5-10 seconds after you stop talking), then run `memory_list` again.
+
+2. Verify write access:
+```text
+memory_store(
+  detail="Test memory to verify write access",
+  confirmed=true
+)
+```
+If the store fails, you may not have write permission on the default repo.
+
+3. Check extraction timeout settings:
+Look at your plugin config:
+```bash
+openclaw config get plugins.entries.clawmem.config.summaryWaitTimeoutMs
+```
+If the value is very low (< 5000), extraction may timeout before completing. Increase it to 120000 (default) or higher.
+
+### Solutions
+
+- **Extraction didn't run yet:** Wait longer and run `memory_list` again. Extraction is intentionally delayed to let the transcript settle.
+- **Write access denied:** Ask your repo owner or org admin to grant you write permission. See [Collaboration](/guides/collaboration/).
+- **Extraction timeout:** Increase `summaryWaitTimeoutMs` in config:
+```bash
+openclaw config set plugins.entries.clawmem.config.summaryWaitTimeoutMs 180000
+openclaw gateway restart
+```
+
+---
+
+## Memories not being recalled
+
+**Symptom:** You have memories stored, but your agent doesn't mention them or recall them at session start.
+
+### Diagnosis steps
+
+1. Verify memories are active and searchable:
+```text
+memory_list(status="active", limit=50)
+```
+Check that memories you expect to see are listed as `active` (not `stale`). If they're closed/stale, they won't be recalled.
+
+2. Check the memory recall limit:
+```bash
+openclaw config get plugins.entries.clawmem.config.memoryRecallLimit
+```
+Default is 5. If set to 0 or 1, very few memories will be recalled.
+
+3. Test manual recall with an explicit query:
+```text
+memory_recall(query="your topic here")
+```
+If manual recall works but automatic recall doesn't, the issue is with the incoming prompt not matching any active memories.
+
+### Solutions
+
+- **Memories are stale:** Reopen closed issues on `git.clawmem.ai` or use `memory_update` to refresh stale memories.
+- **Recall limit too low:** Increase `memoryRecallLimit`:
+```bash
+openclaw config set plugins.entries.clawmem.config.memoryRecallLimit 10
+openclaw gateway restart
+```
+- **No relevant memories:** Active memories aren't matching your new session query. Add more memories with better keywords and topics.
+
+---
+
+## Agent not provisioned
+
+**Symptom:** After installing ClawMem, your agent cannot access `git.clawmem.ai` or reports "no defaultRepo".
+
+### Diagnosis steps
+
+1. Check network access to the gateway:
+```bash
+curl https://git.clawmem.ai/api/v3/
+```
+If this fails, you cannot reach the provisioning endpoint.
+
+2. Check the agents config entry:
+```bash
+openclaw config get plugins.entries.clawmem.config.agents
+```
+Should show at least one agent with a `token` and `defaultRepo`. If empty or `{}`, provisioning hasn't run yet.
+
+3. Try gateway restart:
+```bash
+openclaw gateway restart
+```
+Then ask your agent: `Run memory_repos to check provisioning.`
+
+### Solutions
+
+- **Network unreachable:** Check that you can reach `git.clawmem.ai` from your network. If behind a proxy, configure your system proxy settings.
+- **No agents config yet:** Run:
+```bash
+openclaw gateway restart
+```
+Then start a new session and ask your agent to use any memory tool. Provisioning happens on first use.
+- **Provisioning keeps failing:** Check the OpenClaw logs:
+```bash
+openclaw logs | grep clawmem
+```
+Look for network errors or API failures. If `git.clawmem.ai` is unreachable, you may need to wait for connectivity or check firewall rules.
+
+---
+
+## Duplicate memories
+
+**Symptom:** Similar memories are appearing multiple times in `memory_list`, or the same fact is stored twice with slightly different wording.
+
+### Diagnosis steps
+
+1. Check the memory hashes:
+```text
+memory_list(status="active", limit=100)
+```
+Look at the memory details. If two memories say almost the same thing, they may have different hashes.
+
+2. Understand deduplication:
+ClawMem uses SHA-256 hashing on normalized detail text. Two memories are duplicates only if the detail text (after normalization) is identical. Different wording = different hash, so:
+- "Prefer dark mode" and "Dark mode is preferred" are **different memories**
+- "Prefer dark mode" and "Prefer dark mode" (exact) are **the same memory** (deduplicated)
+
+### Solutions
+
+- **Different wording, same meaning:** Use `memory_update` to merge them:
+```text
+memory_update(
+  id=42,
+  detail="Prefer dark mode across all editors and tools",
+  confirmed=true
+)
+```
+- **Actually should be separate:** Keep them. Different nuance or context makes them distinct.
+
+---
+
+## Stale memories still appearing
+
+**Symptom:** A closed/stale memory keeps showing up in search results or recall.
+
+### Diagnosis steps
+
+1. Verify the memory is actually closed:
+```bash
+# Visit git.clawmem.ai and browse your repo
+# Look for the issue status (open vs closed)
+```
+Closed issues should have `memory-status:stale` label.
+
+2. Check the status filter:
+```text
+memory_list(status="active")
+```
+This only lists active (open) memories. If you want to see stale ones:
+```text
+memory_list(status="stale")
+```
+
+3. Run memory_recall and check the output:
+```text
+memory_recall(query="your topic")
+```
+Recall should only return active memories by default. If you see a stale memory in the results, report this as a bug.
+
+### Solutions
+
+- **Permanently delete the stale issue:** Use the `memory_issue_delete` tool:
+```text
+memory_issue_delete(issueId=123, confirmed=true)
+```
+Or manually delete it from `git.clawmem.ai`.
+
+---
+
+## Collaboration not working
+
+**Symptom:** You invited someone to a repo, but they report they can't access it or see memories.
+
+### Diagnosis steps
+
+1. Verify the invitation was sent and accepted:
+```text
+collaboration_repo_access_inspect(repo="owner/repo")
+```
+Check if the user is listed under "Direct collaborators" or "Teams with access".
+
+2. Check the permission level:
+The user needs at least `read` permission to list memories. If they have `read`, they can use `memory_list` and `memory_recall`. If they have `write`, they can also store.
+
+3. Ask the invitee to check their pending invitations:
+```text
+collaboration_user_repo_invitations()
+```
+If an invitation exists, they must accept it before access is active.
+
+### Solutions
+
+- **Invitation pending:** Invitee must run `collaboration_user_repo_invitation_accept(invitationId=<ID>, confirmed=true)`.
+- **User is an org member but has no access:** Set team or direct repo grant:
+```text
+collaboration_repo_collaborator_set(
+  username="alice",
+  permission="read",
+  confirmed=true
+)
+```
+- **Invitee never received the invitation:** Resend it. Use `collaboration_repo_access_inspect` to debug the current grants.
+
+---
+
+## Console shows no data
+
+**Symptom:** You log into [console.clawmem.ai](https://console.clawmem.ai) but see no memories or repos.
+
+### Diagnosis steps
+
+1. Check that your workspace is mapped to the correct repo:
+In the console settings, verify your default repo is listed. If not set, memories won't display.
+
+2. Verify API connectivity:
+```bash
+curl -H "Authorization: token YOUR_TOKEN" \
+  https://git.clawmem.ai/api/v3/user/repos
+```
+If this fails, your token is invalid or the API is unreachable.
+
+3. Check repo visibility:
+Private repos only appear in the console if you have permission. Public repos always appear.
+
+### Solutions
+
+- **Default repo not set in console:** Set it in console settings to match your agent's `defaultRepo` from config.
+- **API unreachable:** Verify network access to `git.clawmem.ai`. Check firewall or proxy settings.
+- **No memories in repo yet:** Run a few sessions to generate memories. Extraction is delayed; wait 10+ seconds after session end before checking the console.
+
+---
+
+## Plugin conflicts
+
+**Symptom:** ClawMem is installed but another plugin is intercepting memory operations, or ClawMem is not being called.
+
+### Diagnosis steps
+
+1. Check memory slot assignment:
+```bash
+openclaw config get plugins.slots.memory
+```
+Should output: `clawmem`
+
+2. List all installed plugins:
+```bash
+openclaw plugins list
+```
+Look for other memory plugins. If multiple are installed, the slot assignment controls which one is active.
+
+3. Check plugin load order:
+```bash
+openclaw config get plugins.load
+```
+Later plugins can override earlier ones. If another plugin overrides the memory slot after clawmem loads, clawmem won't be used.
+
+### Solutions
+
+- **Memory slot assigned to wrong plugin:** Change it:
+```bash
+openclaw config set plugins.slots.memory clawmem
+openclaw gateway restart
+```
+- **Multiple memory plugins conflict:** Uninstall the unwanted one:
+```bash
+openclaw plugins uninstall other-memory-plugin
+openclaw gateway restart
+```
+- **Plugin load order issue:** Check the load order in config and reorder if needed, then restart.
+
+---
+
+## Agent not responding to memory tools
+
+**Symptom:** You ask your agent to use a memory tool, but it says the tool doesn't exist or it doesn't know what to do.
+
+### Diagnosis steps
+
+1. Ask the agent to list available memory tools:
+```text
+Run memory_repos to list available memory tools.
+```
+
+2. Verify ClawMem is the active memory plugin:
+```bash
+openclaw config get plugins.slots.memory
+# Should output: clawmem
+
+openclaw config get plugins.entries.clawmem.enabled
+# Should output: true
+```
+
+3. Check the agent logs:
+```bash
+openclaw logs | grep memory
+```
+
+### Solutions
+
+- **Plugin not enabled:** Enable it:
+```bash
+openclaw plugins enable clawmem
+openclaw config set plugins.slots.memory clawmem
+openclaw gateway restart
+```
+- **Plugin loaded but tools not registered:** Restart the gateway:
+```bash
+openclaw gateway restart
+```
+Then start a new session.
+
+---
+
+## Memory extraction fails
+
+**Symptom:** A session completes but no memories are saved, and you see an error in the logs.
+
+### Diagnosis steps
+
+1. Check the logs:
+```bash
+openclaw logs | grep -i extraction
+```
+Look for error messages mentioning "extraction", "summary", or "memory".
+
+2. Verify repo write access:
+```text
+memory_store(
+  detail="Test write access",
+  confirmed=true
+)
+```
+If this succeeds, write access is fine.
+
+3. Check extraction timeout:
+```bash
+openclaw config get plugins.entries.clawmem.config.summaryWaitTimeoutMs
+```
+If extraction takes longer than this timeout, it will fail.
+
+### Solutions
+
+- **Permission denied on repo:** Verify you have write access. Ask repo owner to grant permission.
+- **Extraction timeout:** Increase the timeout:
+```bash
+openclaw config set plugins.entries.clawmem.config.summaryWaitTimeoutMs 300000
+openclaw gateway restart
+```
+- **API error:** Check that `git.clawmem.ai` is reachable and your token is valid.
+
+---
+
+## Where to get help
+
+If you've worked through these steps and still have issues:
+
+1. **Check the [Concepts](/guides/concepts/) guide** — Understand memory lifecycle and architecture.
+2. **Review [Installation](/getting-started/installation/) troubleshooting** — Plugin-specific issues.
+3. **Read the [Collaboration](/guides/collaboration/) guide** — Permission and access issues.
+4. **Inspect your repo directly** — Visit `git.clawmem.ai`, browse your memory repo, and look at issue history for clues.
+5. **Check OpenClaw logs** — Run `openclaw logs | grep clawmem` for detailed error messages.

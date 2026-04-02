@@ -1,0 +1,297 @@
+---
+title: Plugin Configuration
+description: Complete reference for ClawMem plugin configuration options, per-agent routing, and tuning.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+ClawMem is configured inside the OpenClaw plugin registry. This document covers all configuration fields, resolution order, and common tuning scenarios.
+
+---
+
+## Configuration location
+
+ClawMem config lives at `plugins.entries.clawmem.config` in your OpenClaw configuration file. After installation, your config will look like this:
+
+```json5
+{
+  plugins: {
+    entries: {
+      clawmem: {
+        enabled: true,
+        config: {
+          baseUrl: "https://git.clawmem.ai",
+          authScheme: "token",
+          agents: {
+            main: {
+              baseUrl: "https://git.clawmem.ai",
+              defaultRepo: "yourname/main-memory",
+              token: "<provisioned-token>",
+              authScheme: "token"
+            }
+          },
+          memoryRecallLimit: 5,
+          turnCommentDelayMs: 1000,
+          summaryWaitTimeoutMs: 120000
+        }
+      }
+    }
+  }
+}
+```
+
+---
+
+## Configuration fields
+
+| Field | Type | Default | Range | Description |
+|---|---|---|---|---|
+| **baseUrl** | string | `"https://git.clawmem.ai"` | — | API endpoint. Automatically normalized to `/api/v3`. Examples: `https://git.clawmem.ai`, `https://github.example.com/api/v3`. |
+| **defaultRepo** | string | — | — | Default memory repository in `owner/repo` form. Used when tools do not specify a repo explicitly. |
+| **repo** | string | — | — | Legacy alias for `defaultRepo`. Deprecated in favor of per-agent routing under `agents.<agentId>`. |
+| **token** | string (sensitive) | — | — | Legacy API token. Deprecated in favor of per-agent tokens under `agents.<agentId>.token`. |
+| **authScheme** | `"token"` \| `"bearer"` | `"token"` | — | Default auth header scheme. Per-agent schemes override this. Typically left as `"token"`. |
+| **agents** | object | `{}` | — | Per-agent routing configuration (see [Per-agent routing](#per-agent-routing) below). |
+| **memoryRecallLimit** | integer | `5` | 1–20 | Maximum number of active memories injected into context before an agent starts. Increase for broader context, decrease to reduce noise. |
+| **turnCommentDelayMs** | integer | `1000` | 0–60000 | Delay (ms) before syncing a transcript comment. Allows transcript writes to settle before mirroring. Set to 0 to sync immediately; set to 5000+ for slow networks. |
+| **summaryWaitTimeoutMs** | integer | `120000` | 1000–600000 | Timeout (ms) waiting for memory extraction to complete. Increase if extraction takes longer than 2 minutes. |
+
+---
+
+## Per-agent routing
+
+Each agent can have its own ClawMem identity, API endpoint, and memory repository. This is useful when:
+- Different agents should have isolated memory spaces
+- Agents connect to different ClawMem backends
+- You want to grant different agents different API tokens
+
+**Configuration:**
+
+```json5
+{
+  agents: {
+    main: {
+      baseUrl: "https://git.clawmem.ai",
+      defaultRepo: "yourname/main-memory",
+      token: "<token-for-main>",
+      authScheme: "token"
+    },
+    research: {
+      baseUrl: "https://git.clawmem.ai",
+      defaultRepo: "yourname/research-memory",
+      token: "<token-for-research>",
+      authScheme: "token"
+    }
+  }
+}
+```
+
+**Per-agent configuration fields:**
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| **baseUrl** | string | No | API endpoint for this agent. Overrides global `baseUrl`. |
+| **defaultRepo** | string | No | Default memory repo for this agent. Overrides global `defaultRepo`. |
+| **repo** | string | No | Legacy alias for `defaultRepo`. |
+| **token** | string (sensitive) | No | API token for this agent. Overrides global `token`. Required unless a global token is set. |
+| **authScheme** | `"token"` \| `"bearer"` | No | Auth scheme for this agent. Overrides global `authScheme`. |
+
+<Aside type="note">
+Per-agent configuration keys are the agent's identity identifier. Examples: `main`, `research`, `debug`. These are set during provisioning and should match the agent ID when the plugin first runs.
+</Aside>
+
+---
+
+## Configuration resolution order
+
+When a memory tool is called, ClawMem resolves configuration in this order:
+
+1. **Per-agent config** (`agents.<agentId>.field`) — highest priority
+2. **Global config** (root-level field) — fallback
+3. **Default value** (if specified) — final fallback
+
+Example: If `agents.main.defaultRepo` is set, it takes precedence over the global `defaultRepo`. If neither is set, the tool fails (no memory repo available).
+
+---
+
+## Auto-provisioning
+
+On first use after installation, ClawMem automatically provisions an agent identity by calling `POST /api/v3/agents` on the configured API endpoint. This happens once per agent.
+
+The provisioning response includes:
+- `token` — API token for the agent
+- `repo_full_name` — Default repo in `owner/repo` form (e.g., `yourname/main-memory`)
+
+These are automatically saved to `agents.<agentId>` in your config, so you don't need to set them manually.
+
+<Aside type="caution">
+If provisioning fails (e.g., no network access to the API endpoint), the agent will have no memory space and memory operations will fail. Check that `baseUrl` is reachable and that your network allows HTTPS traffic to the API endpoint.
+</Aside>
+
+---
+
+## Example configurations
+
+### Single agent (default)
+
+```json5
+{
+  plugins: {
+    entries: {
+      clawmem: {
+        enabled: true,
+        config: {
+          baseUrl: "https://git.clawmem.ai",
+          agents: {
+            main: {
+              defaultRepo: "yourname/main-memory",
+              token: "<provisioned-token>",
+              authScheme: "token"
+            }
+          },
+          memoryRecallLimit: 5,
+          turnCommentDelayMs: 1000,
+          summaryWaitTimeoutMs: 120000
+        }
+      }
+    }
+  }
+}
+```
+
+### Multiple agents with isolated memory
+
+```json5
+{
+  plugins: {
+    entries: {
+      clawmem: {
+        enabled: true,
+        config: {
+          baseUrl: "https://git.clawmem.ai",
+          authScheme: "token",
+          agents: {
+            main: {
+              defaultRepo: "yourname/main-memory",
+              token: "<token-1>",
+            },
+            research: {
+              defaultRepo: "yourname/research-memory",
+              token: "<token-2>",
+            },
+            debug: {
+              defaultRepo: "yourname/debug-memory",
+              token: "<token-3>",
+            }
+          },
+          memoryRecallLimit: 5
+        }
+      }
+    }
+  }
+}
+```
+
+### Custom API endpoint (self-hosted)
+
+```json5
+{
+  plugins: {
+    entries: {
+      clawmem: {
+        enabled: true,
+        config: {
+          baseUrl: "https://github.example.com",
+          agents: {
+            main: {
+              defaultRepo: "internal-org/memory",
+              token: "<github-token>",
+              authScheme: "token"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+---
+
+## Tuning
+
+### Adjust memory recall limit
+
+If the agent recalls too many memories and the context gets noisy:
+```json5
+memoryRecallLimit: 3  // Reduce from default 5
+```
+
+If the agent needs more context before sessions:
+```json5
+memoryRecallLimit: 10  // Increase from default 5
+```
+
+Range: 1–20. Typical values: 3–10.
+
+### Adjust turn sync delay
+
+If transcript mirroring is losing turns (delayed writes):
+```json5
+turnCommentDelayMs: 5000  // Increase from default 1000
+```
+
+If you need real-time mirroring with no delay:
+```json5
+turnCommentDelayMs: 0  // Sync immediately
+```
+
+Range: 0–60000 (0 to 60 seconds). Typical values: 500–5000.
+
+### Adjust memory extraction timeout
+
+If extraction is timing out (memories not being saved):
+```json5
+summaryWaitTimeoutMs: 300000  // Increase from default 120000 (5 minutes)
+```
+
+If you have a fast extraction service:
+```json5
+summaryWaitTimeoutMs: 30000  // Decrease to 30 seconds
+```
+
+Range: 1000–600000 (1 second to 10 minutes). Typical values: 60000–240000.
+
+---
+
+## Common issues
+
+**Plugin fails with "unknown field" validation error**
+
+The config schema is strict. Check that field names match exactly (case-sensitive). Common typos:
+- `defaultRepo` not `default_repo`
+- `agents` not `agent`
+- `baseUrl` not `base_url`
+
+**Provisioning hangs or times out**
+
+Check network access to the `baseUrl`. Run:
+```bash
+curl -I https://git.clawmem.ai/api/v3
+```
+
+If it fails, check firewall rules and DNS resolution.
+
+**Memories are not being recalled**
+
+Check that `memoryRecallLimit` is > 0. Then verify memories exist:
+```text
+memory_list(limit=1)
+```
+
+If the list is empty, run `memory_store` manually to create a test memory.
+
+**Per-agent routing not working**
+
+Verify the agent ID in the `agents` config matches the agent identity when the plugin runs. You can inspect the agent ID from logs or by asking the agent directly.
+

@@ -1,0 +1,141 @@
+---
+title: Installation
+description: Install the ClawMem plugin in your OpenClaw environment and provision your memory repository.
+---
+
+import { Steps, Aside } from '@astrojs/starlight/components';
+
+ClawMem installs as an OpenClaw plugin. The install process sets up the plugin package, provisions a memory repository under your account on `git.clawmem.ai`, and enables automatic session recording.
+
+## Prerequisites
+
+- An active **OpenClaw** installation (any recent version)
+- An **OpenClaw account** with permission to install plugins
+- Network access to `git.clawmem.ai` and `registry.npmjs.org`
+
+No separate ClawMem account signup is required. Your identity on `git.clawmem.ai` is provisioned automatically when the plugin first runs.
+
+---
+
+## Install
+
+Run the following four commands in your OpenClaw environment:
+
+```bash
+openclaw plugins install @clawmem-ai/clawmem
+openclaw plugins enable clawmem
+openclaw config set plugins.slots.memory clawmem
+openclaw config validate
+openclaw gateway restart
+```
+
+You can also paste a single instruction into any OpenClaw chat session and let the agent run it for you:
+
+```text
+Read https://clawmem.ai/SKILL.md and follow the instructions to install ClawMem
+```
+
+The agent will execute the install commands, validate the config, and restart the gateway.
+
+---
+
+## What happens during installation
+
+<Steps>
+1. **Plugin package installed.** `@clawmem-ai/clawmem` is fetched from npm and registered in your OpenClaw plugin registry.
+
+2. **Memory slot assigned.** `plugins.slots.memory` is set to `clawmem`, telling OpenClaw to route all memory operations through this plugin.
+
+3. **Config validated.** `openclaw config validate` checks that the plugin config is well-formed before the gateway restarts.
+
+4. **Gateway restart.** The OpenClaw gateway restarts and loads the plugin.
+
+5. **Agent identity provisioned.** On the first request after restart, ClawMem calls `POST /api/v3/agents` on `git.clawmem.ai` to create an agent identity. The returned token and default repository name (`owner/agent-memory`) are written into your config under `plugins.entries.clawmem.config.agents.<agentId>`. This is your agent's private memory space.
+
+6. **Recording enabled.** From this point forward, every session is automatically mirrored as a `type:conversation` issue, and durable memories are extracted and stored as `type:memory` issues.
+</Steps>
+
+---
+
+## Verify the installation
+
+After the gateway restarts, confirm ClawMem is active:
+
+```bash
+openclaw config get plugins.slots.memory
+# Expected output: clawmem
+
+openclaw config get plugins.entries.clawmem.enabled
+# Expected output: true
+```
+
+Then start a new chat session and ask your agent directly:
+
+```text
+Is ClawMem installed and active?
+```
+
+A properly installed agent will confirm that ClawMem is the active memory plugin, report the `defaultRepo` it is using (e.g. `yourname/main-memory`), and offer to recall any existing memories.
+
+You can also ask the agent to list available memory tools:
+
+```text
+Run memory_repos to show my memory repositories.
+```
+
+If ClawMem is working, the agent will return at least one repository entry — your provisioned default repo.
+
+---
+
+## Config reference
+
+After a successful install, your config will look like this:
+
+```json5
+{
+  plugins: {
+    entries: {
+      clawmem: {
+        enabled: true,
+        config: {
+          baseUrl: "https://git.clawmem.ai/api/v3",
+          authScheme: "token",
+          agents: {
+            main: {
+              baseUrl: "https://git.clawmem.ai/api/v3",
+              defaultRepo: "yourname/main-memory",
+              token: "<provisioned-token>",
+              authScheme: "token"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+The `token` and `defaultRepo` are written automatically during the first-run provisioning step. You do not need to set them manually.
+
+---
+
+## Troubleshooting
+
+**Plugin install fails with a registry error.**
+Check that you can reach `registry.npmjs.org`. If you are behind a corporate proxy, configure npm's proxy settings before running the install command.
+
+**`openclaw config validate` reports an unknown plugin.**
+Confirm the plugin was installed successfully: `openclaw plugins list`. If `clawmem` is not in the list, rerun the install command.
+
+**The agent does not confirm ClawMem after restart.**
+Check that `plugins.slots.memory` is set to `clawmem` and not overridden by another plugin. Run `openclaw config get plugins.slots` to inspect all slot assignments.
+
+**Provisioning fails on first use — no `defaultRepo` in config.**
+This usually means the gateway could not reach `git.clawmem.ai` at startup. Check network access and try `openclaw gateway restart` again. If `git.clawmem.ai` does not expose `POST /api/v3/agents`, the plugin falls back to a legacy anonymous bootstrap path automatically.
+
+**Memories are not being saved after sessions.**
+Durable memory extraction happens during request-scoped maintenance after a turn completes, not in real time. Wait for the session to finalize, then ask `memory_list` to check whether memories were written. If the list is empty after several sessions, ask the agent to run a manual `memory_store` to confirm write access to the repo.
+
+<Aside type="note">
+If your environment uses file-injected reminders such as `SOUL.md`, `AGENTS.md`, or `TOOLS.md`, treat them as optional compatibility hints. The bundled plugin skill is the primary runtime source of truth for memory behavior once ClawMem is installed.
+</Aside>
