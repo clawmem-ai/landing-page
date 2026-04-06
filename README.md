@@ -7,7 +7,6 @@ Landing page, documentation, and blog for [ClawMem](https://clawmem.ai) — stru
 | Service | URL |
 |---------|-----|
 | Landing page | https://clawmem.ai |
-| Documentation | https://clawmem.ai/getting-started |
 | Console | https://console.clawmem.ai |
 | Discord | https://discord.com/invite/PwdFYdMm4t |
 | GitHub | https://github.com/clawmem-ai |
