@@ -38,6 +38,24 @@ const { Content } = await render(post);
     article :global(li) { margin-bottom: 0.25rem; }
     article :global(blockquote) { border-left: 3px solid var(--coral-bright); padding-left: 1rem; margin: 1.5rem 0; color: var(--text-secondary); font-style: italic; }
     article :global(hr) { border: none; border-top: 1px solid var(--border-subtle); margin: 2rem 0; }
+    article :global(.comparison-table) { margin: 1.5rem 0 2rem; overflow-x: auto; border: 1px solid var(--border-subtle); border-radius: var(--radius); background: var(--surface-card); box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12); }
+    article :global(.comparison-table table) { width: 100%; min-width: 640px; border-collapse: collapse; margin: 0; }
+    article :global(.comparison-table thead) { background: linear-gradient(135deg, rgba(255, 117, 90, 0.16), rgba(255, 173, 102, 0.12)); }
+    article :global(.comparison-table th) { text-align: left; padding: 1rem 1.1rem; font-size: 0.82rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-primary); border-bottom: 1px solid var(--border-subtle); }
+    article :global(.comparison-table td) { vertical-align: top; padding: 1rem 1.1rem; color: var(--text-secondary); border-bottom: 1px solid var(--border-subtle); line-height: 1.65; }
+    article :global(.comparison-table tbody tr:last-child td) { border-bottom: none; }
+    article :global(.comparison-table tbody tr:nth-child(even)) { background: rgba(255, 255, 255, 0.02); }
+    article :global(.comparison-table strong) { color: var(--text-primary); }
+    article :global(.full-comparison-table) { margin: 1.75rem 0 2.25rem; overflow-x: auto; border: 1px solid var(--border-subtle); border-radius: var(--radius); background: linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0.01)); box-shadow: 0 18px 44px rgba(0, 0, 0, 0.12); }
+    article :global(.full-comparison-table table) { width: 100%; min-width: 980px; border-collapse: separate; border-spacing: 0; margin: 0; }
+    article :global(.full-comparison-table thead) { background: linear-gradient(135deg, rgba(255, 117, 90, 0.18), rgba(255, 173, 102, 0.14)); }
+    article :global(.full-comparison-table th) { text-align: left; vertical-align: bottom; padding: 1rem 1rem 0.95rem; font-size: 0.78rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-primary); border-bottom: 1px solid var(--border-subtle); }
+    article :global(.full-comparison-table td) { vertical-align: top; padding: 1rem; color: var(--text-secondary); line-height: 1.65; border-bottom: 1px solid var(--border-subtle); }
+    article :global(.full-comparison-table tbody tr:last-child td) { border-bottom: none; }
+    article :global(.full-comparison-table tbody tr:nth-child(even)) { background: rgba(255, 255, 255, 0.02); }
+    article :global(.full-comparison-table td:first-child), article :global(.full-comparison-table th:first-child) { position: sticky; left: 0; z-index: 1; background: inherit; }
+    article :global(.full-comparison-table td:first-child) { font-weight: 600; color: var(--text-primary); background: rgba(15, 20, 26, 0.92); }
+    article :global(.full-comparison-table th:first-child) { z-index: 2; background: linear-gradient(135deg, rgba(255, 117, 90, 0.22), rgba(255, 173, 102, 0.18)); }
     article :global(.install-block) { margin: 1rem 0; }
     article :global(.install-block pre) { margin: 0; background: transparent; border: none; border-radius: 0; padding: 0; flex: 1; min-width: 0; }
     article :global(.install-command) { overflow-x: auto; justify-content: space-between; }
