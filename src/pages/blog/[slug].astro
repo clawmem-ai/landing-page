@@ -38,6 +38,12 @@ const { Content } = await render(post);
     article :global(li) { margin-bottom: 0.25rem; }
     article :global(blockquote) { border-left: 3px solid var(--coral-bright); padding-left: 1rem; margin: 1.5rem 0; color: var(--text-secondary); font-style: italic; }
     article :global(hr) { border: none; border-top: 1px solid var(--border-subtle); margin: 2rem 0; }
+    article :global(img) { max-width: 100%; height: auto; display: block; margin: 2rem auto; border-radius: 8px; }
+    article :global(table) { width: 100%; border-collapse: collapse; margin: 2rem 0; border: 1px solid var(--border-subtle); border-radius: 8px; overflow: hidden; background: var(--surface-card); }
+    article :global(th) { text-align: left; padding: 0.75rem 1rem; font-weight: 600; color: var(--text-primary); background: rgba(224, 71, 90, 0.15); border-bottom: 2px solid var(--coral-bright); }
+    article :global(td) { padding: 0.75rem 1rem; color: var(--text-secondary); border-bottom: 1px solid var(--border-subtle); }
+    article :global(tr:last-child td) { border-bottom: none; }
+    article :global(tr:hover) { background: rgba(255, 255, 255, 0.02); }
     article :global(.comparison-table) { margin: 1.5rem 0 2rem; overflow-x: auto; border: 1px solid var(--border-subtle); border-radius: var(--radius); background: var(--surface-card); box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12); }
     article :global(.comparison-table table) { width: 100%; min-width: 640px; border-collapse: collapse; margin: 0; }
     article :global(.comparison-table thead) { background: linear-gradient(135deg, rgba(255, 117, 90, 0.16), rgba(255, 173, 102, 0.12)); }
