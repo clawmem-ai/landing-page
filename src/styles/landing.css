@@ -7,6 +7,15 @@
   padding: 0;
 }
 
+/* ── Blog Images ── */
+article img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 2rem auto;
+  border-radius: 8px;
+}
+
 /* ── Tokens (Dark) ── */
 :root,
 [data-theme="dark"] {
