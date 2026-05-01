@@ -314,11 +314,11 @@ section {
   color: var(--coral-bright);
 }
 
-/* ── Theme Toggle ── */
-.theme-toggle {
+/* ── Top-right actions ── */
+.theme-toggle,
+.discord-float {
   position: fixed;
   top: 16px;
-  right: 16px;
   z-index: 999;
   width: 40px;
   height: 40px;
@@ -328,14 +328,27 @@ section {
   border-radius: 999px;
   border: 1px solid var(--border-subtle);
   background: var(--surface-card-strong);
+  color: var(--text-secondary);
   cursor: pointer;
   backdrop-filter: blur(10px);
   transition: all 0.2s ease;
 }
-.theme-toggle:hover {
+.theme-toggle {
+  right: 16px;
+}
+.discord-float {
+  right: 64px;
+}
+.theme-toggle:hover,
+.discord-float:hover {
+  color: var(--text-primary);
   border-color: var(--border-accent);
   transform: translateY(-1px);
   box-shadow: 0 10px 24px var(--shadow-coral-soft);
+}
+.discord-float svg {
+  width: 19px;
+  height: 19px;
 }
 
 .theme-icon {
@@ -1588,11 +1601,19 @@ body.has-motion [data-reveal].is-visible {
     font-size: 0.875rem;
   }
 
-  .theme-toggle {
+  .theme-toggle,
+  .discord-float {
     top: 10px;
-    right: 10px;
     width: 36px;
     height: 36px;
+  }
+
+  .theme-toggle {
+    right: 10px;
+  }
+
+  .discord-float {
+    right: 54px;
   }
 
   .install-command {
