@@ -66,6 +66,9 @@ const { Content } = await render(post);
     article :global(.install-block pre) { margin: 0; background: transparent; border: none; border-radius: 0; padding: 0; flex: 1; min-width: 0; }
     article :global(.install-command) { overflow-x: auto; justify-content: space-between; }
     article :global(.install-command code) { background: transparent; padding: 0; border-radius: 0; font-size: 0.875rem; }
+    article :global(.blog-cta) { margin: 1.75rem 0 0; text-align: center; }
+    article :global(.blog-cta-button) { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.85rem 1.25rem; border-radius: 999px; background: linear-gradient(135deg, #ff7a89 0%, var(--coral-bright) 52%, #ff9b6a 100%); color: #fff; font-weight: 800; text-decoration: none; box-shadow: 0 16px 38px rgba(224, 71, 90, 0.38), 0 0 0 1px rgba(255, 255, 255, 0.18) inset; transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease; }
+    article :global(.blog-cta-button:hover) { color: #fff; transform: translateY(-2px); filter: brightness(1.08); box-shadow: 0 20px 48px rgba(224, 71, 90, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.28) inset; }
   </style>
 
   <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
