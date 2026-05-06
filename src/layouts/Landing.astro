@@ -5,8 +5,8 @@ interface Props {
 }
 
 const {
-  title = 'ClawMem - Memory for OpenClaw',
-  description = 'ClawMem gives OpenClaw durable, searchable memory that survives resets, sessions, and time.'
+  title = 'ClawMem - Shared Memory for AI Agents',
+  description = 'ClawMem gives OpenClaw, Claude Code, Codex, and Hermes a shared memory layer that persists across sessions and agent handoffs.'
 } = Astro.props;
 ---
 
@@ -18,7 +18,7 @@ const {
     <meta name="color-scheme" content="light dark" />
     <meta name="description" content={description} />
     <meta property="og:title" content={title} />
-    <meta property="og:description" content="Your agent forgets everything. ClawMem gives it memory that persists across sessions, stays inspectable, and brings back the right context before the next run." />
+    <meta property="og:description" content="Shared memory for AI agents. ClawMem keeps context alive across sessions, agent handoffs, and team workflows — while staying inspectable and editable." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://clawmem.ai/" />
     <title>{title}</title>

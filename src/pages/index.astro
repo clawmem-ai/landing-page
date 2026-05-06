@@ -100,33 +100,206 @@ import '../styles/landing.css';
           </div>
 
           <h1 class="hero-title">ClawMem</h1>
-          <p class="hero-sub" data-i18n="hero.sub">The memory that actually persists.</p>
+          <p class="hero-sub" data-i18n="hero.sub">Shared memory for AI agents.</p>
           <p class="hero-desc" data-i18n="hero.desc">
-            Records your conversations, extracts key facts, searches by relevance,
-            and injects the right context before every session. All inspectable, all editable, all yours.
+            ClawMem gives OpenClaw, Claude Code, Codex, and Hermes a shared memory layer that persists across sessions, survives agent handoffs, keeps team context in sync, and stays inspectable, editable, and yours.
           </p>
           <div class="hero-install-block">
-            <p class="hero-install-hint" data-i18n-html="hero.hint"><span class="hint-action" data-i18n="hero.hint.action">Copy this</span> into your OpenClaw chat to get started</p>
-            <div class="install-block">
-              <div class="install-block-head">
-                <span class="code-dot"></span>
-                <span class="code-dot"></span>
-                <span class="code-dot"></span>
-                <span class="install-method" data-i18n="hero.paste">paste in OpenClaw</span>
+            <p class="hero-install-hint" data-i18n="hero.hint">Choose your agent and copy the quick start.</p>
+            <div class="agent-tabs" data-agent-tabs>
+              <div class="agent-tab-bar" role="tablist" aria-label="Choose agent quick start">
+                <button class="agent-tab is-active" type="button" data-agent-target="openclaw" aria-selected="true">OpenClaw</button>
+                <button class="agent-tab" type="button" data-agent-target="hermes" aria-selected="false">Hermes</button>
+                <button class="agent-tab" type="button" data-agent-target="claude" aria-selected="false">Claude Code</button>
+                <button class="agent-tab" type="button" data-agent-target="codex" aria-selected="false">Codex</button>
+                <button class="agent-tab" type="button" data-agent-target="mcp" aria-selected="false">MCP</button>
               </div>
-              <div class="install-command">
-                <code data-onboarding-command>Read https://clawmem.ai/SKILL.md and follow the instructions to install ClawMem, start recording chats, and build your memory graph in OpenClaw</code>
-                <button
-                  type="button"
-                  class="copy-btn"
-                  data-copy-button="hero-skill"
-                  data-copy-text="Read https://clawmem.ai/SKILL.md and follow the instructions to install ClawMem, start recording chats, and build your memory graph in OpenClaw"
-                  aria-label="Copy install command"
-                >
-                  <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                  <svg class="copy-icon copy-icon-check" viewBox="0 0 24 24" width="14" height="14"><path d="M20 7L10 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </button>
+              <div class="install-block agent-tab-shell">
+                <div class="install-block-head">
+                  <span class="code-dot"></span>
+                  <span class="code-dot"></span>
+                  <span class="code-dot"></span>
+                  <span class="install-method" data-i18n="hero.paste">quick start by agent</span>
+                </div>
+
+              <div class="agent-panel is-active" data-agent-panel="openclaw">
+                <div class="install-command">
+                  <code>Read https://clawmem.ai/SKILL.md and follow the instructions to install ClawMem, start recording chats, and build your memory graph in OpenClaw</code>
+                  <button type="button" class="copy-btn" data-copy-button="hero-openclaw" data-copy-text="Read https://clawmem.ai/SKILL.md and follow the instructions to install ClawMem, start recording chats, and build your memory graph in OpenClaw" aria-label="Copy OpenClaw quick start">
+                    <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <svg class="copy-icon copy-icon-check" viewBox="0 0 24 24" width="14" height="14"><path d="M20 7L10 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </button>
+                </div>
               </div>
+
+              <div class="agent-panel" data-agent-panel="hermes" hidden>
+                <div class="install-command">
+                  <code>curl -fsSL https://raw.githubusercontent.com/clawmem-ai/clawmem-hermes-plugin/main/install.sh | bash</code>
+                  <button type="button" class="copy-btn" data-copy-button="hero-hermes" data-copy-text="curl -fsSL https://raw.githubusercontent.com/clawmem-ai/clawmem-hermes-plugin/main/install.sh | bash" aria-label="Copy Hermes quick start">
+                    <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <svg class="copy-icon copy-icon-check" viewBox="0 0 24 24" width="14" height="14"><path d="M20 7L10 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </button>
+                </div>
+                <p class="agent-step-text">Start a new Hermes session after the script finishes. If activation fails, run <code>hermes memory setup</code>. Verify anytime with <code>hermes memory status</code>.</p>
+              </div>
+
+              <div class="agent-panel" data-agent-panel="claude" hidden>
+                <div class="agent-steps">
+                  <div class="agent-step">
+                    <div class="agent-step-label">Step 1 · Add the marketplace and install the plugin</div>
+                    <div class="install-command install-command--mini">
+                      <code>claude plugin marketplace add https://github.com/clawmem-ai/clawmem-claude-code-plugin
+claude plugin install clawmem-claude-code-plugin@clawmem</code>
+                      <button type="button" class="copy-btn" data-copy-button="hero-claude-install-flow" data-copy-text="claude plugin marketplace add https://github.com/clawmem-ai/clawmem-claude-code-plugin&#10;claude plugin install clawmem-claude-code-plugin@clawmem" aria-label="Copy Claude install flow">
+                        <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <svg class="copy-icon copy-icon-check" viewBox="0 0 24 24" width="14" height="14"><path d="M20 7L10 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="agent-step">
+                    <div class="agent-step-label">Step 2 · Start Claude Code</div>
+                    <div class="install-command install-command--mini">
+                      <code>claude</code>
+                      <button type="button" class="copy-btn" data-copy-button="hero-claude-run" data-copy-text="claude" aria-label="Copy Claude start command">
+                        <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <svg class="copy-icon copy-icon-check" viewBox="0 0 24 24" width="14" height="14"><path d="M20 7L10 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="agent-panel" data-agent-panel="codex" hidden>
+                <div class="agent-steps">
+                  <div class="agent-step">
+                    <div class="agent-step-label">Step 1 · Clone the plugin</div>
+                    <div class="install-command install-command--mini">
+                      <code>git clone https://github.com/clawmem-ai/clawmem-codex-plugin ~/clawmem-codex-plugin</code>
+                      <button type="button" class="copy-btn" data-copy-button="hero-codex-clone" data-copy-text="git clone https://github.com/clawmem-ai/clawmem-codex-plugin ~/clawmem-codex-plugin" aria-label="Copy Codex clone command">
+                        <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <svg class="copy-icon copy-icon-check" viewBox="0 0 24 24" width="14" height="14"><path d="M20 7L10 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      </button>
+                    </div>
+                    <p class="agent-step-text">Keep the repo at <code>~/clawmem-codex-plugin</code> as a sibling of <code>~/.agents</code> — not inside <code>~/.agents/plugins</code>.</p>
+                  </div>
+                  <div class="agent-step">
+                    <div class="agent-step-label">Step 2 · Create ~/.agents/plugins/marketplace.json</div>
+                    <div class="install-command install-command--json">
+                      <code>&#123;
+  "name": "clawmem-ai",
+  "interface": &#123; "displayName": "ClawMem" &#125;,
+  "plugins": [&#123;
+    "name": "clawmem",
+    "source": &#123; "source": "local", "path": "./clawmem-codex-plugin" &#125;,
+    "policy": &#123; "installation": "AVAILABLE", "authentication": "ON_INSTALL" &#125;,
+    "category": "Productivity"
+  &#125;]
+&#125;</code>
+                      <button type="button" class="copy-btn" data-copy-button="hero-codex-marketplace-json" data-copy-text="&#123;&#10;  &quot;name&quot;: &quot;clawmem-ai&quot;,&#10;  &quot;interface&quot;: &#123; &quot;displayName&quot;: &quot;ClawMem&quot; &#125;,&#10;  &quot;plugins&quot;: [&#123;&#10;    &quot;name&quot;: &quot;clawmem&quot;,&#10;    &quot;source&quot;: &#123; &quot;source&quot;: &quot;local&quot;, &quot;path&quot;: &quot;./clawmem-codex-plugin&quot; &#125;,&#10;    &quot;policy&quot;: &#123; &quot;installation&quot;: &quot;AVAILABLE&quot;, &quot;authentication&quot;: &quot;ON_INSTALL&quot; &#125;,&#10;    &quot;category&quot;: &quot;Productivity&quot;&#10;  &#125;]&#10;&#125;" aria-label="Copy Codex marketplace JSON">
+                        <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <svg class="copy-icon copy-icon-check" viewBox="0 0 24 24" width="14" height="14"><path d="M20 7L10 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="agent-step">
+                    <div class="agent-step-label">Step 3 · Restart Codex and install from the Plugins UI</div>
+                    <p class="agent-step-text">Restart Codex because marketplace changes do not hot-reload. Then open the Plugins UI, install ClawMem from the clawmem-ai marketplace, and skip extra MCP config unless you want the raw tools only.</p>
+                  </div>
+                  <div class="agent-step">
+                    <div class="agent-step-label">Step 4 · Optional: enable hooks for auto-recall and mirroring</div>
+                    <div class="install-command install-command--mini">
+                      <code>[features]
+codex_hooks = true</code>
+                    </div>
+                    <div class="install-command install-command--mini">
+                      <code>export CLAWMEM_CODEX_PLUGIN_ROOT=~/clawmem-codex-plugin
+cp "$CLAWMEM_CODEX_PLUGIN_ROOT/hooks/hooks.json" ~/.codex/hooks.json</code>
+                      <button type="button" class="copy-btn" data-copy-button="hero-codex-hooks" data-copy-text="export CLAWMEM_CODEX_PLUGIN_ROOT=~/clawmem-codex-plugin&#10;cp &quot;$CLAWMEM_CODEX_PLUGIN_ROOT/hooks/hooks.json&quot; ~/.codex/hooks.json" aria-label="Copy Codex hooks setup">
+                        <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <svg class="copy-icon copy-icon-check" viewBox="0 0 24 24" width="14" height="14"><path d="M20 7L10 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      </button>
+                    </div>
+                    <p class="agent-step-text">Put the export in your shell init so it persists. If you already have <code>~/.codex/hooks.json</code>, merge the <code>hooks.*</code> arrays instead of overwriting.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="agent-panel" data-agent-panel="mcp" hidden>
+                <div class="agent-steps">
+                  <div class="agent-step">
+                    <div class="agent-step-label">Step 1 · Launch the raw MCP server</div>
+                    <div class="install-command">
+                      <code>npx -y clawmem-mcp-server</code>
+                      <button type="button" class="copy-btn" data-copy-button="hero-mcp" data-copy-text="npx -y clawmem-mcp-server" aria-label="Copy MCP quick start">
+                        <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <svg class="copy-icon copy-icon-check" viewBox="0 0 24 24" width="14" height="14"><path d="M20 7L10 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="agent-step">
+                    <div class="agent-step-label">Step 2 · Or add it to your MCP config</div>
+                  <div class="install-command install-command--json">
+                    <code>&#123;
+  "mcpServers": &#123;
+    "clawmem": &#123;
+      "command": "npx",
+      "args": ["-y", "clawmem-mcp-server"]
+    &#125;
+  &#125;
+&#125;</code>
+                    <button type="button" class="copy-btn" data-copy-button="mcp-config-json" data-copy-text="&#123;&#10;  &quot;mcpServers&quot;: &#123;&#10;    &quot;clawmem&quot;: &#123;&#10;      &quot;command&quot;: &quot;npx&quot;,&#10;      &quot;args&quot;: [&quot;-y&quot;, &quot;clawmem-mcp-server&quot;]&#10;    &#125;&#10;  &#125;&#10;&#125;" aria-label="Copy MCP config JSON">
+                      <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      <svg class="copy-icon copy-icon-check" viewBox="0 0 24 24" width="14" height="14"><path d="M20 7L10 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                  </div>
+                </div>
+              </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── TEAM MEMORY SPOTLIGHT ── -->
+      <section id="team-memory" class="section-team-memory" data-reveal>
+        <div class="team-memory-shell surface">
+          <div class="team-memory-copy">
+            <p class="team-memory-kicker" data-i18n="teamMemory.kicker">Team memory</p>
+            <h2 class="section-heading team-memory-heading" data-i18n-html="teamMemory.heading">One <span class="claw-accent">shared memory layer</span> for the whole team</h2>
+            <p class="section-desc team-memory-desc" data-i18n="teamMemory.desc">Updates captured by one teammate become usable by the next agent immediately.</p>
+            <div class="team-memory-stats">
+              <div class="team-memory-stat" data-i18n="teamMemory.stat1">1 shared memory layer</div>
+              <div class="team-memory-stat" data-i18n="teamMemory.stat2">cross-agent handoffs</div>
+              <div class="team-memory-stat" data-i18n="teamMemory.stat3">no re-briefing</div>
+            </div>
+          </div>
+
+          <div class="team-memory-visual" aria-label="Team memory flow">
+            <div class="team-memory-lanes">
+              <div class="team-memory-lane">
+                <div class="team-memory-lane-name" data-i18n="teamMemory.lane1.name">Sarah · Claude Code</div>
+                <div class="team-memory-lane-note" data-i18n="teamMemory.lane1.note">client update saved</div>
+              </div>
+              <div class="team-memory-lane">
+                <div class="team-memory-lane-name" data-i18n="teamMemory.lane2.name">Hazel · Codex</div>
+                <div class="team-memory-lane-note" data-i18n="teamMemory.lane2.note">context recalled before work starts</div>
+              </div>
+            </div>
+
+            <div class="team-memory-core-card">
+              <div class="team-memory-core-title" data-i18n="teamMemory.core.title">Shared team memory</div>
+              <div class="team-memory-chip-row">
+                <span class="team-memory-chip" data-i18n="teamMemory.core.item1">meeting moved → Thu 2pm</span>
+                <span class="team-memory-chip" data-i18n="teamMemory.core.item2">proposal focus → sustainability</span>
+                <span class="team-memory-chip" data-i18n="teamMemory.core.item3">source → Sarah</span>
+              </div>
+            </div>
+
+            <div class="team-memory-recall">
+              <div class="team-memory-recall-label" data-i18n="teamMemory.recall.label">next run</div>
+              <div class="team-memory-recall-title" data-i18n="teamMemory.recall.title">Team context is already there</div>
+              <div class="team-memory-recall-desc" data-i18n="teamMemory.recall.desc">No Slack archaeology. No repeating the brief.</div>
             </div>
           </div>
         </div>
@@ -432,13 +605,13 @@ import '../styles/landing.css';
       <!-- ── UNDER THE HOOD ── -->
       <section class="section-hood" data-reveal>
         <h2 class="section-heading" data-i18n-html="hood.heading">Under the <span class="claw-accent">hood</span></h2>
-        <p class="section-desc" data-i18n="hood.desc">Memory is stored in a structured, inspectable backend inspired by GitHub workflows.</p>
+        <p class="section-desc" data-i18n="hood.desc">ClawMem sits between your agents and a structured, inspectable backend that keeps shared memory consistent across sessions.</p>
         <div class="hood-flow">
-          <div class="hood-node" data-i18n="hood.node1">OpenClaw Session</div>
+          <div class="hood-node" data-i18n="hood.node1">Agent Session</div>
           <div class="hood-arrow">&rarr;</div>
-          <div class="hood-node" data-i18n="hood.node2">ClawMem Plugin</div>
+          <div class="hood-node" data-i18n="hood.node2">ClawMem Integration</div>
           <div class="hood-arrow">&rarr;</div>
-          <div class="hood-node" data-i18n="hood.node3">Memory Backend</div>
+          <div class="hood-node" data-i18n="hood.node3">Shared Memory Backend</div>
           <div class="hood-arrow">&rarr;</div>
           <div class="hood-node" data-i18n="hood.node4">Next-Run Recall</div>
         </div>
@@ -492,39 +665,173 @@ import '../styles/landing.css';
             <div class="compare-col compare-col--without" data-i18n="compare.row5.without">Re-explain every session</div>
             <div class="compare-col compare-col--with" data-i18n="compare.row5.with">Explain once, remembered forever</div>
           </div>
+          <div class="compare-row">
+            <div class="compare-label" data-i18n="compare.row6.label">Team memory</div>
+            <div class="compare-col compare-col--without" data-i18n="compare.row6.without">Knowledge stays trapped in separate chats</div>
+            <div class="compare-col compare-col--with" data-i18n="compare.row6.with">Teammates and agents build on the same shared memory layer</div>
+          </div>
         </div>
       </section>
 
       <!-- ── FINAL CTA ── -->
       <section id="install" class="section-cta" data-reveal>
-        <h2 class="cta-title" data-i18n-html="cta.title">Stop restarting from <span class="claw-accent">zero</span>.</h2>
-        <p class="section-desc" data-i18n="cta.desc">Install in one step: paste this into your OpenClaw agent.</p>
+        <h2 class="cta-title" data-i18n-html="cta.title">Start with the agent you already <span class="claw-accent">use</span>.</h2>
+        <p class="section-desc" data-i18n="cta.desc">Copy the quick start for the agent you already use.</p>
         <div class="cta-install">
-          <div class="install-block">
-            <div class="install-block-head">
-              <span class="code-dot"></span>
-              <span class="code-dot"></span>
-              <span class="code-dot"></span>
-              <span class="install-method" data-i18n="cta.paste">paste in OpenClaw</span>
+          <div class="agent-tabs" data-agent-tabs>
+            <div class="agent-tab-bar" role="tablist" aria-label="Choose agent install">
+              <button class="agent-tab is-active" type="button" data-agent-target="openclaw" aria-selected="true">OpenClaw</button>
+              <button class="agent-tab" type="button" data-agent-target="hermes" aria-selected="false">Hermes</button>
+              <button class="agent-tab" type="button" data-agent-target="claude" aria-selected="false">Claude Code</button>
+              <button class="agent-tab" type="button" data-agent-target="codex" aria-selected="false">Codex</button>
+              <button class="agent-tab" type="button" data-agent-target="mcp" aria-selected="false">MCP</button>
             </div>
-            <div class="install-command">
-              <code>Read https://clawmem.ai/SKILL.md and follow the instructions to install ClawMem, start recording chats, and build your memory graph in OpenClaw</code>
-              <button
-                type="button"
-                class="copy-btn"
-                data-copy-button="cta-skill"
-                data-copy-text="Read https://clawmem.ai/SKILL.md and follow the instructions to install ClawMem, start recording chats, and build your memory graph in OpenClaw"
-                aria-label="Copy install command"
-              >
-                <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                <svg class="copy-icon copy-icon-check" viewBox="0 0 24 24" width="14" height="14"><path d="M20 7L10 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </button>
+            <div class="install-block agent-tab-shell">
+              <div class="install-block-head">
+                <span class="code-dot"></span>
+                <span class="code-dot"></span>
+                <span class="code-dot"></span>
+                <span class="install-method" data-i18n="cta.paste">quick start by agent</span>
+              </div>
+
+            <div class="agent-panel is-active" data-agent-panel="openclaw">
+              <div class="install-command">
+                <code>Read https://clawmem.ai/SKILL.md and follow the instructions to install ClawMem, start recording chats, and build your memory graph in OpenClaw</code>
+                <button type="button" class="copy-btn" data-copy-button="cta-openclaw" data-copy-text="Read https://clawmem.ai/SKILL.md and follow the instructions to install ClawMem, start recording chats, and build your memory graph in OpenClaw" aria-label="Copy OpenClaw quick start">
+                  <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <svg class="copy-icon copy-icon-check" viewBox="0 0 24 24" width="14" height="14"><path d="M20 7L10 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="agent-panel" data-agent-panel="hermes" hidden>
+              <div class="install-command">
+                <code>curl -fsSL https://raw.githubusercontent.com/clawmem-ai/clawmem-hermes-plugin/main/install.sh | bash</code>
+                <button type="button" class="copy-btn" data-copy-button="cta-hermes" data-copy-text="curl -fsSL https://raw.githubusercontent.com/clawmem-ai/clawmem-hermes-plugin/main/install.sh | bash" aria-label="Copy Hermes quick start">
+                  <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <svg class="copy-icon copy-icon-check" viewBox="0 0 24 24" width="14" height="14"><path d="M20 7L10 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+              </div>
+              <p class="agent-step-text">Start a new Hermes session after the script finishes. If activation fails, run <code>hermes memory setup</code>. Verify anytime with <code>hermes memory status</code>.</p>
+            </div>
+
+            <div class="agent-panel" data-agent-panel="claude" hidden>
+              <div class="agent-steps">
+                <div class="agent-step">
+                  <div class="agent-step-label">Step 1 · Add the marketplace and install the plugin</div>
+                  <div class="install-command install-command--mini">
+                    <code>claude plugin marketplace add https://github.com/clawmem-ai/clawmem-claude-code-plugin
+claude plugin install clawmem-claude-code-plugin@clawmem</code>
+                    <button type="button" class="copy-btn" data-copy-button="cta-claude-install-flow" data-copy-text="claude plugin marketplace add https://github.com/clawmem-ai/clawmem-claude-code-plugin&#10;claude plugin install clawmem-claude-code-plugin@clawmem" aria-label="Copy Claude install flow">
+                      <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      <svg class="copy-icon copy-icon-check" viewBox="0 0 24 24" width="14" height="14"><path d="M20 7L10 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="agent-step">
+                  <div class="agent-step-label">Step 2 · Start Claude Code</div>
+                  <div class="install-command install-command--mini">
+                    <code>claude</code>
+                    <button type="button" class="copy-btn" data-copy-button="cta-claude-run" data-copy-text="claude" aria-label="Copy Claude start command">
+                      <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      <svg class="copy-icon copy-icon-check" viewBox="0 0 24 24" width="14" height="14"><path d="M20 7L10 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="agent-panel" data-agent-panel="codex" hidden>
+              <div class="agent-steps">
+                <div class="agent-step">
+                  <div class="agent-step-label">Step 1 · Clone the plugin</div>
+                  <div class="install-command install-command--mini">
+                    <code>git clone https://github.com/clawmem-ai/clawmem-codex-plugin ~/clawmem-codex-plugin</code>
+                    <button type="button" class="copy-btn" data-copy-button="cta-codex-clone" data-copy-text="git clone https://github.com/clawmem-ai/clawmem-codex-plugin ~/clawmem-codex-plugin" aria-label="Copy Codex clone command">
+                      <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      <svg class="copy-icon copy-icon-check" viewBox="0 0 24 24" width="14" height="14"><path d="M20 7L10 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                  <p class="agent-step-text">Keep the repo at <code>~/clawmem-codex-plugin</code> as a sibling of <code>~/.agents</code> — not inside <code>~/.agents/plugins</code>.</p>
+                </div>
+                <div class="agent-step">
+                  <div class="agent-step-label">Step 2 · Create ~/.agents/plugins/marketplace.json</div>
+                  <div class="install-command install-command--json">
+                    <code>&#123;
+  "name": "clawmem-ai",
+  "interface": &#123; "displayName": "ClawMem" &#125;,
+  "plugins": [&#123;
+    "name": "clawmem",
+    "source": &#123; "source": "local", "path": "./clawmem-codex-plugin" &#125;,
+    "policy": &#123; "installation": "AVAILABLE", "authentication": "ON_INSTALL" &#125;,
+    "category": "Productivity"
+  &#125;]
+&#125;</code>
+                    <button type="button" class="copy-btn" data-copy-button="codex-marketplace-json" data-copy-text="&#123;&#10;  &quot;name&quot;: &quot;clawmem-ai&quot;,&#10;  &quot;interface&quot;: &#123; &quot;displayName&quot;: &quot;ClawMem&quot; &#125;,&#10;  &quot;plugins&quot;: [&#123;&#10;    &quot;name&quot;: &quot;clawmem&quot;,&#10;    &quot;source&quot;: &#123; &quot;source&quot;: &quot;local&quot;, &quot;path&quot;: &quot;./clawmem-codex-plugin&quot; &#125;,&#10;    &quot;policy&quot;: &#123; &quot;installation&quot;: &quot;AVAILABLE&quot;, &quot;authentication&quot;: &quot;ON_INSTALL&quot; &#125;,&#10;    &quot;category&quot;: &quot;Productivity&quot;&#10;  &#125;]&#10;&#125;" aria-label="Copy Codex marketplace JSON">
+                      <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      <svg class="copy-icon copy-icon-check" viewBox="0 0 24 24" width="14" height="14"><path d="M20 7L10 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="agent-step">
+                  <div class="agent-step-label">Step 3 · Restart Codex and install from the Plugins UI</div>
+                  <p class="agent-step-text">Restart Codex because marketplace changes do not hot-reload. Then install ClawMem from the clawmem-ai marketplace, and skip extra MCP config unless you want the raw tools only.</p>
+                </div>
+                <div class="agent-step">
+                  <div class="agent-step-label">Step 4 · Optional: enable hooks for auto-recall and mirroring</div>
+                  <div class="install-command install-command--mini">
+                    <code>[features]
+codex_hooks = true</code>
+                  </div>
+                  <div class="install-command install-command--mini">
+                    <code>export CLAWMEM_CODEX_PLUGIN_ROOT=~/clawmem-codex-plugin
+cp "$CLAWMEM_CODEX_PLUGIN_ROOT/hooks/hooks.json" ~/.codex/hooks.json</code>
+                    <button type="button" class="copy-btn" data-copy-button="cta-codex-hooks" data-copy-text="export CLAWMEM_CODEX_PLUGIN_ROOT=~/clawmem-codex-plugin&#10;cp &quot;$CLAWMEM_CODEX_PLUGIN_ROOT/hooks/hooks.json&quot; ~/.codex/hooks.json" aria-label="Copy Codex hooks setup">
+                      <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      <svg class="copy-icon copy-icon-check" viewBox="0 0 24 24" width="14" height="14"><path d="M20 7L10 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                  <p class="agent-step-text">Put the export in your shell init so it persists. If you already have <code>~/.codex/hooks.json</code>, merge the <code>hooks.*</code> arrays instead of overwriting.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="agent-panel" data-agent-panel="mcp" hidden>
+              <div class="agent-steps">
+                <div class="agent-step">
+                  <div class="agent-step-label">Step 1 · Launch the raw MCP server</div>
+                  <div class="install-command">
+                    <code>npx -y clawmem-mcp-server</code>
+                    <button type="button" class="copy-btn" data-copy-button="cta-mcp" data-copy-text="npx -y clawmem-mcp-server" aria-label="Copy MCP quick start">
+                      <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      <svg class="copy-icon copy-icon-check" viewBox="0 0 24 24" width="14" height="14"><path d="M20 7L10 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="agent-step">
+                  <div class="agent-step-label">Step 2 · Or add it to your MCP config</div>
+                  <div class="install-command install-command--json">
+                    <code>&#123;
+  "mcpServers": &#123;
+    "clawmem": &#123;
+      "command": "npx",
+      "args": ["-y", "clawmem-mcp-server"]
+    &#125;
+  &#125;
+&#125;</code>
+                    <button type="button" class="copy-btn" data-copy-button="mcp-config-json" data-copy-text="&#123;&#10;  &quot;mcpServers&quot;: &#123;&#10;    &quot;clawmem&quot;: &#123;&#10;      &quot;command&quot;: &quot;npx&quot;,&#10;      &quot;args&quot;: [&quot;-y&quot;, &quot;clawmem-mcp-server&quot;]&#10;    &#125;&#10;  &#125;&#10;&#125;" aria-label="Copy MCP config JSON">
+                      <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      <svg class="copy-icon copy-icon-check" viewBox="0 0 24 24" width="14" height="14"><path d="M20 7L10 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-        <p class="cta-note" data-i18n="cta.note">ClawMem is installed through OpenClaw. The agent reads the setup skill and completes the configuration for you.</p>
+        <p class="cta-note" data-i18n="cta.note">Each tab gives you a copyable quick start for that agent.</p>
         <p class="cta-privacy" data-i18n="cta.privacy">Your memories are stored privately and belong entirely to you. Browse, export, or delete anytime.</p>
-        <p class="cta-console" data-i18n-html="cta.console">Already installed? <a href="https://console.clawmem.ai/" target="_blank" rel="noreferrer">Go to Console</a> to manage your memories.</p>
+        <p class="cta-console" data-i18n-html="cta.console">Already installed? <a href="https://console.clawmem.ai/" target="_blank" rel="noreferrer">Go to Console</a> to inspect your shared memory.</p>
       </section>
     </main>
 
@@ -540,7 +847,7 @@ import '../styles/landing.css';
           <span class="footer-separator">&middot;</span>
           <a href="https://console.clawmem.ai/" target="_blank" rel="noreferrer" data-i18n="nav.console">Console</a>
         </div>
-        <p class="copyright" data-i18n="footer.tagline">Structured memory for OpenClaw agents.</p>
+        <p class="copyright" data-i18n="footer.tagline">Shared memory for OpenClaw, Claude Code, Codex, and Hermes.</p>
         <p class="disclaimer" data-i18n="footer.license">Apache-2.0 License</p>
       </div>
     </footer>

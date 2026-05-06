@@ -615,3 +615,33 @@ if (!prefersReducedMotion.matches) {
 } else {
   reveals.forEach((el) => el.classList.add("is-visible"));
 }
+
+
+/* ── Agent quick-start tabs ── */
+(() => {
+  const groups = Array.from(document.querySelectorAll('[data-agent-tabs]'));
+  if (!groups.length) return;
+
+  for (const group of groups) {
+    const tabs = Array.from(group.querySelectorAll('.agent-tab'));
+    const panels = Array.from(group.querySelectorAll('.agent-panel'));
+    if (!tabs.length || !panels.length) continue;
+
+    function activate(target) {
+      tabs.forEach((tab) => {
+        const active = tab.dataset.agentTarget === target;
+        tab.classList.toggle('is-active', active);
+        tab.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
+      panels.forEach((panel) => {
+        const active = panel.dataset.agentPanel === target;
+        panel.classList.toggle('is-active', active);
+        panel.hidden = !active;
+      });
+    }
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => activate(tab.dataset.agentTarget));
+    });
+  }
+})();
