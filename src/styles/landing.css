@@ -1939,6 +1939,9 @@ body.has-motion [data-reveal].is-visible {
 }
 
 .install-command--json code {
+  display: block;
+  width: 100%;
+  text-align: left;
   white-space: pre-wrap;
   font-size: 0.8rem;
 }
