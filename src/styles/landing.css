@@ -1539,7 +1539,15 @@ section {
   font-size: 0.875rem;
   line-height: 1.7;
   color: var(--text-secondary);
-  word-break: break-word;
+  text-align: center;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.install-command--bash code,
+.install-command--config code {
+  text-align: left;
 }
 
 .copy-btn {
