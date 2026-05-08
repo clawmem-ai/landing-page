@@ -133,7 +133,7 @@ import '../styles/landing.css';
               </div>
 
               <div class="agent-panel" data-agent-panel="hermes" hidden>
-                <div class="install-command">
+                <div class="install-command install-command--bash">
                   <code>curl -fsSL https://raw.githubusercontent.com/clawmem-ai/clawmem-hermes-plugin/main/install.sh | bash</code>
                   <button type="button" class="copy-btn" data-copy-button="hero-hermes" data-copy-text="curl -fsSL https://raw.githubusercontent.com/clawmem-ai/clawmem-hermes-plugin/main/install.sh | bash" aria-label="Copy Hermes quick start">
                     <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -147,7 +147,7 @@ import '../styles/landing.css';
                 <div class="agent-steps">
                   <div class="agent-step">
                     <div class="agent-step-label">Step 1 · Add the marketplace and install the plugin</div>
-                    <div class="install-command install-command--mini">
+                    <div class="install-command install-command--mini install-command--bash">
                       <code>claude plugin marketplace add https://github.com/clawmem-ai/clawmem-claude-code-plugin
 claude plugin install clawmem-claude-code-plugin@clawmem</code>
                       <button type="button" class="copy-btn" data-copy-button="hero-claude-install-flow" data-copy-text="claude plugin marketplace add https://github.com/clawmem-ai/clawmem-claude-code-plugin&#10;claude plugin install clawmem-claude-code-plugin@clawmem" aria-label="Copy Claude install flow">
@@ -158,7 +158,7 @@ claude plugin install clawmem-claude-code-plugin@clawmem</code>
                   </div>
                   <div class="agent-step">
                     <div class="agent-step-label">Step 2 · Start Claude Code</div>
-                    <div class="install-command install-command--mini">
+                    <div class="install-command install-command--mini install-command--bash">
                       <code>claude</code>
                       <button type="button" class="copy-btn" data-copy-button="hero-claude-run" data-copy-text="claude" aria-label="Copy Claude start command">
                         <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -173,7 +173,7 @@ claude plugin install clawmem-claude-code-plugin@clawmem</code>
                 <div class="agent-steps">
                   <div class="agent-step">
                     <div class="agent-step-label">Step 1 · Clone the plugin</div>
-                    <div class="install-command install-command--mini">
+                    <div class="install-command install-command--mini install-command--bash">
                       <code>git clone https://github.com/clawmem-ai/clawmem-codex-plugin ~/clawmem-codex-plugin</code>
                       <button type="button" class="copy-btn" data-copy-button="hero-codex-clone" data-copy-text="git clone https://github.com/clawmem-ai/clawmem-codex-plugin ~/clawmem-codex-plugin" aria-label="Copy Codex clone command">
                         <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -207,11 +207,11 @@ claude plugin install clawmem-claude-code-plugin@clawmem</code>
                   </div>
                   <div class="agent-step">
                     <div class="agent-step-label">Step 4 · Optional: enable hooks for auto-recall and mirroring</div>
-                    <div class="install-command install-command--mini">
+                    <div class="install-command install-command--mini install-command--config">
                       <code>[features]
 codex_hooks = true</code>
                     </div>
-                    <div class="install-command install-command--mini">
+                    <div class="install-command install-command--mini install-command--bash">
                       <code>export CLAWMEM_CODEX_PLUGIN_ROOT=~/clawmem-codex-plugin
 cp "$CLAWMEM_CODEX_PLUGIN_ROOT/hooks/hooks.json" ~/.codex/hooks.json</code>
                       <button type="button" class="copy-btn" data-copy-button="hero-codex-hooks" data-copy-text="export CLAWMEM_CODEX_PLUGIN_ROOT=~/clawmem-codex-plugin&#10;cp &quot;$CLAWMEM_CODEX_PLUGIN_ROOT/hooks/hooks.json&quot; ~/.codex/hooks.json" aria-label="Copy Codex hooks setup">
@@ -228,7 +228,7 @@ cp "$CLAWMEM_CODEX_PLUGIN_ROOT/hooks/hooks.json" ~/.codex/hooks.json</code>
                 <div class="agent-steps">
                   <div class="agent-step">
                     <div class="agent-step-label">Step 1 · Launch the raw MCP server</div>
-                    <div class="install-command">
+                    <div class="install-command install-command--bash">
                       <code>npx -y clawmem-mcp-server</code>
                       <button type="button" class="copy-btn" data-copy-button="hero-mcp" data-copy-text="npx -y clawmem-mcp-server" aria-label="Copy MCP quick start">
                         <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -705,7 +705,7 @@ cp "$CLAWMEM_CODEX_PLUGIN_ROOT/hooks/hooks.json" ~/.codex/hooks.json</code>
             </div>
 
             <div class="agent-panel" data-agent-panel="hermes" hidden>
-              <div class="install-command">
+              <div class="install-command install-command--bash">
                 <code>curl -fsSL https://raw.githubusercontent.com/clawmem-ai/clawmem-hermes-plugin/main/install.sh | bash</code>
                 <button type="button" class="copy-btn" data-copy-button="cta-hermes" data-copy-text="curl -fsSL https://raw.githubusercontent.com/clawmem-ai/clawmem-hermes-plugin/main/install.sh | bash" aria-label="Copy Hermes quick start">
                   <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -719,7 +719,7 @@ cp "$CLAWMEM_CODEX_PLUGIN_ROOT/hooks/hooks.json" ~/.codex/hooks.json</code>
               <div class="agent-steps">
                 <div class="agent-step">
                   <div class="agent-step-label">Step 1 · Add the marketplace and install the plugin</div>
-                  <div class="install-command install-command--mini">
+                  <div class="install-command install-command--mini install-command--bash">
                     <code>claude plugin marketplace add https://github.com/clawmem-ai/clawmem-claude-code-plugin
 claude plugin install clawmem-claude-code-plugin@clawmem</code>
                     <button type="button" class="copy-btn" data-copy-button="cta-claude-install-flow" data-copy-text="claude plugin marketplace add https://github.com/clawmem-ai/clawmem-claude-code-plugin&#10;claude plugin install clawmem-claude-code-plugin@clawmem" aria-label="Copy Claude install flow">
@@ -730,7 +730,7 @@ claude plugin install clawmem-claude-code-plugin@clawmem</code>
                 </div>
                 <div class="agent-step">
                   <div class="agent-step-label">Step 2 · Start Claude Code</div>
-                  <div class="install-command install-command--mini">
+                  <div class="install-command install-command--mini install-command--bash">
                     <code>claude</code>
                     <button type="button" class="copy-btn" data-copy-button="cta-claude-run" data-copy-text="claude" aria-label="Copy Claude start command">
                       <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -745,7 +745,7 @@ claude plugin install clawmem-claude-code-plugin@clawmem</code>
               <div class="agent-steps">
                 <div class="agent-step">
                   <div class="agent-step-label">Step 1 · Clone the plugin</div>
-                  <div class="install-command install-command--mini">
+                  <div class="install-command install-command--mini install-command--bash">
                     <code>git clone https://github.com/clawmem-ai/clawmem-codex-plugin ~/clawmem-codex-plugin</code>
                     <button type="button" class="copy-btn" data-copy-button="cta-codex-clone" data-copy-text="git clone https://github.com/clawmem-ai/clawmem-codex-plugin ~/clawmem-codex-plugin" aria-label="Copy Codex clone command">
                       <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -779,11 +779,11 @@ claude plugin install clawmem-claude-code-plugin@clawmem</code>
                 </div>
                 <div class="agent-step">
                   <div class="agent-step-label">Step 4 · Optional: enable hooks for auto-recall and mirroring</div>
-                  <div class="install-command install-command--mini">
+                  <div class="install-command install-command--mini install-command--config">
                     <code>[features]
 codex_hooks = true</code>
                   </div>
-                  <div class="install-command install-command--mini">
+                  <div class="install-command install-command--mini install-command--bash">
                     <code>export CLAWMEM_CODEX_PLUGIN_ROOT=~/clawmem-codex-plugin
 cp "$CLAWMEM_CODEX_PLUGIN_ROOT/hooks/hooks.json" ~/.codex/hooks.json</code>
                     <button type="button" class="copy-btn" data-copy-button="cta-codex-hooks" data-copy-text="export CLAWMEM_CODEX_PLUGIN_ROOT=~/clawmem-codex-plugin&#10;cp &quot;$CLAWMEM_CODEX_PLUGIN_ROOT/hooks/hooks.json&quot; ~/.codex/hooks.json" aria-label="Copy Codex hooks setup">
@@ -800,7 +800,7 @@ cp "$CLAWMEM_CODEX_PLUGIN_ROOT/hooks/hooks.json" ~/.codex/hooks.json</code>
               <div class="agent-steps">
                 <div class="agent-step">
                   <div class="agent-step-label">Step 1 · Launch the raw MCP server</div>
-                  <div class="install-command">
+                  <div class="install-command install-command--bash">
                     <code>npx -y clawmem-mcp-server</code>
                     <button type="button" class="copy-btn" data-copy-button="cta-mcp" data-copy-text="npx -y clawmem-mcp-server" aria-label="Copy MCP quick start">
                       <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
