@@ -120,8 +120,12 @@
       activate(i);
       pauseAutoRotation();
 
-      // Analytics
-      if (typeof posthog !== "undefined" && posthog.capture) {
+      if (window.__clawmemTrack) {
+        window.__clawmemTrack("scenario_tab_clicked", {
+          scenario: SCENARIOS[i],
+          auto: false,
+        });
+      } else if (typeof posthog !== "undefined" && posthog.capture) {
         posthog.capture("scenario_tab_clicked", {
           scenario: SCENARIOS[i],
           auto: false,

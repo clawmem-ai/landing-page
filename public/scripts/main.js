@@ -41,18 +41,20 @@ copyButtons.forEach((btn) => {
     const text = btn.dataset.copyText ?? "";
     if (!text) return;
 
-    const copied = await copyText(text);
-    btn.classList.add("is-copied");
+	    const copied = await copyText(text);
+	    btn.dataset.copySuccess = copied ? "true" : "false";
+	    btn.classList.add("is-copied");
     if (copyFeedback) {
       const i18n = window.__i18n;
       copyFeedback.textContent = copied
         ? (i18n ? i18n.t("copy.success") : "Install command copied.")
         : (i18n ? i18n.t("copy.fail") : "Copy failed. Please copy manually.");
     }
-    setTimeout(() => {
-      btn.classList.remove("is-copied");
-      if (copyFeedback) copyFeedback.textContent = "";
-    }, 1600);
+	    setTimeout(() => {
+	      btn.classList.remove("is-copied");
+	      delete btn.dataset.copySuccess;
+	      if (copyFeedback) copyFeedback.textContent = "";
+	    }, 1600);
   });
 });
 
