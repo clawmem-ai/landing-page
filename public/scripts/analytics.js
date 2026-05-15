@@ -1,43 +1,170 @@
-/* ── PostHog Event Tracking ── */
-
 function ph(event, props) {
   if (typeof posthog !== "undefined" && posthog.capture) {
     posthog.capture(event, props);
   }
 }
 
-/* ── Theme toggle ── */
+function defaultAnalyticsEndpoint() {
+  const host = window.location.hostname;
+  if (host === "staging.clawmem.ai") {
+    return "https://git.staging.clawmem.ai/api/v3/analytics/events";
+  }
+  if (host === "clawmem.ai" || host === "www.clawmem.ai") {
+    return "https://git.clawmem.ai/api/v3/analytics/events";
+  }
+  if (host === "localhost" || host === "127.0.0.1") {
+    return "http://localhost:8080/api/v3/analytics/events";
+  }
+  return "";
+}
+
+const analyticsEndpoint = window.__CLAWMEM_ANALYTICS_ENDPOINT || defaultAnalyticsEndpoint();
+
+function currentPath() {
+  return window.location.pathname || "/";
+}
+
+function currentSource() {
+  const path = currentPath();
+  if (path.startsWith("/blog")) return "blog";
+  if (path.startsWith("/docs")) return "docs";
+  return "landing_page";
+}
+
+function referrerDomain() {
+  if (!document.referrer) return "";
+  try {
+    return new URL(document.referrer).hostname;
+  } catch {
+    return "";
+  }
+}
+
+function searchParam(name) {
+  return new URLSearchParams(window.location.search).get(name) || "";
+}
+
+function pathFromHref(href) {
+  if (!href) return "";
+  try {
+    const url = new URL(href, window.location.href);
+    return url.pathname || "/";
+  } catch {
+    return "";
+  }
+}
+
+function platformFromButton(buttonId) {
+  const id = (buttonId || "").toLowerCase();
+  if (id.includes("claude")) return "claude_code";
+  if (id.includes("codex")) return "codex";
+  if (id.includes("hermes")) return "hermes";
+  if (id.includes("openclaw")) return "openclaw";
+  if (id.includes("mcp")) return "mcp";
+  return "unknown";
+}
+
+function locationFromButton(buttonId, element) {
+  const id = (buttonId || "").toLowerCase();
+  if (id.startsWith("hero-")) return "hero";
+  if (id.startsWith("cta-")) return "cta";
+  if (id.startsWith("blog-")) return "blog";
+  if (element?.closest?.("article")) return "article";
+  if (element?.closest?.(".hero")) return "hero";
+  if (element?.closest?.(".section-cta")) return "cta";
+  return "unknown";
+}
+
+function linkLocation(a) {
+  if (a.closest(".nav-links")) return "nav";
+  if (a.closest(".footer-nav")) return "footer";
+  if (a.closest(".cta-console")) return "cta";
+  if (a.closest("article")) return "article";
+  return "unknown";
+}
+
+function linkTarget(a) {
+  const href = a.getAttribute("href") || "";
+  if (href.includes("console.clawmem.ai")) return "console";
+  return href.replace("#", "") || a.textContent.trim();
+}
+
+function frontendPayload(event, props = {}) {
+  return {
+    event_name: event,
+    source: props.source || currentSource(),
+    path: props.path || currentPath(),
+    target_path: props.target_path || "",
+    page: props.page || "",
+    platform: props.platform || "",
+    location: props.location || "",
+    button_id: props.button_id || "",
+    success: typeof props.success === "boolean" ? props.success : undefined,
+    traffic_source: props.traffic_source || "",
+    utm_source: searchParam("utm_source"),
+    referrer_domain: referrerDomain(),
+  };
+}
+
+function sendFrontendMetric(event, props) {
+  if (!analyticsEndpoint) return;
+
+  const body = JSON.stringify(frontendPayload(event, props));
+  if (navigator.sendBeacon) {
+    try {
+      const blob = new Blob([body], { type: "application/json" });
+      if (navigator.sendBeacon(analyticsEndpoint, blob)) return;
+    } catch {
+      // Fall back to fetch below.
+    }
+  }
+
+  fetch(analyticsEndpoint, {
+    method: "POST",
+    mode: "cors",
+    credentials: "omit",
+    keepalive: true,
+    headers: { "Content-Type": "application/json" },
+    body,
+  }).catch(() => {});
+}
+
+function track(event, props = {}) {
+  ph(event, props);
+  sendFrontendMetric(event, props);
+}
+
+window.__clawmemTrack = track;
+sendFrontendMetric("page_view", {});
+
 document.getElementById("theme-toggle")?.addEventListener("click", () => {
-  // read after toggle (main.js toggles first since it loads before this)
   requestAnimationFrame(() => {
-    ph("theme_toggled", {
+    track("theme_toggled", {
       theme: document.documentElement.dataset.theme || "dark",
     });
   });
 });
 
-/* ── Install command copy ── */
 document.querySelectorAll("[data-copy-button]").forEach((btn) => {
   btn.addEventListener("click", () => {
-    const location = btn.dataset.copyButton === "hero-skill" ? "hero" : "cta";
-    // delay slightly so we can check the is-copied class set by main.js
+    const buttonId = btn.dataset.copyButton || "unknown";
     setTimeout(() => {
-      ph("install_command_copied", {
-        location,
-        success: btn.classList.contains("is-copied"),
+      track("install_command_copied", {
+        button_id: buttonId,
+        platform: platformFromButton(buttonId),
+        location: locationFromButton(buttonId, btn),
+        success: btn.dataset.copySuccess === "true",
       });
     }, 100);
   });
 });
 
-/* ── Language changed ── */
 document.querySelectorAll("[data-lang-option]").forEach((btn) => {
   btn.addEventListener("click", () => {
     const prevLang = document.documentElement.lang || "en";
-    // i18n.js updates lang synchronously on click
     requestAnimationFrame(() => {
       const newLang = document.documentElement.lang || "en";
-      ph("language_changed", {
+      track("language_changed", {
         from: prevLang,
         to: newLang,
         language: newLang,
@@ -46,33 +173,46 @@ document.querySelectorAll("[data-lang-option]").forEach((btn) => {
   });
 });
 
-/* ── Link click helper ── */
-function linkTarget(a) {
-  const href = a.getAttribute("href") || "";
-  if (href.includes("console.clawmem.ai")) return "console";
-  return href.replace("#", "") || a.textContent.trim();
-}
-
-/* ── Nav link clicks ── */
 document.querySelectorAll(".nav-links a").forEach((a) => {
   a.addEventListener("click", () => {
-    ph("nav_clicked", { target: linkTarget(a) });
+    track("nav_clicked", {
+      target: linkTarget(a),
+      location: "nav",
+      target_path: pathFromHref(a.href),
+    });
   });
 });
 
-/* ── Footer link clicks ── */
 document.querySelectorAll(".footer-nav a").forEach((a) => {
   a.addEventListener("click", () => {
-    ph("footer_clicked", { target: linkTarget(a) });
+    track("footer_clicked", {
+      target: linkTarget(a),
+      location: "footer",
+      target_path: pathFromHref(a.href),
+    });
   });
 });
 
-/* ── CTA console link ── */
-document.querySelector(".cta-console a")?.addEventListener("click", () => {
-  ph("console_clicked", { location: "cta" });
+document.querySelectorAll("a[href]").forEach((a) => {
+  a.addEventListener("click", () => {
+    const href = a.getAttribute("href") || "";
+    const location = linkLocation(a);
+    const targetPath = pathFromHref(a.href);
+    if (href.includes("console.clawmem.ai")) {
+      track("console_clicked", {
+        location,
+        target_path: targetPath,
+      });
+    }
+    if (targetPath === "/blog/" || targetPath.startsWith("/blog/")) {
+      track("blog_click", {
+        location,
+        target_path: targetPath,
+      });
+    }
+  });
 });
 
-/* ── Section viewed (scroll tracking) ── */
 const sectionMap = {
   "section-how": "features",
   "section-inspectable": "inspectable_memory",
@@ -91,7 +231,7 @@ if ("IntersectionObserver" in window) {
         for (const [cls, name] of Object.entries(sectionMap)) {
           if (el.classList.contains(cls) && !viewedSections.has(name)) {
             viewedSections.add(name);
-            ph("section_viewed", { section: name });
+            track("section_viewed", { section: name });
             sectionObserver.unobserve(el);
             break;
           }
@@ -107,7 +247,6 @@ if ("IntersectionObserver" in window) {
   }
 }
 
-/* ── Hero viewed (track if user actually sees the hero content) ── */
 const heroEl = document.querySelector(".hero");
 if (heroEl && "IntersectionObserver" in window) {
   let heroTracked = false;
@@ -117,7 +256,7 @@ if (heroEl && "IntersectionObserver" in window) {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           heroTracked = true;
-          ph("section_viewed", { section: "hero" });
+          track("section_viewed", { section: "hero", location: "hero" });
           heroObs.disconnect();
         }
       });
@@ -127,7 +266,6 @@ if (heroEl && "IntersectionObserver" in window) {
   heroObs.observe(heroEl);
 }
 
-/* ── Scroll depth tracking ── */
 (() => {
   const milestones = [25, 50, 75, 100];
   const reached = new Set();
@@ -141,7 +279,7 @@ if (heroEl && "IntersectionObserver" in window) {
     for (const m of milestones) {
       if (pct >= m && !reached.has(m)) {
         reached.add(m);
-        ph("scroll_depth", { percent: m });
+        track("scroll_depth", { percent: m });
       }
     }
   }
@@ -158,10 +296,9 @@ if (heroEl && "IntersectionObserver" in window) {
   }, { passive: true });
 })();
 
-/* ── Initial page properties ── */
 requestAnimationFrame(() => {
   const i18n = window.__i18n;
-  posthog?.register?.({
+  window.posthog?.register?.({
     initial_theme: document.documentElement.dataset.theme || "dark",
     initial_language: i18n ? i18n.currentLang() : document.documentElement.lang || "en",
   });

@@ -8,6 +8,8 @@ const {
   title = 'ClawMem - Shared Memory for AI Agents',
   description = 'ClawMem gives OpenClaw, Claude Code, Codex, and Hermes a shared memory layer that persists across sessions and agent handoffs.'
 } = Astro.props;
+
+const analyticsEndpoint = import.meta.env.PUBLIC_CLAWMEM_ANALYTICS_ENDPOINT ?? '';
 ---
 
 <!doctype html>
@@ -35,6 +37,9 @@ const {
           api_host: 'https://us.i.posthog.com',
           defaults: '2026-01-30'
       })
+    </script>
+    <script define:vars={{ analyticsEndpoint }}>
+      window.__CLAWMEM_ANALYTICS_ENDPOINT = analyticsEndpoint;
     </script>
     <script is:inline>
       (() => {
