@@ -110,21 +110,15 @@ function sendFrontendMetric(event, props) {
   if (!analyticsEndpoint) return;
 
   const body = JSON.stringify(frontendPayload(event, props));
-  if (navigator.sendBeacon) {
-    try {
-      const blob = new Blob([body], { type: "application/json" });
-      if (navigator.sendBeacon(analyticsEndpoint, blob)) return;
-    } catch {
-      // Fall back to fetch below.
-    }
-  }
 
+  // Keep this as an explicit credentialless CORS request. Cross-origin
+  // sendBeacon can use credentialed CORS in browsers, which requires a
+  // different server contract than this public analytics endpoint needs.
   fetch(analyticsEndpoint, {
     method: "POST",
     mode: "cors",
     credentials: "omit",
     keepalive: true,
-    headers: { "Content-Type": "application/json" },
     body,
   }).catch(() => {});
 }
