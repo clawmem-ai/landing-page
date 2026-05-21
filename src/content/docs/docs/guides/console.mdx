@@ -1,0 +1,82 @@
+---
+title: Console
+description: Use console.clawmem.ai to browse your memory knowledge graph, inspect records, and govern ClawMem repositories.
+---
+
+The ClawMem Console is the web UI for the same GitHub-compatible backend your agents use.
+
+Open it at **[https://console.clawmem.ai](https://console.clawmem.ai)**.
+
+## Knowledge graph
+
+The Console Insights view renders your memory space as an **interactive knowledge graph** — every `type:memory` issue becomes a node, and cross-references (`#123` links between issues) become edges. Nodes are colored by knowledge type so you can see the shape of what your agents know at a glance.
+
+<img src="/blog/building-an-ai-maintained-knowledge-base-with-clawmem/01-untitled_design_-42-.png" alt="ClawMem Console knowledge graph: memory nodes colored by type (Core Facts, Lessons, Memory, Tasks, Skills, Summaries, Conventions, Conversations) connected by cross-reference edges, with aggregate counts for connections, people, and knowledge items." style="border-radius: 12px; border: 1px solid #28324f;" />
+
+The graph classifies memories by `kind:*` label into types: Core Facts, Lessons, Memory, Tasks, Skills, Summaries, Conventions, and Conversations. You can filter by type, click any node to inspect its full body and metadata, and follow edges to related records. Stats at the bottom show total connections, unique people, and total knowledge items in the repo.
+
+## What Console can do today
+
+Console is a **memory browser, knowledge graph, and workspace UI**.
+
+It can help you inspect and navigate:
+
+- **Knowledge graph** — interactive visualization of memory nodes and their connections
+- **Memory browser** — open and closed `type:memory` issues with label filters, search, and state toggle
+- **Conversation trail** — `type:conversation` issues with per-turn comments for source provenance
+- **Wiki** — browse wiki pages by tree/path, search content, inspect history and backlinks, create or edit pages with write access
+- **Repository settings** — labels, collaborators, and access controls when your account has permission
+- **Organization surfaces** — org, team, invitation, and collaborator management when available
+
+## Common workflows
+
+### See what your agents know
+
+1. Open the relevant memory repo.
+2. Go to **Insights** to see the knowledge graph.
+3. Filter by knowledge type to focus on decisions, conventions, or active tasks.
+4. Click a node to read the full memory body and follow source links.
+
+### Audit memory for a topic
+
+1. Go to **Memories**.
+2. Filter by `topic:*` or `kind:*` labels to narrow the list.
+3. Search by title or body text.
+4. Open a memory and follow `#123` source references to the originating conversation.
+
+### Find stale or incorrect memory
+
+1. Search for the memory by label or keyword.
+2. Confirm the body is wrong or outdated.
+3. Copy the issue number and ask an agent with write access to update or close it, or use `gh issue edit` / GitHub-compatible API directly.
+
+### Browse source conversations
+
+Conversation issues preserve source context. Use them when you need to answer "why did the agent remember this?" A useful memory issue links back to its source conversation issue or comment.
+
+### Manage wiki knowledge
+
+- browse wiki pages by tree/path
+- search wiki content
+- inspect page history and backlinks
+- create or edit wiki pages when you have write access
+
+Use wiki pages for team contracts, runbooks, source registries, concepts, and project documentation — and as an index linking related memory issues.
+
+### Manage repo settings and access
+
+When your account has the right permission, Console can help with:
+
+- repository name, description, visibility, and transfer/delete flows
+- label creation, editing, and deletion
+- collaborator access
+- team and organization access surfaces where available
+
+## Console and agents share one source of truth
+
+Console reads the same repos, issues, comments, labels, wiki pages, and permissions that agents use.
+
+- A memory you see in Console is the same `type:memory` issue an agent can recall.
+- A conversation you open in Console is the same `type:conversation` issue created by the integration.
+- A wiki page you edit in Console is stored through the GitHub-compatible wiki backend.
+- A label or access change can affect search, routing, governance, and team workflows.

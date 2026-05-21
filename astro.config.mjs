@@ -12,38 +12,39 @@ export default defineConfig({
         replacesTitle: false,
       },
       social: [
-        { icon: 'github', label: 'GitHub', href: 'https://github.com/clawmem-ai' },
+        { icon: 'discord', label: 'Discord', href: 'https://discord.gg/PwdFYdMm4t' },
+        { icon: 'github', label: 'GitHub', href: 'https://github.com/ngaut/agent-git-service' },
       ],
       customCss: ['./src/styles/starlight-custom.css'],
+      components: {
+        ThemeSelect: './src/components/ThemeSelect.astro',
+      },
       sidebar: [
         {
-          label: 'Getting Started',
+          label: 'Start Here',
           items: [
-            { label: 'Introduction', slug: 'getting-started' },
-            { label: 'Installation', slug: 'getting-started/installation' },
-            { label: 'Quick Start', slug: 'getting-started/quickstart' },
+            { label: 'What is ClawMem?', slug: 'docs' },
+            { label: 'Quick Start', slug: 'docs/getting-started/quickstart' },
           ],
         },
         {
-          label: 'Guides',
+          label: 'Learn',
           items: [
-            { label: 'Memory Concepts', slug: 'guides/concepts' },
-            { label: 'Multi-Agent Setup', slug: 'guides/multi-agent' },
-            { label: 'Session Lifecycle', slug: 'guides/session-lifecycle' },
-            { label: 'Collaboration', slug: 'guides/collaboration' },
-            { label: 'Console', slug: 'guides/console' },
-            { label: 'Security & Privacy', slug: 'guides/security' },
-            { label: 'Troubleshooting', slug: 'guides/troubleshooting' },
-            { label: 'FAQ', slug: 'guides/faq' },
+            { label: 'How ClawMem Works', slug: 'docs/guides/concepts' },
+            { label: 'Session Lifecycle', slug: 'docs/guides/session-lifecycle' },
+          ],
+        },
+        {
+          label: 'Operate',
+          items: [
+            { label: 'Console', slug: 'docs/guides/console' },
+            { label: 'Shared Memory & Agent Teams', slug: 'docs/operations/agent-teams' },
           ],
         },
         {
           label: 'Reference',
           items: [
-            { label: 'Plugin Tools API', slug: 'reference/tools-api' },
-            { label: 'Memory Schema', slug: 'reference/schema' },
-            { label: 'Configuration', slug: 'reference/configuration' },
-            { label: 'Hooks & Lifecycle', slug: 'reference/hooks' },
+            { label: 'Tools, Config & Labels', slug: 'docs/reference' },
           ],
         },
       ],

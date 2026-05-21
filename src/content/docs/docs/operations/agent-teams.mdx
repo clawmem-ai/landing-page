@@ -1,0 +1,167 @@
+---
+title: Shared Memory & Agent Teams
+description: How ClawMem permission layers enable shared memory across agents and teams, and how the clawmem-team skill adds structured multi-agent workflows.
+---
+
+import { Card, CardGrid, Steps, Aside } from '@astrojs/starlight/components';
+
+ClawMem is built around a straightforward idea: memory repositories are the sharing boundary. A repo can be private to one agent, shared with a project team, or governed at the organization level. The same permission model that governs code repos in GitHub governs memory repos in ClawMem.
+
+## Permission layers
+
+ClawMem uses a three-level permission hierarchy, mirroring GitHub's collaboration model.
+
+### Organization
+
+An organization is the top-level container for teams, repos, and members. Use an org when you want a stable shared boundary across multiple projects or agent groups — for example, a company or department that runs several agent workflows.
+
+Inside an org you can:
+- create teams and assign members (humans or agents) to them
+- set a default permission level for all repos in the org
+- manage org-wide invitations and memberships
+- create org-owned repos that belong to the org rather than an individual
+
+### Teams
+
+Teams are groups within an org. You can give a team access to specific repos at a specific permission level (`read`, `write`, or `admin`), and manage team membership independently of direct collaborator grants.
+
+Common patterns:
+- **One team per project** — all agents and humans working on a project share a team that has `write` access to the project memory repo
+- **A coordinator team** — has `admin` access to the shared task queue; worker agents have `write`
+- **A read-only team** — product or external stakeholders can inspect shared memory without being able to write
+
+### Repository access
+
+Every repo has its own access list. Access can come from:
+
+| Source | How it works |
+| --- | --- |
+| Org ownership | Repos owned by an org inherit the org's default permission |
+| Team grants | A team's access level applies to all team members |
+| Direct collaborator | Individual `read`, `write`, or `admin` grant on one repo |
+| Plugin bootstrap | Each agent auto-provisions a personal default repo on first use |
+
+| Permission level | What it allows |
+| --- | --- |
+| `read` | Recall and inspect memory — consume shared context without modifying it |
+| `write` | Create, update, comment on, and close issues through agent tools or `gh` — maintain shared memory |
+| `admin` | Manage repo settings, labels, collaborators, and team access |
+
+A coding agent can have `write` access to a project repo without ever seeing a user's private repo. A reviewer agent can have `read` access to shared context without permission to mutate it. This granularity is what makes shared memory safe to use in practice.
+
+## Setting up shared memory
+
+The simplest shared memory setup is a shared repo with direct collaborator grants.
+
+<Steps>
+1. One agent creates a shared memory repo: `memory_repo_create` (MCP) or `gh api user/repos` with the right visibility.
+2. Invite other agents or humans as collaborators with the appropriate permission level.
+3. Each participant points their memory operations at the shared repo using `memory_repo_set_default` or by targeting it explicitly in tool calls.
+4. Any agent with `write` access can store, update, or close memories. Any agent with `read` access can recall from it.
+</Steps>
+
+For org-scale setups with many repos and agents, the full permission hierarchy is available through the collaboration tools (`collaboration_org_invitation_*`, `collaboration_team_*`, `collaboration_repo_collaborator_*`).
+
+<Aside type="tip">
+Don't copy private memories into a shared repo just to make recall work. Instead, grant the agent access to the shared repo and let it use the shared repo for project-level memory while keeping personal preferences in its private default repo.
+</Aside>
+
+## What agents can share
+
+Shared repos work for any kind of memory that should outlive one agent's session:
+
+- **Project conventions and decisions** — coding style, architecture choices, naming rules
+- **Team knowledge** — operating runbooks, onboarding context, process docs in wiki pages
+- **Active task state** — what's in progress, who owns what, what's blocked
+- **Lessons learned** — post-mortems, root causes, rules derived from past failures
+- **Release or GTM context** — timeline, audience, messaging constraints
+
+Agents from different runtimes — Claude Code, Codex, Hermes, OpenClaw — can all read and write the same repo. Memory stored by one agent is available to any other agent with access.
+
+## Cross-runtime memory sharing
+
+Because ClawMem is backed by a GitHub-compatible API, memory is not locked to any one agent runtime. A Claude Code session can store a decision; a Codex session later in the day reads it back. A Hermes workflow produces a summary; an OpenClaw agent recalls it next week.
+
+The shared source of truth is always the repo itself — not a plugin-specific cache or a per-session state file.
+
+---
+
+## clawmem-team skill (optional)
+
+The sections above describe ClawMem's built-in shared memory and permission model. The `clawmem-team` skill is an **optional ecosystem addition** that composes these primitives into structured multi-agent workflows: explicit contracts, labeled task queues, reviewer loops, and handoff rules.
+
+You do not need `clawmem-team` for shared memory. Install it when you want a repeatable workflow template on top of the shared memory substrate.
+
+Read the launch story: [Stop Black-Box Multi-Agent Collaboration](/blog/clawmem-team-collaboration/)
+
+### Install
+
+For OpenClaw:
+
+```bash
+openclaw skills install clawmem-team
+```
+
+<Aside type="note">
+For Claude Code, Codex, and Hermes, you can set up shared repos, team contracts, and task queues directly through ClawMem tools — no separate install step needed.
+</Aside>
+
+### What the skill adds
+
+A `clawmem-team` workflow is built from visible ClawMem records:
+
+| Primitive | What it does |
+| --- | --- |
+| **Team Contract** | Canonical memory defining roles, label schema, handoff rules, and closure rules |
+| **Task queue** | Issues labeled by task kind, status, assignee, reviewer, blocker, and priority |
+| **Progress comments** | Evidence trail: current step, confirmed facts, open questions, next action |
+| **Wiki pages** | Long-form team knowledge: runbooks, role docs, operating manuals |
+
+Every task should cite the contract before acting:
+
+```markdown
+Team contract: fetch #123 before acting.
+```
+
+This might be `memory_get #123`, `gh issue view 123`, or an equivalent MCP call depending on your runtime. The important part is the explicit fetch — not relying on auto-recall to happen to include the contract.
+
+### Built-in templates
+
+| Template | Best for |
+| --- | --- |
+| `main-worker-summary-queue.md` | Coordinator + worker agents — main creates tasks, workers execute, summaries stay visible |
+| `reviewing.md` | Code, docs, design, or policy review — requester submits, reviewer checks, feedback recorded on review issues |
+
+### How to use it
+
+<Steps>
+1. **Describe the workflow.** Say what outcome you want, who participates, and whether it is one-off or recurring.
+2. **Review the blueprint.** The agent proposes roles, repo plan, access model, label schema, Team Contract location, and verification plan.
+3. **Approve bootstrap.** Only after approval should the agent create repos, set permissions, write the contract, and seed the first task.
+4. **Verify one handoff.** A real participant must fetch the contract, act on a task, comment progress, and close it according to the contract.
+</Steps>
+
+Example prompts:
+
+```text
+Set up a recurring release-notes team using ClawMem. One agent collects
+merged product changes, one writes the draft, one reviews for accuracy.
+Show me the blueprint before creating anything.
+```
+
+```text
+Use the reviewing workflow to review this docs page. The requester is
+my main agent, the reviewer should check factual accuracy against the
+ClawMem repos, and the result should be visible in a shared review queue.
+```
+
+### Verification checklist
+
+A Team is not ready just because the repo exists:
+
+- each participant can access the shared repo
+- the Team Contract exists with roles, label schema, and closure rules
+- one task cites the contract by id or path
+- a participant explicitly fetched the contract before acting
+- progress is written as comments on the task issue
+- terminal status closes the issue so the open queue filter no longer returns it

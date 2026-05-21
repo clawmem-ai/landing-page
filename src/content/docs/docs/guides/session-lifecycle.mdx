@@ -1,0 +1,92 @@
+---
+title: Session Lifecycle
+description: How ClawMem mirrors conversations, injects recall context, and finalizes sessions.
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+A ClawMem-enabled session has two layers: the live agent conversation and the GitHub-native record trail behind it.
+
+## Lifecycle overview
+
+<Steps>
+1. **Route resolution.** The plugin resolves the active agent identity, API endpoint, token, and `defaultRepo`.
+2. **Pre-turn recall.** When memory is likely to help and time budget allows, ClawMem searches active `type:memory` issues and injects compact context.
+3. **Transcript mirroring.** Real user and assistant messages are mirrored into a `type:conversation` issue.
+4. **Agent-side retention.** The bundled skill workflow decides whether durable memory should be added, updated, closed, or skipped.
+5. **Final summary.** On reset/end, the conversation issue receives a final title or summary. The transcript remains the durable source.
+</Steps>
+
+## Pre-turn recall
+
+ClawMem's normal serving path is memory-first:
+
+1. search open `type:memory` issues in the selected repo
+2. run the configured recall strategy
+3. deduplicate and rank results
+4. apply temporal validity where available
+5. inject a compact context block with source issue ids
+
+Conversation issues are not the default recall corpus. If a transcript detail is important for future answers, it should be distilled into a `type:memory` issue.
+
+## Transcript mirroring
+
+All major ClawMem integrations support transcript mirroring. For the OpenClaw plugin, mirroring is mandatory. For Claude Code (via the `Stop` hook), Hermes (via `agent_end`), and Codex (via the `Stop` hook), mirroring is automatic when hooks are active.
+
+- each real session gets one `type:conversation` issue
+- each normalized user/assistant message becomes its own comment by default
+- tool calls, tool results, system prompts, and heartbeat noise stay out by default
+- hidden message markers help retries avoid duplicate comments
+- mirror failures are retried and surfaced through status/repair flows
+
+The conversation issue is an episodic record: provenance, audit trail, and rebuild input.
+
+## Retention after turns
+
+Durable memory retention is not a server-side black box. It is a local agent workflow.
+
+The retention workflow looks for durable local alpha: facts, preferences, procedures, lessons, decisions, and tasks specific to a person, team, repo, or environment. It searches existing memories before writing and chooses one action:
+
+- **ADD** — create a new `type:memory` issue
+- **UPDATE** — edit the existing canonical memory
+- **DELETE** — close an incorrect or stale memory with a reason
+- **NONE** — do not store anything
+
+This lets the agent update memory deliberately instead of spraying duplicate notes.
+
+## Finalization
+
+At session close or reset, ClawMem waits for transcript mirroring to be sufficiently current, then writes a final conversation summary/title. If summary generation fails, the mirrored transcript remains the source of truth.
+
+`conversationSummaryMode` controls this behavior:
+
+```json5
+conversationSummaryMode: "llm"          // normal sessions
+conversationSummaryMode: "placeholder"  // bulk or eval runs
+```
+
+## Tuning knobs
+
+The following configuration keys are primarily for the OpenClaw plugin. Claude Code and Codex expose a subset via plugin config schema (`CLAWMEM_MEMORY_RECALL_LIMIT`, `CLAWMEM_MEMORY_AUTO_RECALL_LIMIT`). See each plugin's README for the full list of supported env vars.
+
+| Config | Purpose |
+| --- | --- |
+| `memoryAutoRecallLimit` | Max active memories injected before a turn |
+| `memoryAutoRecallStrategy` | `single`, `literal-repair`, or `query-planner` |
+| `memoryAutoRecallPlannerVariantLimit` | Max query-planner variants, up to 6 |
+| `apiRequestRetries` | Retries for transient read/search failures |
+| `transcriptCommentBatchSize` | Messages per transcript comment; keep `1` for normal use |
+| `summaryWaitTimeoutMs` | How long finalization waits for summary work |
+| `conversationSummaryMode` | `llm` or `placeholder` |
+
+<Aside type="note">
+For normal production use, keep `transcriptCommentBatchSize: 1`. Higher batch sizes are intended for bulk imports or evaluation harnesses where fewer API writes matter more than per-message readability.
+</Aside>
+
+## Failure semantics
+
+- Read/search failures may retry.
+- Write requests are not blindly retried unless idempotency markers make them safe.
+- If recall misses its latency budget, the turn proceeds without injected context.
+- If summary fails, the conversation transcript still exists.
+- If a memory is wrong, repair it by updating or closing the memory issue and linking the source.
