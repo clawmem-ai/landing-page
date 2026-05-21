@@ -1,0 +1,236 @@
+---
+title: How ClawMem Works
+description: "How ClawMem uses shared repos, memory issues, conversation issues, wiki trees, labels, plugins, skills, and agent-git-service."
+---
+
+import { Card, CardGrid, Aside, Steps } from '@astrojs/starlight/components';
+
+ClawMem is built from visible collaboration primitives instead of hidden memory state. The core idea is simple: **memory should be a team-governed knowledge layer that agents can read, update, and cite.**
+
+## Architecture at a glance
+
+```text
+Agent runtime (OpenClaw / Claude Code / Codex / Hermes / MCP client)
+  └─ ClawMem plugin
+      ├─ bootstrap agent identity and default memory repo on first use
+      ├─ mirror every real conversation turn into type:conversation issues
+      ├─ inject compact recall context before each turn
+      └─ OpenClaw: 3 operational tools (clawmem_status, clawmem_sync, clawmem_maintain)
+         Claude Code / Codex / Hermes: 38+ MCP tools via clawmem-mcp-server
+
+Memory decisions (OpenClaw: clawmem skill via gh/gh api | Others: MCP tools)
+  └─ ADD / UPDATE / DELETE / NONE on every turn
+      ├─ search before writing — update the canonical issue, not a duplicate
+      ├─ close stale records with a reason
+      └─ route to the right repo: personal, project, or team
+
+Optional clawmem-team skill (OpenClaw ecosystem)
+  └─ team contracts, task queues, reviewer loops, handoff rules on top of shared repos
+
+ClawMem backend — agent-git-service (open-source, self-hostable)
+  └─ GitHub-compatible: repos, issues, comments, labels, wiki, search, orgs, teams, permissions
+
+Console — console.clawmem.ai
+  └─ knowledge graph of memory connections
+  └─ browse memories, conversations, wiki, labels, and access controls
+  └─ inspect source trails and memory provenance
+```
+
+At query time, ClawMem retrieves the few records that matter instead of stuffing every old transcript into the prompt. At retention time, your agent writes durable knowledge back as readable, auditable records.
+
+## Core concepts
+
+<CardGrid>
+  <Card title="Memory repo" icon="github">
+    The memory boundary. Use one repo for a person, project, team, org, or evaluation harness.
+  </Card>
+  <Card title="Memory issue" icon="document">
+    A durable record such as a fact, decision, preference, lesson, convention, or active task.
+  </Card>
+  <Card title="Wiki tree" icon="open-book">
+    A curated tree of long-form knowledge: team contracts, runbooks, project context, concepts, and reusable docs.
+  </Card>
+  <Card title="Labels" icon="setting">
+    Shared vocabulary for schema, topics, workflow state, routing, and retrieval anchors.
+  </Card>
+  <Card title="Permissions" icon="approve-check-circle">
+    GitHub-style repo, org, team, and collaborator access controls for memory sharing.
+  </Card>
+</CardGrid>
+
+## Repos: the sharing boundary
+
+A repo is the memory space. You decide what belongs where — personal preferences stay in a private repo, project decisions go in a project repo, team knowledge goes in a team repo. The same agent can read from multiple repos in the same request.
+
+Sharing works at multiple levels:
+
+- **Direct repo sharing** — grant a collaborator or agent read/write access to a specific repo
+- **Org-level sharing** — set a default permission for all repos under an org, so every member has baseline access
+- **Team-based sharing** — create teams within an org and grant each team access to the repos they need
+
+This layered model means you can keep a strict boundary between an agent's private memory and a team's shared project context, while still letting both exist in the same system.
+
+## Permissions: who can use which memory
+
+ClawMem permissions are **context permissions**, not just agent tool permissions. They decide which memory spaces an agent or human can read, write, or govern.
+
+| Permission | What it allows | Typical use |
+| --- | --- | --- |
+| `read` | Recall and inspect memory | Give an agent project context without letting it change records |
+| `write` | Create, update, close, and comment through agent tools or GitHub-compatible APIs | Let a worker agent maintain project or team memory |
+| `admin` | Manage access and repo settings | Give a coordinator or owner governance control |
+
+Access can come from:
+
+- repo ownership
+- organization default permission
+- team grants
+- direct collaborator grants
+- a personal default repo assigned during plugin bootstrap
+
+This separation matters for teams. A coding agent can have write access to a project memory repo without seeing a user's private memory repo. A reviewer agent can have read access to shared context without permission to mutate it. A coordinator can manage a team repo while workers only update assigned records.
+
+<Aside type="tip">
+If an agent needs to do shared work, grant it access to the shared repo. Do not copy private memories into team memory just to make recall work.
+</Aside>
+
+## Issues: memory and conversations
+
+ClawMem uses two top-level issue types:
+
+| Type | Purpose |
+| --- | --- |
+| `type:conversation` | Mirrored session transcript and source trail |
+| `type:memory` | Durable, answerable memory record used for recall |
+
+Conversation issues preserve what happened. Memory issues preserve what should be useful later.
+
+A `type:memory` issue should usually contain one atomic durable idea. For example:
+
+```markdown
+## Memory
+
+The ClawMem docs should use plugin-first language for agent runtimes.
+
+## Relations
+
+- Source: #123
+- Related: #118
+
+<!-- clawmem
+schema_version: clawmem/v2
+valid_from: 2026-05-21
+-->
+```
+
+## Labels: schema and routing
+
+Labels make memory understandable to agents and humans.
+
+| Label family | Example | Meaning |
+| --- | --- | --- |
+| `type:*` | `type:memory` | Top-level record type |
+| `kind:*` | `kind:decision` | What kind of memory this is |
+| `topic:*` | `topic:documentation` | What domain or project area it belongs to |
+
+Good memory labels are reusable. Avoid creating one-off labels for dates, message IDs, or tiny details. Put those in the body or comments.
+
+## Wiki tree: curated knowledge and index
+
+Issues are great for atomic memories, discussion, and lifecycle. A wiki tree is better for curated, long-form knowledge and for providing a navigable index into the memory space.
+
+Use wiki pages for:
+
+- team contracts and role definitions
+- project runbooks and workflow playbooks
+- architecture notes and product concepts
+- source registries and operating manuals
+- **knowledge indexes** — linking related memory issues, mapping concepts to issue IDs, and giving agents and humans a structured entry point into a large memory repo
+
+Use memory issues for:
+
+- one durable fact, decision, preference, task, or lesson
+- one update that may later be superseded
+
+A healthy ClawMem setup uses both: issues for living memory records, wiki pages for organized knowledge and the index that ties them together.
+
+## Plugin layer
+
+Each agent runtime connects through a plugin or MCP path, but the tool surface differs significantly between OpenClaw and the other runtimes.
+
+**OpenClaw plugin** — skill-driven. The plugin handles bootstrap, mandatory transcript mirroring, and compact recall injection. It exposes only three operational tools:
+
+- `clawmem_status` — show active agent identity, memory host, default repo, mirror health, and `gh` auth health
+- `clawmem_sync` — force transcript mirror flush and retry for the current session
+- `clawmem_maintain` — run skill-driven memory maintenance: recall, retention, repair
+
+Memory work (recall, store, update, close) is performed by the bundled `clawmem` skill through `gh`/`gh api` commands against the GitHub-compatible backend. There are no `memory_store`, `memory_forget`, or `collaboration_*` wrapper tools in the OpenClaw plugin.
+
+**Claude Code, Codex, Hermes** — MCP tools. The plugin launches `clawmem-mcp-server` and hooks handle recall injection, conversation mirroring, and session lifecycle. Memory and collaboration operations are available as MCP tools (`memory_recall`, `memory_store`, `memory_update`, `memory_forget`, and the full collaboration surface).
+
+In both paths, the plugin is intentionally not the whole memory brain. The plugin handles runtime glue; the skill or MCP tool behavior defines how memory is actually used.
+
+## Skill layer
+
+The bundled `clawmem` skill is the **primary memory runtime for OpenClaw**. It teaches the agent how to think about memory using GitHub-native operations:
+
+- list accessible repos and choose the right memory space before acting
+- list labels in the selected repo before recall or write
+- search before acting — inspect exact issues before trusting them
+- update the canonical issue instead of creating duplicates
+- close stale records with a reason and a link to the replacement
+- keep one durable fact per memory issue
+- reuse the repo's observed label vocabulary
+- leave an auditable trail for the next collaborator
+
+For OpenClaw, the skill runs `gh`/`gh api` commands directly. It applies an explicit write decision on every turn: `ADD`, `UPDATE`, `DELETE`, or `NONE` — no speculative stores. Memory writes link back to the source `type:conversation` issue comment.
+
+For Claude Code, Codex, and Hermes, behavior guidance is embedded in the plugin and hooks. Explicit memory operations go through MCP tools instead of `gh` commands, but the same principles apply: search before writing, update in place, close stale records.
+
+## agent-git-service backend
+
+ClawMem's backend is built on [agent-git-service](https://github.com/ngaut/agent-git-service), an open-source GitHub-compatible API server for agents.
+
+It provides the primitives ClawMem uses as memory infrastructure:
+
+- GitHub-style REST and GraphQL APIs
+- Git Smart HTTP repositories
+- issues, comments, labels, search, and wiki-style knowledge
+- agent identities and API tokens
+- orgs, teams, collaborators, and permissions
+
+<Aside type="note">
+This is why ClawMem feels like project infrastructure rather than an opaque vector store: memory is represented as records, labels, links, comments, repos, wiki pages, and permissions.
+</Aside>
+
+## Lifecycle
+
+<Steps>
+1. A session creates or updates a `type:conversation` source record.
+2. Recall searches open `type:memory` records in the right repo.
+3. The skill decides whether new durable knowledge should be saved.
+4. Updated facts modify the canonical memory instead of creating duplicates.
+5. Stale or false memories are closed, not silently ignored.
+</Steps>
+
+Open `type:memory` issues are active recall material. Closed `type:memory` issues are inactive but still auditable.
+
+## Teams and agent teams
+
+For team memory, the repo is the boundary and labels/comments provide visibility. For more structured agent-team work, add the [`clawmem-team` skill](/docs/operations/agent-teams/).
+
+That skill is part of the ClawMem ecosystem, but it is intentionally separate from the core plugin. The core plugin/runtime path provides memory infrastructure and runtime glue; `clawmem-team` composes those primitives into explicit workflows.
+
+It builds on the same concepts:
+
+- shared repo
+- Team Contract stored as a canonical memory artifact
+- task or review queue
+- workflow label schema
+- worker/reviewer assignment labels
+- progress comments
+- handoff rules
+- terminal closure rules
+- verification that a real participant fetched the contract and completed work
+
+ClawMem core provides the memory substrate. Skills define the operating model on top.

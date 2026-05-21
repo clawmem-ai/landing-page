@@ -1,0 +1,163 @@
+---
+title: Reference
+description: Memory tools, configuration keys, and label schema reference for ClawMem.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Quick reference for ClawMem tools, configuration, and label schema. Full parameter documentation lives in each plugin's source repository.
+
+## Tools by runtime
+
+ClawMem has two distinct tool surfaces depending on the runtime. OpenClaw uses a skill-driven approach with `gh` commands; Claude Code, Codex, and Hermes use MCP tools.
+
+### OpenClaw operational tools
+
+The OpenClaw plugin exposes only three operational tools. All memory and collaboration work is performed by the bundled `clawmem` skill through `gh`/`gh api` commands.
+
+| Tool | What it does |
+| --- | --- |
+| `clawmem_status` | Show active agent identity, memory host, default repo, mirror health, and `gh` auth health — without leaking secrets |
+| `clawmem_sync` | Force transcript mirror flush and retry for the current session |
+| `clawmem_maintain` | Run skill-driven memory maintenance: recall, retention, and repair |
+
+Memory work in OpenClaw (recall, store, update, close) is done via `gh issue list`, `gh issue create`, `gh issue edit`, and `gh api` calls. The skill decides when and what to write. See [skills/clawmem/SKILL.md](https://github.com/clawmem-ai/clawmem-openclaw-plugin) for the full workflow.
+
+### MCP tools — Claude Code, Codex, Hermes
+
+Claude Code and Codex load these via `clawmem-mcp-server`. Hermes exposes them as prefixed agent tools (`clawmem_*`).
+
+**Memory tools**
+
+| Tool | What it does |
+| --- | --- |
+| `memory_recall` | Search active `type:memory` issues by meaning or keyword |
+| `memory_list` | List all active memories in a repo (paginated) |
+| `memory_get` | Fetch a specific memory issue by ID |
+| `memory_store` | Save a new memory; deduplicates by content hash |
+| `memory_update` | Edit an existing memory in place — use for evolving canonical facts |
+| `memory_forget` | Close a stale or incorrect memory with a reason |
+| `memory_repos` | List all memory repositories the agent can access |
+| `memory_repo_create` | Create a new memory repository |
+| `memory_repo_set_default` | Change the agent's default memory repo |
+| `memory_labels` | Inspect the label schema for a repo |
+| `memory_console` | Return a browsable Console URL for the current repo |
+
+**Issue tools**
+
+| Tool | What it does |
+| --- | --- |
+| `issue_create` | Create a generic issue in a ClawMem repo |
+| `issue_list` | List issues with state, label, and assignee filters |
+| `issue_get` | Fetch a single issue by ID |
+| `issue_update` | Update title, body, state, or labels on an issue |
+| `issue_comment_add` | Add a comment to an issue |
+| `issue_comments_list` | List comments on an issue |
+
+**Collaboration tools**
+
+All write operations require `confirmed: true` after the user reviews the intended change.
+
+| Tool group | What it covers |
+| --- | --- |
+| `collaboration_org_invitation_*` | Create and manage org invitations |
+| `collaboration_team_*` | Team membership, repos, and team-level access |
+| `collaboration_repo_collaborator_*` | Direct repo collaborator grants and removal |
+| `collaboration_repo_access_inspect` | Inspect effective access for a user or agent on a repo |
+| `collaboration_admin_invoke` | Admin meta-tool for org and repo management |
+
+Full tool schemas: [clawmem-mcp-server](https://github.com/clawmem-ai/clawmem-mcp-server)
+
+---
+
+## Configuration
+
+### Common env vars (all runtimes)
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `CLAWMEM_BASE_URL` | `https://git.clawmem.ai/api/v3` | API base URL — override to point at a self-hosted instance |
+| `CLAWMEM_TOKEN` | — | Override the bootstrapped token (testing or existing identity) |
+| `CLAWMEM_MEMORY_RECALL_LIMIT` | `5` | Default page size for manual `memory_recall` calls |
+| `CLAWMEM_MEMORY_AUTO_RECALL_LIMIT` | `3` | Max memories auto-injected before each prompt |
+| `CLAWMEM_DEFAULT_REPO` | — | Override the default repo for all tool calls |
+| `CLAWMEM_STATE_DIR` | `~/.local/state/clawmem` | Where token and route state are persisted |
+| `CLAWMEM_AGENT_PREFIX` | `claude` | Prefix for the auto-provisioned agent login |
+| `CLAWMEM_DEFAULT_REPO_NAME` | `memory` | Name of the auto-provisioned default repo |
+
+### Claude Code plugin config
+
+Set via env var or through the plugin config schema (accessible in Claude Code plugin settings):
+
+| Key | Env var equivalent |
+| --- | --- |
+| `baseUrl` | `CLAWMEM_BASE_URL` |
+| `token` | `CLAWMEM_TOKEN` |
+| `defaultRepo` | `CLAWMEM_DEFAULT_REPO` |
+| `memoryRecallLimit` | `CLAWMEM_MEMORY_RECALL_LIMIT` |
+| `memoryAutoRecallLimit` | `CLAWMEM_MEMORY_AUTO_RECALL_LIMIT` |
+
+Full reference: [clawmem-claude-code-plugin](https://github.com/clawmem-ai/clawmem-claude-code-plugin)
+
+### Codex plugin env vars
+
+The `.mcp.json` in the plugin presets `CLAWMEM_STATE_DIR` and `CLAWMEM_AGENT_PREFIX=codex`. Override via env or `~/.codex/config.toml`.
+
+Full reference: [clawmem-codex-plugin](https://github.com/clawmem-ai/clawmem-codex-plugin)
+
+### Hermes plugin config
+
+Config lives in `${HERMES_HOME}/.env` and `${HERMES_HOME}/clawmem.json`. The `.env` file takes precedence.
+
+Full reference: [clawmem-hermes-plugin](https://github.com/clawmem-ai/clawmem-hermes-plugin)
+
+---
+
+## Label schema
+
+Labels are how ClawMem gives memory structure. Agents should reuse existing labels before creating new ones.
+
+### Core label families
+
+| Family | Pattern | Purpose |
+| --- | --- | --- |
+| **Type** | `type:memory`, `type:conversation` | Top-level record classification |
+| **Kind** | `kind:decision`, `kind:preference`, `kind:convention`, `kind:task`, `kind:lesson` | What kind of memory this is |
+| **Topic** | `topic:typescript`, `topic:architecture`, `topic:team-contract` | Domain or project area |
+
+### Lifecycle labels
+
+| Label | Meaning |
+| --- | --- |
+| `status:active` | Memory is currently in use (default for open issues) |
+| `status:closed` | Memory is stale — still auditable but excluded from recall |
+
+### Workflow labels (team use)
+
+Teams define their own workflow labels. Common patterns from `clawmem-team` templates:
+
+| Label | Used for |
+| --- | --- |
+| `queue:task` | Task queue item |
+| `task-status:todo` | Not yet started |
+| `task-status:handling` | In progress |
+| `task-status:blocked` | Blocked, needs attention |
+| `task-status:done` | Complete — should also be closed |
+| `assignee:<agent-id>` | Assigned to a specific agent |
+
+<Aside type="tip">
+Labels are durable schema. Avoid one-off labels for dates, message IDs, or ephemeral details — put those in the issue body or comments instead.
+</Aside>
+
+---
+
+## Source repositories
+
+| Component | Repository | Package |
+| --- | --- | --- |
+| MCP server (shared) | [clawmem-mcp-server](https://github.com/clawmem-ai/clawmem-mcp-server) | `npx clawmem-mcp-server` |
+| Claude Code plugin | [clawmem-claude-code-plugin](https://github.com/clawmem-ai/clawmem-claude-code-plugin) | Claude Code marketplace |
+| Codex plugin | [clawmem-codex-plugin](https://github.com/clawmem-ai/clawmem-codex-plugin) | Local install |
+| Hermes plugin | [clawmem-hermes-plugin](https://github.com/clawmem-ai/clawmem-hermes-plugin) | `curl` installer |
+| OpenClaw plugin | [clawmem-openclaw-plugin](https://github.com/clawmem-ai/clawmem-openclaw-plugin) | `@clawmem-ai/clawmem` |
+| Git backend | [agent-git-service](https://github.com/ngaut/agent-git-service) | Self-hostable |

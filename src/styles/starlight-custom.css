@@ -81,3 +81,121 @@ header.header {
 .sl-markdown-content a[href="/"] {
   color: var(--sl-color-accent);
 }
+
+/* ── Landing-page aligned docs polish: solid, not gradient ── */
+:root {
+  --claw-coral: #e0475a;
+  --claw-cyan: #2dd4b8;
+  --claw-panel: #0c1020;
+  --claw-panel-soft: #10172a;
+  --claw-panel-border: rgba(224, 71, 90, 0.22);
+  --claw-shadow: rgba(0, 0, 0, 0.22);
+}
+
+:root[data-theme='light'] {
+  --claw-panel: #ffffff;
+  --claw-panel-soft: #f7f9fd;
+  --claw-panel-border: rgba(214, 56, 74, 0.18);
+  --claw-shadow: rgba(11, 18, 32, 0.08);
+}
+
+body {
+  background: var(--sl-color-black);
+}
+
+header.header {
+  background: var(--sl-color-black);
+  border-bottom: 1px solid var(--claw-panel-border);
+  box-shadow: 0 10px 32px var(--claw-shadow);
+}
+
+:root[data-theme='light'] header.header {
+  background: var(--sl-color-black);
+}
+
+.site-title {
+  letter-spacing: -0.04em;
+  color: var(--sl-color-white) !important;
+}
+
+.social-icons a[href*='discord.gg'],
+.social-icons a[href*='discord.com'] {
+  color: var(--claw-cyan);
+}
+
+.social-icons a,
+.theme-toggle,
+.site-search button {
+  border-radius: 999px;
+}
+
+.content-panel,
+.right-sidebar-panel,
+.sidebar-pane,
+.main-pane main {
+  background: var(--sl-color-black);
+}
+
+.hero {
+  border: 1px solid var(--claw-panel-border);
+  background: var(--claw-panel-soft);
+  border-radius: 28px;
+  box-shadow: 0 18px 48px var(--claw-shadow);
+  padding: clamp(2rem, 5vw, 4rem);
+}
+
+.hero h1,
+[data-page-title] {
+  letter-spacing: -0.06em;
+}
+
+.hero .tagline {
+  color: var(--sl-color-gray-1);
+}
+
+.card {
+  border: 1px solid var(--claw-panel-border) !important;
+  background: var(--claw-panel) !important;
+  border-radius: 22px;
+  box-shadow: 0 14px 36px var(--claw-shadow);
+}
+
+.card .icon {
+  border-color: rgba(45, 212, 184, 0.35) !important;
+  background: rgba(45, 212, 184, 0.10) !important;
+  color: var(--claw-cyan);
+}
+
+.sl-link-button.primary {
+  background: var(--claw-coral);
+  border: 1px solid var(--claw-coral);
+  color: white;
+  box-shadow: 0 12px 28px rgba(224, 71, 90, 0.20);
+}
+
+.sl-link-button:not(.primary) {
+  border-color: rgba(45, 212, 184, 0.35);
+}
+
+.sidebar-content {
+  border-right-color: var(--claw-panel-border);
+}
+
+.sidebar-content a[aria-current='page'] {
+  color: var(--claw-cyan);
+}
+
+.sl-markdown-content code:not(pre code) {
+  border: 1px solid var(--claw-panel-border);
+  border-radius: 0.45rem;
+}
+
+.clawmem-diagram {
+  display: block;
+  width: 100%;
+  margin: 2rem 0;
+  border: 1px solid var(--claw-panel-border);
+  border-radius: 24px;
+  background: var(--claw-panel);
+  box-shadow: 0 16px 40px var(--claw-shadow);
+}

@@ -5,6 +5,7 @@ const translations = {
     // Nav
     "nav.features": "Features",
     "nav.install": "Install",
+    "nav.docs": "Docs",
     "nav.console": "Console",
     "nav.blog": "Blog",
     // Hero
@@ -146,7 +147,7 @@ const translations = {
     "hood.heading": 'Under the <span class="claw-accent">hood</span>',
     "hood.desc": "ClawMem sits between your agents and a structured, inspectable backend that keeps shared memory consistent across sessions.",
     "hood.node1": "Agent Session",
-    "hood.node2": "ClawMem Integration",
+    "hood.node2": "ClawMem Plugin",
     "hood.node3": "Shared Memory Backend",
     "hood.node4": "Next-Run Recall",
     "hood.api.title": "GitHub-compatible API",
@@ -200,6 +201,7 @@ const translations = {
   "zh-CN": {
     "nav.features": "\u529f\u80fd",
     "nav.install": "\u5b89\u88c5",
+    "nav.docs": "\u6587\u6863",
     "nav.console": "\u63a7\u5236\u53f0",
     "nav.blog": "\u535a\u5ba2",
     "hero.sub": "AI \u667a\u80fd\u4f53\u5171\u4eab\u8bb0\u5fc6\u5c42\u3002",
@@ -337,7 +339,7 @@ const translations = {
     "hood.heading": '\u5e95\u5c42<span class="claw-accent">\u67b6\u6784</span>',
     "hood.desc": "\u8bb0\u5fc6\u5b58\u50a8\u5728\u7ed3\u6784\u5316\u3001\u53ef\u68c0\u89c6\u7684\u540e\u7aef\u4e2d\uff0c\u8bbe\u8ba1\u7075\u611f\u6765\u81ea GitHub \u5de5\u4f5c\u6d41\u3002",
     "hood.node1": "Agent \u4f1a\u8bdd",
-    "hood.node2": "ClawMem \u96c6\u6210",
+    "hood.node2": "ClawMem \u63d2\u4ef6",
     "hood.node3": "\u5171\u4eab\u8bb0\u5fc6\u540e\u7aef",
     "hood.node4": "\u4e0b\u6b21\u8fd0\u884c\u53ec\u56de",
     "hood.api.title": "\u517c\u5bb9 GitHub \u7684 API",
@@ -386,6 +388,7 @@ const translations = {
   ja: {
     "nav.features": "\u6a5f\u80fd",
     "nav.install": "\u30a4\u30f3\u30b9\u30c8\u30fc\u30eb",
+    "nav.docs": "\u30c9\u30ad\u30e5\u30e1\u30f3\u30c8",
     "nav.console": "\u30b3\u30f3\u30bd\u30fc\u30eb",
     "nav.blog": "\u30d6\u30ed\u30b0",
     "hero.sub": "\u672c\u5f53\u306b\u6b8b\u308b\u8a18\u61b6\u3002",
@@ -505,7 +508,7 @@ const translations = {
     "hood.heading": '<span class="claw-accent">\u4ed5\u7d44\u307f</span>\u306e\u5185\u5074',
     "hood.desc": "\u8a18\u61b6\u306f GitHub \u30ef\u30fc\u30af\u30d5\u30ed\u30fc\u306b\u30a4\u30f3\u30b9\u30d1\u30a4\u30a2\u3055\u308c\u305f\u3001\u69cb\u9020\u5316\u3055\u308c\u691c\u67fb\u53ef\u80fd\u306a\u30d0\u30c3\u30af\u30a8\u30f3\u30c9\u306b\u4fdd\u5b58\u3055\u308c\u307e\u3059\u3002",
     "hood.node1": "Agent \u30bb\u30c3\u30b7\u30e7\u30f3",
-    "hood.node2": "ClawMem \u9023\u643a",
+    "hood.node2": "ClawMem \u30d7\u30e9\u30b0\u30a4\u30f3",
     "hood.node3": "\u8a18\u61b6\u30d0\u30c3\u30af\u30a8\u30f3\u30c9",
     "hood.node4": "\u6b21\u56de\u5b9f\u884c\u6642\u306e\u547c\u3073\u51fa\u3057",
     "hood.api.title": "GitHub \u4e92\u63db API",
