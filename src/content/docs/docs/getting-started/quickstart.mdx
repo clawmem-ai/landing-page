@@ -1,25 +1,36 @@
 ---
 title: Quick Start
-description: Install ClawMem for OpenClaw, Claude Code, Codex, Hermes, or an MCP-capable client, then verify one memory loop.
+description: Install ClawMem for OpenClaw, Hermes, Codex, Claude Code, or an MCP-capable client, then verify one memory loop.
 ---
 
 import { Steps, Aside } from '@astrojs/starlight/components';
 
-The landing page gives you the shortest copy-paste install commands. This page is the detailed setup guide: pick your agent runtime, follow the real plugin instructions from the source repo, then verify that ClawMem can store and recall one harmless memory.
+The landing page gives you the shortest copy-paste install commands. This page is the detailed setup guide: choose your agent runtime first, jump to its install path, then verify that ClawMem can store and recall one harmless memory.
 
-Runtime paths: [OpenClaw](#openclaw) · [Claude Code](#claude-code) · [Codex](#codex) · [Hermes](#hermes) · [MCP-only](#mcp-only)
+<div class="agent-jump-panel">
+  <p class="agent-jump-eyebrow">Choose your runtime</p>
+  <div class="agent-jump-grid">
+    <a class="agent-jump-card" href="#openclaw"><span class="agent-jump-top"><span class="agent-jump-logo"><img src="/images/docs/agent-icons/openclaw.png" alt="" /></span><span class="agent-jump-name">OpenClaw</span></span><span class="agent-jump-meta">Native plugin · channel memory</span></a>
+    <a class="agent-jump-card" href="#hermes"><span class="agent-jump-top"><span class="agent-jump-logo"><img src="/images/docs/agent-icons/hermes.png" alt="" /></span><span class="agent-jump-name">Hermes</span></span><span class="agent-jump-meta">Memory provider · one-line installer</span></a>
+    <a class="agent-jump-card" href="#codex"><span class="agent-jump-top"><span class="agent-jump-logo"><img src="/images/docs/agent-icons/codex.svg" alt="" /></span><span class="agent-jump-name">Codex</span></span><span class="agent-jump-meta">Local plugin · optional hooks</span></a>
+    <a class="agent-jump-card" href="#claude-code"><span class="agent-jump-top"><span class="agent-jump-logo"><img src="/images/docs/agent-icons/claude-code.png" alt="" /></span><span class="agent-jump-name">Claude Code</span></span><span class="agent-jump-meta">Marketplace plugin · MCP tools</span></a>
+    <a class="agent-jump-card" href="#mcp-only"><span class="agent-jump-top"><span class="agent-jump-logo"><img src="/images/docs/agent-icons/mcp.svg" alt="" /></span><span class="agent-jump-name">MCP-only</span></span><span class="agent-jump-meta">Raw stdio server · custom clients</span></a>
+  </div>
+</div>
 
 <Aside type="tip">
-**No account signup or API key required.** ClawMem auto-provisions your agent identity and a default memory repository on first use.
+**No signup or API key required.** ClawMem auto-provisions an agent identity and default memory repo on first use.
 </Aside>
 
 <Aside type="note">
-Do not paste or publish generated tokens. If a command prints a token, treat it like a secret.
+**Keep tokens private.** If a command prints a token, treat it like a secret and do not paste it publicly.
 </Aside>
 
 ## OpenClaw
 
 Source: [clawmem-ai/clawmem-openclaw-plugin](https://github.com/clawmem-ai/clawmem-openclaw-plugin)
+
+<div class="agent-install-summary"><strong>Best for:</strong> OpenClaw as the active cross-channel memory runtime. <span>Recommended path: ask the agent to install and verify.</span></div>
 
 Use this path when you want ClawMem as OpenClaw's active memory plugin across Discord, Telegram, WhatsApp, Slack, iMessage, and other OpenClaw-connected channels.
 
@@ -62,52 +73,76 @@ On first use, the plugin provisions an agent identity against `https://git.clawm
 The OpenClaw plugin is the runtime memory layer. Agent-team workflow templates live in the separate `clawmem-team` skill ecosystem, not inside the core plugin.
 </Aside>
 
-## Claude Code
+## Hermes
 
-Source: [clawmem-ai/clawmem-claude-code-plugin](https://github.com/clawmem-ai/clawmem-claude-code-plugin)
+Source: [clawmem-ai/clawmem-hermes-plugin](https://github.com/clawmem-ai/clawmem-hermes-plugin)
 
-Use this path when you want Claude Code to recall project context, mirror coding sessions, and use the shared ClawMem MCP tools.
+<div class="agent-install-summary"><strong>Best for:</strong> Hermes as a ClawMem-backed external memory provider. <span>Recommended path: one-line installer, then verify provider status.</span></div>
 
-### Install
+Use this path when you want ClawMem as a Hermes memory provider.
 
-Install from the GitHub-hosted Claude Code plugin marketplace:
+### Prerequisites
+
+- Hermes Agent is installed and working
+- `hermes version` returns version information
+- the machine can reach the ClawMem Git server
+
+### Quick install
 
 ```bash
-claude plugin marketplace add https://github.com/clawmem-ai/clawmem-claude-code-plugin
-claude plugin install clawmem-claude-code-plugin@clawmem
+curl -fsSL https://raw.githubusercontent.com/clawmem-ai/clawmem-hermes-plugin/main/install.sh | bash
 ```
 
-Start Claude Code normally:
+The installer:
+
+1. installs the plugin through `hermes plugins install`
+2. links the plugin into the Hermes memory provider directory
+3. auto-registers an agent identity
+4. saves token and config under `${HERMES_HOME:-$HOME/.hermes}`
+5. activates `memory.provider=clawmem`
+
+Start a new Hermes session after the script finishes.
+
+### Verify
 
 ```bash
-claude
+hermes memory status
 ```
 
-### Bootstrap and verify
+You should see `clawmem` listed as the active memory provider.
 
-Installing or updating the plugin loads plugin configuration. The ClawMem route is created on first normal prompt hook or first ClawMem tool call.
+### Manual install
 
-To verify immediately, start Claude Code and ask it to call `memory_repos`. A clean repo list means the route is provisioned and usable.
+```bash
+hermes plugins install clawmem-ai/clawmem-hermes-plugin
+bash "${HERMES_HOME:-$HOME/.hermes}/plugins/clawmem/scripts/link-memory-provider.sh"
+hermes memory setup
+```
+
+During `hermes memory setup`, select `clawmem` in the picker.
 
 ### Update
 
 ```bash
-claude plugin marketplace update clawmem
-claude plugin update clawmem-claude-code-plugin@clawmem
+hermes plugins update clawmem
 ```
 
-### Claude Code capabilities
+Start a new Hermes session after updating. Existing `.env` and `clawmem.json` config are preserved.
 
-- first-use bootstrap with `POST /api/v3/agents`
-- route persistence in Claude's plugin data directory
-- recall context injection through the `UserPromptSubmit` hook
-- conversation mirroring through the `Stop` hook
-- session close labeling through the `SessionEnd` hook
-- shared MCP tools for memory, issue, repo, console URL, and collaboration operations
+### Hermes capabilities
+
+- ClawMem as the active Hermes memory provider
+- auto-recall every turn
+- conversation mirroring into `type:conversation` issues
+- session-end extraction into durable memories
+- memory write mirroring for Hermes memory commands
+- ClawMem agent tools for memory, schema/routing, issues, collaboration, and console links
 
 ## Codex
 
 Source: [clawmem-ai/clawmem-codex-plugin](https://github.com/clawmem-ai/clawmem-codex-plugin)
+
+<div class="agent-install-summary"><strong>Best for:</strong> Codex users who want ClawMem MCP tools now and optional hook-based automation. <span>Recommended path: local marketplace plugin.</span></div>
 
 Use this path when you want Codex to access ClawMem tools and, optionally, use Codex hooks for auto-recall and conversation mirroring.
 
@@ -189,72 +224,56 @@ Check `~/.local/state/clawmem/debug/events.jsonl` for `recall_complete` or `mirr
 Codex currently has no `SessionEnd` event, so conversation issues may stay active until explicitly archived. `PostToolUse` hook coverage is also limited compared with Claude Code.
 </Aside>
 
-## Hermes
+## Claude Code
 
-Source: [clawmem-ai/clawmem-hermes-plugin](https://github.com/clawmem-ai/clawmem-hermes-plugin)
+Source: [clawmem-ai/clawmem-claude-code-plugin](https://github.com/clawmem-ai/clawmem-claude-code-plugin)
 
-Use this path when you want ClawMem as a Hermes memory provider.
+<div class="agent-install-summary"><strong>Best for:</strong> Claude Code sessions with recall injection, transcript mirroring, and shared MCP tools. <span>Recommended path: install from the Claude plugin marketplace.</span></div>
 
-### Prerequisites
+Use this path when you want Claude Code to recall project context, mirror coding sessions, and use the shared ClawMem MCP tools.
 
-- Hermes Agent is installed and working
-- `hermes version` returns version information
-- the machine can reach the ClawMem Git server
+### Install
 
-### Quick install
+Install from the GitHub-hosted Claude Code plugin marketplace:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/clawmem-ai/clawmem-hermes-plugin/main/install.sh | bash
+claude plugin marketplace add https://github.com/clawmem-ai/clawmem-claude-code-plugin
+claude plugin install clawmem-claude-code-plugin@clawmem
 ```
 
-The installer:
-
-1. installs the plugin through `hermes plugins install`
-2. links the plugin into the Hermes memory provider directory
-3. auto-registers an agent identity
-4. saves token and config under `${HERMES_HOME:-$HOME/.hermes}`
-5. activates `memory.provider=clawmem`
-
-Start a new Hermes session after the script finishes.
-
-### Verify
+Start Claude Code normally:
 
 ```bash
-hermes memory status
+claude
 ```
 
-You should see `clawmem` listed as the active memory provider.
+### Bootstrap and verify
 
-### Manual install
+Installing or updating the plugin loads plugin configuration. The ClawMem route is created on first normal prompt hook or first ClawMem tool call.
 
-```bash
-hermes plugins install clawmem-ai/clawmem-hermes-plugin
-bash "${HERMES_HOME:-$HOME/.hermes}/plugins/clawmem/scripts/link-memory-provider.sh"
-hermes memory setup
-```
-
-During `hermes memory setup`, select `clawmem` in the picker.
+To verify immediately, start Claude Code and ask it to call `memory_repos`. A clean repo list means the route is provisioned and usable.
 
 ### Update
 
 ```bash
-hermes plugins update clawmem
+claude plugin marketplace update clawmem
+claude plugin update clawmem-claude-code-plugin@clawmem
 ```
 
-Start a new Hermes session after updating. Existing `.env` and `clawmem.json` config are preserved.
+### Claude Code capabilities
 
-### Hermes capabilities
-
-- ClawMem as the active Hermes memory provider
-- auto-recall every turn
-- conversation mirroring into `type:conversation` issues
-- session-end extraction into durable memories
-- memory write mirroring for Hermes memory commands
-- ClawMem agent tools for memory, schema/routing, issues, collaboration, and console links
+- first-use bootstrap with `POST /api/v3/agents`
+- route persistence in Claude's plugin data directory
+- recall context injection through the `UserPromptSubmit` hook
+- conversation mirroring through the `Stop` hook
+- session close labeling through the `SessionEnd` hook
+- shared MCP tools for memory, issue, repo, console URL, and collaboration operations
 
 ## MCP-only
 
 Source: [clawmem-ai/clawmem-mcp-server](https://github.com/clawmem-ai/clawmem-mcp-server)
+
+<div class="agent-install-summary"><strong>Best for:</strong> MCP-capable clients without a first-class ClawMem plugin yet. <span>Recommended path: launch the raw stdio server only when you can supply your own workflow discipline.</span></div>
 
 Use MCP-only when your client can launch stdio MCP servers but does not yet have a first-class ClawMem plugin.
 

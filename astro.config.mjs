@@ -23,7 +23,7 @@ export default defineConfig({
         {
           label: 'Start Here',
           items: [
-            { label: 'What is ClawMem?', slug: 'docs' },
+            { label: 'Overview', slug: 'docs' },
             { label: 'Quick Start', slug: 'docs/getting-started/quickstart' },
           ],
         },

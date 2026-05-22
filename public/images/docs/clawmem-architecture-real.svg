@@ -1,0 +1,78 @@
+<svg width="1440" height="900" viewBox="0 0 1440 900" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">ClawMem architecture at a glance</title>
+  <desc id="desc">OpenClaw, Claude Code, Codex, Hermes, and MCP clients connect through plugins, skills, hooks, or MCP tools to ClawMem memory workflows, which use the GitHub-compatible agent-git-service backend to store conversation issues, durable memory issues, wiki pages, labels, comments, search indexes, and permissions.</desc>
+  <defs>
+    <marker id="arrow-cyan" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth"><path d="M2 2 L10 6 L2 10" fill="none" stroke="#2dd4b8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></marker>
+    <marker id="arrow-coral" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth"><path d="M2 2 L10 6 L2 10" fill="none" stroke="#e0475a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></marker>
+    <style>
+      .bg{fill:#080a14}.panel{fill:#0c1020;stroke:#27324f;stroke-width:2}.box{fill:#111827;stroke:#34405f;stroke-width:2}.cyan{fill:#0d1c23;stroke:#2dd4b8;stroke-width:2.4}.coral{fill:#21131b;stroke:#e0475a;stroke-width:2.4}.api{fill:#12182a;stroke:#4b587c;stroke-width:2}.store{fill:#101728;stroke:#596789;stroke-width:2}.pill{fill:#182033;stroke:#34405f;stroke-width:1.4}.title{font:800 31px ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;fill:#f4f7ff}.h{font:800 22px ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;fill:#f4f7ff}.t{font:600 17px ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;fill:#cbd5e1}.s{font:500 14px ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;fill:#8b96b4}.label{font:800 13px ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;letter-spacing:.1em;fill:#2dd4b8}.mono{font:700 15px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono',monospace;fill:#dbeafe}.line{stroke:#34405f;stroke-width:2;stroke-linecap:round}.flowC{stroke:#2dd4b8;stroke-width:3.4;stroke-linecap:round;stroke-linejoin:round}.flowR{stroke:#e0475a;stroke-width:3.4;stroke-linecap:round;stroke-linejoin:round}.flowN{stroke:#596789;stroke-width:3.4;stroke-linecap:round;stroke-linejoin:round}.dotC{fill:#2dd4b8}.dotR{fill:#e0475a}.dotB{fill:#7dd3fc}
+    </style>
+  </defs>
+
+  <rect class="bg" width="1440" height="900" rx="34"/>
+  <rect class="panel" x="36" y="36" width="1368" height="828" rx="32"/>
+
+  <text x="78" y="90" class="label">ARCHITECTURE</text>
+  <text x="78" y="130" class="title">ClawMem maps agent memory workflows onto GitHub-compatible primitives.</text>
+  <text x="78" y="164" class="t">Plugins and MCP tools decide what to remember, then store auditable records in repos backed by agent-git-service.</text>
+
+  <rect class="box" x="78" y="230" width="282" height="410" rx="28"/>
+  <text x="116" y="278" class="h">Agent runtimes</text>
+  <text x="116" y="306" class="s">Where the work happens</text>
+  <rect class="pill" x="116" y="338" width="194" height="38" rx="19"/><text x="136" y="363" class="t">OpenClaw</text>
+  <rect class="pill" x="116" y="388" width="194" height="38" rx="19"/><text x="136" y="413" class="t">Claude Code</text>
+  <rect class="pill" x="116" y="438" width="194" height="38" rx="19"/><text x="136" y="463" class="t">Codex</text>
+  <rect class="pill" x="116" y="488" width="194" height="38" rx="19"/><text x="136" y="513" class="t">Hermes</text>
+  <rect class="pill" x="116" y="538" width="194" height="38" rx="19"/><text x="136" y="563" class="t">MCP clients</text>
+
+  <rect class="cyan" x="452" y="230" width="330" height="410" rx="28"/>
+  <text x="490" y="278" class="h">ClawMem runtime layer</text>
+  <text x="490" y="306" class="s">Plugin, hooks, skill, or MCP tools</text>
+  <circle class="dotC" cx="504" cy="350" r="6"/><text x="524" y="356" class="t">Bootstrap agent route</text>
+  <circle class="dotC" cx="504" cy="394" r="6"/><text x="524" y="400" class="t">Mirror conversations</text>
+  <circle class="dotC" cx="504" cy="438" r="6"/><text x="524" y="444" class="t">Recall active memory</text>
+  <circle class="dotC" cx="504" cy="482" r="6"/><text x="524" y="488" class="t">Store/update/forget</text>
+  <line class="line" x1="490" y1="520" x2="746" y2="520"/>
+  <text x="490" y="556" class="mono">OpenClaw: skill + gh API</text>
+  <text x="490" y="586" class="mono">Others: clawmem MCP</text>
+
+  <rect class="coral" x="872" y="230" width="416" height="410" rx="28"/>
+  <text x="910" y="278" class="h">ClawMem backend</text>
+  <text x="910" y="306" class="s">agent-git-service on git.clawmem.ai or self-hosted</text>
+  <rect class="api" x="910" y="340" width="324" height="58" rx="17"/>
+  <text x="934" y="376" class="t">GitHub-compatible REST / Git</text>
+  <circle class="dotR" cx="922" cy="438" r="6"/><text x="942" y="444" class="t">Agent identities and tokens</text>
+  <circle class="dotR" cx="922" cy="482" r="6"/><text x="942" y="488" class="t">Repos, orgs, teams, collaborators</text>
+  <circle class="dotR" cx="922" cy="526" r="6"/><text x="942" y="532" class="t">Issues, comments, labels, wiki</text>
+  <circle class="dotR" cx="922" cy="570" r="6"/><text x="942" y="576" class="t">Issue search + wiki search</text>
+
+  <path class="flowC" d="M360 435 H440"/>
+  <circle class="dotC" cx="440" cy="435" r="5"/>
+  <text x="376" y="410" class="s">uses</text>
+  <path class="flowR" d="M782 435 H860"/>
+  <circle class="dotR" cx="860" cy="435" r="5"/>
+  <text x="798" y="410" class="s">writes / reads</text>
+
+  <path class="flowR" d="M1080 640 V672"/>
+  <circle class="dotR" cx="1080" cy="672" r="5"/>
+
+  <rect class="api" x="96" y="682" width="1208" height="142" rx="26"/>
+  <text x="128" y="708" class="s">Memory repo storage</text>
+
+  <rect class="store" x="112" y="715" width="258" height="88" rx="22"/>
+  <text x="144" y="750" class="h">Transcript issues</text>
+  <text x="144" y="780" class="mono">type:conversation</text>
+
+  <rect class="store" x="418" y="715" width="258" height="88" rx="22"/>
+  <text x="450" y="750" class="h">Memory issues</text>
+  <text x="450" y="780" class="mono">type:memory</text>
+
+  <rect class="store" x="724" y="715" width="258" height="88" rx="22"/>
+  <text x="756" y="750" class="h">Wiki pages</text>
+  <text x="756" y="780" class="mono">Git-backed docs</text>
+
+  <rect class="store" x="1030" y="715" width="258" height="88" rx="22"/>
+  <text x="1062" y="750" class="h">Schema + access</text>
+  <text x="1062" y="780" class="mono">labels · permissions</text>
+
+</svg>

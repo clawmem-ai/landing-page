@@ -9,32 +9,14 @@ ClawMem is built from visible collaboration primitives instead of hidden memory 
 
 ## Architecture at a glance
 
-```text
-Agent runtime (OpenClaw / Claude Code / Codex / Hermes / MCP client)
-  └─ ClawMem plugin
-      ├─ bootstrap agent identity and default memory repo on first use
-      ├─ mirror every real conversation turn into type:conversation issues
-      ├─ inject compact recall context before each turn
-      └─ OpenClaw: 3 operational tools (clawmem_status, clawmem_sync, clawmem_maintain)
-         Claude Code / Codex / Hermes: 38+ MCP tools via clawmem-mcp-server
+<img class="clawmem-diagram architecture-diagram" src="/images/docs/clawmem-architecture-real.svg" alt="ClawMem architecture: agent runtimes connect through plugins, skills, hooks, or MCP tools to ClawMem memory workflows, which use agent-git-service to store conversation issues, memory issues, wiki pages, labels, comments, search indexes, and permissions." />
 
-Memory decisions (OpenClaw: clawmem skill via gh/gh api | Others: MCP tools)
-  └─ ADD / UPDATE / DELETE / NONE on every turn
-      ├─ search before writing — update the canonical issue, not a duplicate
-      ├─ close stale records with a reason
-      └─ route to the right repo: personal, project, or team
+The important boundary is this: agents work with **memory behavior** — recall, retention, transcript mirroring, repo routing, and governance — while ClawMem stores the result as GitHub-compatible primitives.
 
-Optional clawmem-team skill (OpenClaw ecosystem)
-  └─ team contracts, task queues, reviewer loops, handoff rules on top of shared repos
-
-ClawMem backend — agent-git-service (open-source, self-hostable)
-  └─ GitHub-compatible: repos, issues, comments, labels, wiki, search, orgs, teams, permissions
-
-Console — console.clawmem.ai
-  └─ knowledge graph of memory connections
-  └─ browse memories, conversations, wiki, labels, and access controls
-  └─ inspect source trails and memory provenance
-```
+- Agent runtimes connect through plugins, hooks, skills, or the MCP server.
+- The ClawMem runtime layer exposes memory-oriented behavior such as recall, transcript mirroring, retention decisions, and repo routing.
+- `agent-git-service` provides the backend primitives: repos, issues, comments, labels, wiki, search, orgs, teams, and permissions.
+- Transcript/session provenance belongs in `type:conversation` issues and comments; durable recall records live as `type:memory` issues; curated long-form knowledge belongs in wiki pages with labels, backlinks, history, and search.
 
 At query time, ClawMem retrieves the few records that matter instead of stuffing every old transcript into the prompt. At retention time, your agent writes durable knowledge back as readable, auditable records.
 
@@ -152,7 +134,7 @@ Use memory issues for:
 - one durable fact, decision, preference, task, or lesson
 - one update that may later be superseded
 
-A healthy ClawMem setup uses both: issues for living memory records, wiki pages for organized knowledge and the index that ties them together.
+A healthy ClawMem setup uses both: issues for living memory records and source history, wiki pages for organized knowledge and the index that ties them together.
 
 ## Plugin layer
 

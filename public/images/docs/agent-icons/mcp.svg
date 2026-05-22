@@ -1,0 +1,10 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title">
+  <title id="title">MCP</title>
+  <path d="M166 180h180M199 234l57 92M313 234l-57 92" stroke="#E0475A" stroke-width="42" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="166" cy="180" r="64" fill="#E0475A"/>
+  <circle cx="346" cy="180" r="64" fill="#E0475A"/>
+  <circle cx="256" cy="340" r="64" fill="#E0475A"/>
+  <circle cx="166" cy="180" r="24" fill="#fff" fill-opacity=".92"/>
+  <circle cx="346" cy="180" r="24" fill="#fff" fill-opacity=".92"/>
+  <circle cx="256" cy="340" r="24" fill="#fff" fill-opacity=".92"/>
+</svg>
