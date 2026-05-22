@@ -1,67 +1,75 @@
-<svg width="1400" height="760" viewBox="0 0 1400 760" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
-  <title id="title">ClawMem memory model</title>
-  <desc id="desc">A ClawMem repo contains source conversation issues, durable memory issues, wiki pages, labels, comments, and permissions. Conversation sources are distilled into active memory issues for recall while wiki pages hold curated team knowledge.</desc>
+<svg width="1440" height="860" viewBox="0 0 1440 860" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">ClawMem memory space surfaces</title>
+  <desc id="desc">A ClawMem memory space is a repository containing conversation issues, durable memory issues, wiki pages, labels, comments, search indexes, and permissions.</desc>
   <defs>
+    <marker id="arrow-cyan" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth"><path d="M2 2 L10 6 L2 10" fill="none" stroke="#2dd4b8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></marker>
+    <marker id="arrow-coral" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth"><path d="M2 2 L10 6 L2 10" fill="none" stroke="#e0475a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></marker>
     <style>
-      .bg{fill:#080a14}.outer{fill:#0b1020;stroke:#28324f;stroke-width:2}.repo{fill:#101728;stroke:#e0475a;stroke-width:2.5}.card{fill:#111827;stroke:#34405f;stroke-width:2}.cardC{fill:#0d1c23;stroke:#2dd4b8;stroke-width:2.5}.cardR{fill:#21131b;stroke:#e0475a;stroke-width:2.5}.title{font:800 30px ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;fill:#f4f7ff}.h{font:800 22px ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;fill:#f4f7ff}.t{font:600 17px ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;fill:#cbd5e1}.s{font:500 14px ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;fill:#8792ad}.label{font:800 13px ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;letter-spacing:.09em;fill:#2dd4b8}.mono{font:700 15px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono',monospace;fill:#dbeafe}.pill{fill:#182033;stroke:#34405f;stroke-width:1.3}.arrow{fill:#16263d;stroke:#2dd4b8;stroke-width:2.5}.arrowR{fill:#251a28;stroke:#e0475a;stroke-width:2.5}.line{stroke:#34405f;stroke-width:2;stroke-linecap:round}.dotC{fill:#2dd4b8}.dotR{fill:#e0475a}.dotB{fill:#7dd3fc}
+      .bg{fill:#080a14}.panel{fill:#0c1020;stroke:#27324f;stroke-width:2}.repo{fill:#101728;stroke:#e0475a;stroke-width:2.4}.card{fill:#111827;stroke:#34405f;stroke-width:2}.cyan{fill:#0d1c23;stroke:#2dd4b8;stroke-width:2.4}.coral{fill:#21131b;stroke:#e0475a;stroke-width:2.4}.wiki{fill:#111827;stroke:#7dd3fc;stroke-width:2.2}.pill{fill:#182033;stroke:#34405f;stroke-width:1.4}.title{font:800 31px ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;fill:#f4f7ff}.h{font:800 22px ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;fill:#f4f7ff}.t{font:600 17px ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;fill:#cbd5e1}.s{font:500 14px ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;fill:#8b96b4}.label{font:800 13px ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;letter-spacing:.1em;fill:#2dd4b8}.mono{font:700 15px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono',monospace;fill:#dbeafe}.line{stroke:#34405f;stroke-width:2;stroke-linecap:round}.flowC{stroke:#2dd4b8;stroke-width:3.4;stroke-linecap:round;stroke-linejoin:round}.flowR{stroke:#e0475a;stroke-width:3.4;stroke-linecap:round;stroke-linejoin:round}.flowB{stroke:#7dd3fc;stroke-width:3.4;stroke-linecap:round;stroke-linejoin:round}.dotC{fill:#2dd4b8}.dotR{fill:#e0475a}.dotB{fill:#7dd3fc}
     </style>
   </defs>
 
-  <rect class="bg" width="1400" height="760" rx="34"/>
-  <rect class="outer" x="36" y="36" width="1328" height="688" rx="32"/>
+  <rect class="bg" width="1440" height="860" rx="34"/>
+  <rect class="panel" x="36" y="36" width="1368" height="788" rx="32"/>
 
-  <text x="72" y="86" class="label">MEMORY MODEL</text>
-  <text x="72" y="126" class="title">A ClawMem repo is a shared memory workspace.</text>
-  <text x="72" y="158" class="t">Source conversations, durable memories, and curated wiki knowledge live together with labels and permissions.</text>
+  <text x="78" y="90" class="label">MEMORY SPACE</text>
+  <text x="78" y="130" class="title">One repo holds transcript history, active memory, and team knowledge.</text>
+  <text x="78" y="164" class="t">Issues keep source trails and atomic memories. Wiki pages organize long-form knowledge. Labels, search, comments, and permissions make the repo usable by teams.</text>
 
-  <rect class="repo" x="72" y="205" width="1256" height="470" rx="30"/>
-  <text x="108" y="250" class="h">repo: team / project / agent memory space</text>
-  <text x="108" y="280" class="s">The repo boundary decides what is personal, project-level, or shared with a team.</text>
+  <rect class="repo" x="78" y="210" width="1284" height="540" rx="32"/>
+  <text x="118" y="260" class="h">repo: personal / project / team memory space</text>
+  <text x="118" y="290" class="s">The repository boundary decides who can see and change this context.</text>
 
-  <!-- Conversation sources -->
-  <rect class="card" x="112" y="330" width="270" height="230" rx="22"/>
-  <text x="144" y="374" class="h">Source</text>
-  <text x="144" y="402" class="mono">type:conversation</text>
-  <line class="line" x1="144" y1="424" x2="340" y2="424"/>
-  <circle class="dotB" cx="156" cy="456" r="6"/><text x="174" y="462" class="t">Transcript comments</text>
-  <circle class="dotB" cx="156" cy="494" r="6"/><text x="174" y="500" class="t">Session summary</text>
-  <circle class="dotB" cx="156" cy="532" r="6"/><text x="174" y="538" class="t">Provenance links</text>
+  <rect class="card" x="116" y="340" width="300" height="250" rx="24"/>
+  <text x="152" y="386" class="h">Conversation source</text>
+  <text x="152" y="416" class="mono">type:conversation</text>
+  <line class="line" x1="152" y1="440" x2="380" y2="440"/>
+  <circle class="dotB" cx="164" cy="474" r="6"/><text x="184" y="480" class="t">Session metadata</text>
+  <circle class="dotB" cx="164" cy="514" r="6"/><text x="184" y="520" class="t">Turn-by-turn comments</text>
+  <circle class="dotB" cx="164" cy="554" r="6"/><text x="184" y="560" class="t">Provenance links</text>
 
-  <!-- Arrow distill -->
-  <polygon class="arrow" points="418,410 482,410 482,380 558,445 482,510 482,480 418,480"/>
-  <text x="436" y="438" class="mono">distill</text>
-  <text x="438" y="465" class="mono">+ label</text>
+  <rect class="cyan" x="488" y="340" width="300" height="250" rx="24"/>
+  <text x="524" y="386" class="h">Durable memory</text>
+  <text x="524" y="416" class="mono">type:memory</text>
+  <line class="line" x1="524" y1="440" x2="752" y2="440"/>
+  <circle class="dotC" cx="536" cy="474" r="6"/><text x="556" y="480" class="t">One atomic fact</text>
+  <circle class="dotC" cx="536" cy="514" r="6"/><text x="556" y="520" class="t">kind:* / topic:* labels</text>
+  <circle class="dotC" cx="536" cy="554" r="6"/><text x="556" y="560" class="t">Open = active recall</text>
 
-  <!-- Durable memories -->
-  <rect class="cardC" x="558" y="300" width="300" height="290" rx="24"/>
-  <text x="594" y="346" class="h">Durable memory</text>
-  <text x="594" y="374" class="mono">type:memory</text>
-  <line class="line" x1="594" y1="398" x2="816" y2="398"/>
-  <circle class="dotC" cx="606" cy="430" r="6"/><text x="624" y="436" class="t">Visible Markdown body</text>
-  <circle class="dotC" cx="606" cy="468" r="6"/><text x="624" y="474" class="t">kind:* / topic:* labels</text>
-  <circle class="dotC" cx="606" cy="506" r="6"/><text x="624" y="512" class="t">Open = active recall</text>
-  <circle class="dotC" cx="606" cy="544" r="6"/><text x="624" y="550" class="t">Closed = stale / audit</text>
+  <rect class="wiki" x="860" y="340" width="300" height="250" rx="24"/>
+  <text x="896" y="386" class="h">Wiki knowledge</text>
+  <text x="896" y="416" class="mono">Git-backed pages</text>
+  <line class="line" x1="896" y1="440" x2="1124" y2="440"/>
+  <circle class="dotB" cx="908" cy="474" r="6"/><text x="928" y="480" class="t">Team contracts</text>
+  <circle class="dotB" cx="908" cy="514" r="6"/><text x="928" y="520" class="t">Runbooks + concepts</text>
+  <circle class="dotB" cx="908" cy="554" r="6"/><text x="928" y="560" class="t">History + backlinks</text>
 
-  <!-- Wiki -->
-  <rect class="cardR" x="948" y="300" width="300" height="290" rx="24"/>
-  <text x="984" y="346" class="h">Wiki knowledge</text>
-  <text x="984" y="374" class="mono">Git-backed pages</text>
-  <line class="line" x1="984" y1="398" x2="1206" y2="398"/>
-  <circle class="dotR" cx="996" cy="430" r="6"/><text x="1014" y="436" class="t">Team contracts</text>
-  <circle class="dotR" cx="996" cy="468" r="6"/><text x="1014" y="474" class="t">Runbooks + concepts</text>
-  <circle class="dotR" cx="996" cy="506" r="6"/><text x="1014" y="512" class="t">History + backlinks</text>
-  <circle class="dotR" cx="996" cy="544" r="6"/><text x="1014" y="550" class="t">Labels + search</text>
+  <path class="flowC" d="M416 465 H478"/>
+  <circle class="dotC" cx="478" cy="465" r="5"/>
+  <text x="428" y="442" class="s">distill</text>
+  <path class="flowR" d="M788 465 H850"/>
+  <circle class="dotR" cx="850" cy="465" r="5"/>
+  <text x="802" y="442" class="s">curate</text>
 
-  <!-- Shared governance strip -->
-  <rect class="pill" x="348" y="614" width="704" height="42" rx="21"/>
-  <text x="386" y="641" class="t">Shared schema: labels · comments · permissions · teams · collaborators</text>
+  <rect class="coral" x="1200" y="340" width="122" height="250" rx="24"/>
+  <text x="1230" y="386" class="h">Recall</text>
+  <text x="1222" y="416" class="mono">search</text>
+  <line class="line" x1="1222" y1="440" x2="1300" y2="440"/>
+  <circle class="dotR" cx="1232" cy="474" r="6"/><text x="1250" y="480" class="s">issues</text>
+  <circle class="dotR" cx="1232" cy="514" r="6"/><text x="1250" y="520" class="s">labels</text>
+  <circle class="dotR" cx="1232" cy="554" r="6"/><text x="1250" y="560" class="s">wiki</text>
+  <path class="flowR" d="M1160 465 H1190"/>
+  <circle class="dotR" cx="1190" cy="465" r="5"/>
 
-  <!-- Links -->
-  <path d="M858 445 H914" stroke="#e0475a" stroke-width="3" stroke-linecap="round"/>
-  <path d="M914 445 L898 431 M914 445 L898 459" stroke="#e0475a" stroke-width="3" stroke-linecap="round"/>
-  <text x="870" y="424" class="s">curate</text>
+  <rect class="pill" x="218" y="660" width="1004" height="56" rx="28"/>
+  <text x="720" y="694" class="t" text-anchor="middle">Shared governance: repo/org/team permissions · collaborators · comments · labels · review notes · Git history</text>
 
-  <path d="M708 590 V614" stroke="#2dd4b8" stroke-width="3" stroke-linecap="round"/>
-  <path d="M1098 590 V614" stroke="#e0475a" stroke-width="3" stroke-linecap="round"/>
-  <path d="M247 560 V614" stroke="#7dd3fc" stroke-width="3" stroke-linecap="round"/>
+  <path class="flowB" d="M266 590 V658"/>
+  <circle class="dotB" cx="266" cy="658" r="5"/>
+  <path class="flowC" d="M638 590 V658"/>
+  <circle class="dotC" cx="638" cy="658" r="5"/>
+  <path class="flowB" d="M1010 590 V658"/>
+  <circle class="dotB" cx="1010" cy="658" r="5"/>
+  <path class="flowR" d="M1261 590 V658"/>
+  <circle class="dotR" cx="1261" cy="658" r="5"/>
 </svg>
