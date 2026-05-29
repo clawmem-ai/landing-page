@@ -1,82 +1,205 @@
 ---
 title: Console
-description: Use console.clawmem.ai to browse your memory knowledge graph, inspect records, and govern ClawMem repositories.
+description: Bind agents, inspect memory, browse the knowledge graph and wiki, manage access, and operate ClawMem repositories from the human UI.
 ---
 
-The ClawMem Console is the web UI for the same GitHub-compatible backend your agents use.
+import { Card, CardGrid, Steps, Aside } from '@astrojs/starlight/components';
+
+ClawMem Console is the human UI for the same GitHub-compatible memory backend your agents use.
 
 Open it at **[https://console.clawmem.ai](https://console.clawmem.ai)**.
 
+Use Console when you want to see what your agents know, inspect where memory came from, bind managed agents, browse wiki knowledge, or manage the permissions and invitations around shared memory spaces.
+
+## What Console is for
+
+Console makes the **human ↔ agent ↔ memory** relationship visible and manageable.
+
+It lets a human:
+
+- bind an agent account into a workspace
+- grant that agent repo, org, or team access during binding
+- switch into a bound agent account view
+- inspect memories, source provenance, wiki pages, labels, and knowledge graph connections
+- manage repo permissions, collaborators, team grants, organization membership, and pending invitations
+- create or revoke invitations when people or agents need access to shared memory spaces
+- verify that an agent sees only the memory spaces it should see
+
+ClawMem agents can store and recall memory through runtime tools. Console gives humans the oversight layer: identity, access, invitations, permissions, inspection, correction, and navigation.
+
+## Console capabilities
+
+<CardGrid>
+  <Card title="Agent onboarding" icon="rocket">
+    Bind an agent account, queue repo or team access, complete the bind invite in the agent runtime, then verify the binding.
+  </Card>
+  <Card title="Account switching" icon="setting">
+    Switch from a human account into a bound agent account to inspect Console from the agent's perspective.
+  </Card>
+  <Card title="Knowledge graph" icon="puzzle">
+    See memory nodes and cross-references as a graph so you can understand how agent knowledge connects.
+  </Card>
+  <Card title="Memories tab" icon="document">
+    Browse active and closed memory records, filter by labels, search by topic, and inspect source links.
+  </Card>
+  <Card title="Wiki browser" icon="open-book">
+    Browse repo-backed wiki pages in a tree for runbooks, team contracts, source registries, and project knowledge.
+  </Card>
+  <Card title="Permissions and invitations" icon="approve-check-circle">
+    Manage collaborators, team grants, organization members, repo invitations, and org invitations.
+  </Card>
+</CardGrid>
+
+## Agent onboarding and account switching
+
+The newest Console onboarding flow is intentionally explicit. Installing ClawMem gives an agent its own identity and default repo. Binding connects that agent to a human-managed workspace and optional shared memory permissions.
+
+<Steps>
+1. **Open Console as the human operator.** Sign in with the account that should manage the agent.
+2. **Go to Agents.** This is the binding hub for managed agents.
+3. **Choose the access to grant.** Queue repo/project access, org/team access, and the permission level the agent should receive.
+4. **Create a bind invite.** Console generates a bind invite for that agent.
+5. **Complete the invite in the agent runtime.** The agent confirms the bind from its own runtime.
+6. **Verify the agent entry.** Check granted repos, teams, token/reset controls, and display name.
+7. **Switch into the agent account view.** Confirm the agent sees exactly the intended memory spaces.
+</Steps>
+
+<div class="console-shot console-shot--wide">
+  <img src="/images/docs/console/agent-binding.webp" alt="ClawMem Console Agents page showing bound agents and the bind-an-agent panel with queued repository and team access grants." />
+  <p><strong>Agents page:</strong> bind an agent, queue repository access, queue team access, and review which agents are already connected.</p>
+</div>
+
+<Aside type="tip">
+Onboarding is not just “install the plugin.” For managed agents, the important step is deciding which memory spaces the agent should see and then verifying that view after binding.
+</Aside>
+
 ## Knowledge graph
 
-The Console Insights view renders your memory space as an **interactive knowledge graph** — every `type:memory` issue becomes a node, and cross-references (`#123` links between issues) become edges. Nodes are colored by knowledge type so you can see the shape of what your agents know at a glance.
+The Console Insights view renders a memory repo as an interactive knowledge graph. `type:memory` records become nodes, and cross-references between records become edges.
 
-<img src="/blog/building-an-ai-maintained-knowledge-base-with-clawmem/01-untitled_design_-42-.png" alt="ClawMem Console knowledge graph: memory nodes colored by type (Core Facts, Lessons, Memory, Tasks, Skills, Summaries, Conventions, Conversations) connected by cross-reference edges, with aggregate counts for connections, people, and knowledge items." style="border-radius: 12px; border: 1px solid #28324f;" />
+Use the graph when you want to:
 
-The graph classifies memories by `kind:*` label into types: Core Facts, Lessons, Memory, Tasks, Skills, Summaries, Conventions, and Conversations. You can filter by type, click any node to inspect its full body and metadata, and follow edges to related records. Stats at the bottom show total connections, unique people, and total knowledge items in the repo.
+- see the shape of what an agent or team knows
+- find clusters of related decisions, conventions, lessons, or tasks
+- follow links from one memory record to another
+- investigate why a topic keeps surfacing in recall
+- audit gaps, stale hubs, or disconnected knowledge
 
-## What Console can do today
+<div class="console-shot console-shot--wide">
+  <img src="/blog/building-an-ai-maintained-knowledge-base-with-clawmem/01-untitled_design_-42-.png" alt="ClawMem Console knowledge graph showing memory nodes colored by type and connected by cross-reference edges." />
+  <p><strong>Knowledge graph:</strong> inspect connected memory nodes and relationships as an investigation view.</p>
+</div>
 
-Console is a **memory browser, knowledge graph, and workspace UI**.
+The graph is an investigation surface. The default work starts from agents, memory records, wiki pages, and access management; the graph helps explain relationships once the repo has enough connected knowledge.
 
-It can help you inspect and navigate:
+## Memories tab
 
-- **Knowledge graph** — interactive visualization of memory nodes and their connections
-- **Memory browser** — open and closed `type:memory` issues with label filters, search, and state toggle
-- **Conversation trail** — `type:conversation` issues with per-turn comments for source provenance
-- **Wiki** — browse wiki pages by tree/path, search content, inspect history and backlinks, create or edit pages with write access
-- **Repository settings** — labels, collaborators, and access controls when your account has permission
-- **Organization surfaces** — org, team, invitation, and collaborator management when available
+The **Memories** tab is where humans inspect durable memories directly.
 
-## Common workflows
+Use it to:
 
-### See what your agents know
+- browse open `type:memory` records that are active recall material
+- inspect closed memories that are no longer active but remain auditable
+- filter by `kind:*`, `topic:*`, and workflow labels
+- search by title or body text
+- open a memory and follow source links
+
+<div class="console-shot console-shot--wide">
+  <img src="/images/docs/console/memory-browser.webp" alt="ClawMem Console Memories tab showing searchable memory records, labels, active state, and source provenance for a selected memory." />
+  <p><strong>Memories tab:</strong> inspect durable memory records, labels, active/stale state, and source links in one place.</p>
+</div>
+
+Conversation records are not the main Console capability here. They are the source provenance behind a memory. When a memory links to its source, humans can follow that link to check what the user actually said, which assistant turn created or changed the memory, and whether the record should be updated or closed.
+
+## Wiki knowledge
+
+Wiki pages are for curated, long-form knowledge inside a memory repo.
+
+Use wiki pages for:
+
+- team contracts
+- workflow runbooks
+- source registries
+- architecture notes
+- onboarding docs
+- project indexes that link related memory issues and conversations
+
+Console lets humans browse wiki pages by path, search content, and inspect labels or backlinks when they have access.
+
+<div class="console-shot console-shot--wide">
+  <img src="/images/docs/console/wiki-tree.webp" alt="ClawMem Console Wiki tab showing a tree of wiki pages and a selected repo-backed knowledge page." />
+  <p><strong>Wiki tab:</strong> browse repo-backed knowledge as a tree, open pages, and inspect labels attached to wiki knowledge.</p>
+</div>
+
+## Permissions, teams, and invitations
+
+Console is also the human governance surface for shared memory.
+
+Use it to manage:
+
+- repo collaborators and permission levels
+- pending repository invitations
+- team grants on organization-owned repos
+- organization members and pending org invitations
+- team membership and repo access for each team
+- access verification for bound agents
+
+This matters because ClawMem memory is collaborative infrastructure. A human should be able to decide who, including which agent, can read, write, or administer each memory space.
+
+<div class="console-shot console-shot--wide">
+  <img src="/images/docs/console/permissions.webp" alt="ClawMem Console Settings access page showing collaborators, pending invitations, team grants, and permission levels." />
+  <p><strong>Access settings:</strong> manage collaborators, pending invitations, team grants, and permission levels for a memory repo.</p>
+</div>
+
+## Console capabilities in practice
+
+### Agent binding verification
+
+1. Open **Agents**.
+2. Confirm the target agent appears in the bound-agent list.
+3. Review the repo and team grants attached during binding.
+4. Use the account switcher to enter that agent's account view.
+5. Open the expected repo or org surface.
+6. Switch back to the human account.
+
+### Agent knowledge inspection
 
 1. Open the relevant memory repo.
-2. Go to **Insights** to see the knowledge graph.
-3. Filter by knowledge type to focus on decisions, conventions, or active tasks.
-4. Click a node to read the full memory body and follow source links.
+2. Go to **Memories** for active records.
+3. Use **Insights** when you need a graph of related memories.
+4. Open a memory and follow source provenance links.
 
-### Audit memory for a topic
+### Memory audit and repair
 
 1. Go to **Memories**.
-2. Filter by `topic:*` or `kind:*` labels to narrow the list.
+2. Filter by `topic:*` or `kind:*` labels.
 3. Search by title or body text.
-4. Open a memory and follow `#123` source references to the originating conversation.
+4. Open the memory, inspect source provenance, then ask an agent with write access to update or close stale records.
 
-### Find stale or incorrect memory
+### Wiki knowledge browsing
 
-1. Search for the memory by label or keyword.
-2. Confirm the body is wrong or outdated.
-3. Copy the issue number and ask an agent with write access to update or close it, or use `gh issue edit` / GitHub-compatible API directly.
+Use wiki pages for team contracts, runbooks, source registries, concepts, and project documentation.
 
-### Browse source conversations
+A good wiki page acts as an index: it explains the current state and links to the memory issues or conversations that justify it.
 
-Conversation issues preserve source context. Use them when you need to answer "why did the agent remember this?" A useful memory issue links back to its source conversation issue or comment.
+### Access and repo governance
 
-### Manage wiki knowledge
+When your account has permission, Console can help with:
 
-- browse wiki pages by tree/path
-- search wiki content
-- inspect page history and backlinks
-- create or edit wiki pages when you have write access
-
-Use wiki pages for team contracts, runbooks, source registries, concepts, and project documentation — and as an index linking related memory issues.
-
-### Manage repo settings and access
-
-When your account has the right permission, Console can help with:
-
-- repository name, description, visibility, and transfer/delete flows
-- label creation, editing, and deletion
+- repository name, description, and visibility
+- label creation and cleanup
 - collaborator access
-- team and organization access surfaces where available
+- team and organization access surfaces
+- repository and organization invitations
+- token/access verification for bound agents
 
 ## Console and agents share one source of truth
 
 Console reads the same repos, issues, comments, labels, wiki pages, and permissions that agents use.
 
 - A memory you see in Console is the same `type:memory` issue an agent can recall.
-- A conversation you open in Console is the same `type:conversation` issue created by the integration.
-- A wiki page you edit in Console is stored through the GitHub-compatible wiki backend.
-- A label or access change can affect search, routing, governance, and team workflows.
+- Source provenance links point back to the records created by the integration.
+- A wiki page you open in Console is stored through the GitHub-compatible wiki backend.
+- A label, collaborator, team, or access change can affect what agents can recall or update.
+
+That is the point of ClawMem's Console: humans can manage agents without treating agent memory as a black box.

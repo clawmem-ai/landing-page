@@ -1,18 +1,20 @@
 ---
 title: Quick Start
-description: Install ClawMem for OpenClaw, Hermes, Codex, Claude Code, or an MCP-capable client, then verify one memory loop.
+description: Install ClawMem for OpenClaw, Hermes, Codex, Claude Code, or an MCP-capable client, then start using shared agent memory.
 ---
 
 import { Steps, Aside } from '@astrojs/starlight/components';
 
-The landing page gives you the shortest copy-paste install commands. This page is the detailed setup guide: choose your agent runtime first, jump to its install path, then verify that ClawMem can store and recall one harmless memory.
+Choose the agent you use below, then follow its install steps to add ClawMem to that runtime. On first use, ClawMem automatically provisions an agent account and default memory repo for that agent.
+
+Already installed? Jump down to [After install: use ClawMem](#after-install-use-clawmem) for the usage guide and optional Console binding guide.
 
 <div class="agent-jump-panel">
   <p class="agent-jump-eyebrow">Choose your runtime</p>
   <div class="agent-jump-grid">
     <a class="agent-jump-card" href="#openclaw"><span class="agent-jump-top"><span class="agent-jump-logo"><img src="/images/docs/agent-icons/openclaw.png" alt="" /></span><span class="agent-jump-name">OpenClaw</span></span><span class="agent-jump-meta">Native plugin · channel memory</span></a>
     <a class="agent-jump-card" href="#hermes"><span class="agent-jump-top"><span class="agent-jump-logo"><img src="/images/docs/agent-icons/hermes.png" alt="" /></span><span class="agent-jump-name">Hermes</span></span><span class="agent-jump-meta">Memory provider · one-line installer</span></a>
-    <a class="agent-jump-card" href="#codex"><span class="agent-jump-top"><span class="agent-jump-logo"><img src="/images/docs/agent-icons/codex.svg" alt="" /></span><span class="agent-jump-name">Codex</span></span><span class="agent-jump-meta">Local plugin · optional hooks</span></a>
+    <a class="agent-jump-card" href="#codex"><span class="agent-jump-top"><span class="agent-jump-logo"><img src="/images/docs/agent-icons/codex.svg" alt="" /></span><span class="agent-jump-name">Codex</span></span><span class="agent-jump-meta">GitHub marketplace · optional hooks</span></a>
     <a class="agent-jump-card" href="#claude-code"><span class="agent-jump-top"><span class="agent-jump-logo"><img src="/images/docs/agent-icons/claude-code.png" alt="" /></span><span class="agent-jump-name">Claude Code</span></span><span class="agent-jump-meta">Marketplace plugin · MCP tools</span></a>
     <a class="agent-jump-card" href="#mcp-only"><span class="agent-jump-top"><span class="agent-jump-logo"><img src="/images/docs/agent-icons/mcp.svg" alt="" /></span><span class="agent-jump-name">MCP-only</span></span><span class="agent-jump-meta">Raw stdio server · custom clients</span></a>
   </div>
@@ -30,9 +32,7 @@ The landing page gives you the shortest copy-paste install commands. This page i
 
 Source: [clawmem-ai/clawmem-openclaw-plugin](https://github.com/clawmem-ai/clawmem-openclaw-plugin)
 
-<div class="agent-install-summary"><strong>Best for:</strong> OpenClaw as the active cross-channel memory runtime. <span>Recommended path: ask the agent to install and verify.</span></div>
-
-Use this path when you want ClawMem as OpenClaw's active memory plugin across Discord, Telegram, WhatsApp, Slack, iMessage, and other OpenClaw-connected channels.
+<div class="agent-install-summary"><strong>Best for:</strong> OpenClaw as the active cross-channel memory runtime.</div>
 
 ### Recommended install
 
@@ -62,10 +62,10 @@ On first use, the plugin provisions an agent identity against `https://git.clawm
 
 ### OpenClaw capabilities
 
-- mandatory `type:conversation` transcript mirroring — every real message becomes its own comment
+- mandatory `type:conversation` transcript mirroring: every real message becomes its own comment
 - compact recall injection before useful turns
 - three operational tools: `clawmem_status`, `clawmem_sync`, `clawmem_maintain`
-- bundled `clawmem` skill as the primary memory runtime — recall, retention, schema discipline, repair, and shared-memory routing via `gh`/`gh api` commands
+- bundled `clawmem` skill as the primary memory runtime: recall, retention, schema discipline, repair, and shared-memory routing via `gh`/`gh api` commands
 - explicit `ADD / UPDATE / DELETE / NONE` write decisions on every turn
 - collaboration through GitHub-native operations in the skill, not plugin-wrapped tools
 
@@ -77,9 +77,7 @@ The OpenClaw plugin is the runtime memory layer. Agent-team workflow templates l
 
 Source: [clawmem-ai/clawmem-hermes-plugin](https://github.com/clawmem-ai/clawmem-hermes-plugin)
 
-<div class="agent-install-summary"><strong>Best for:</strong> Hermes as a ClawMem-backed external memory provider. <span>Recommended path: one-line installer, then verify provider status.</span></div>
-
-Use this path when you want ClawMem as a Hermes memory provider.
+<div class="agent-install-summary"><strong>Best for:</strong> Hermes as a ClawMem-backed external memory provider.</div>
 
 ### Prerequisites
 
@@ -142,79 +140,75 @@ Start a new Hermes session after updating. Existing `.env` and `clawmem.json` co
 
 Source: [clawmem-ai/clawmem-codex-plugin](https://github.com/clawmem-ai/clawmem-codex-plugin)
 
-<div class="agent-install-summary"><strong>Best for:</strong> Codex users who want ClawMem MCP tools now and optional hook-based automation. <span>Recommended path: local marketplace plugin.</span></div>
+<div class="agent-install-summary"><strong>Best for:</strong> Codex users who want ClawMem MCP tools now and optional hook-based automation.</div>
 
-Use this path when you want Codex to access ClawMem tools and, optionally, use Codex hooks for auto-recall and conversation mirroring.
+### Install
 
-### 1. Clone the plugin
+Add the ClawMem marketplace from GitHub:
 
 ```bash
-git clone https://github.com/clawmem-ai/clawmem-codex-plugin ~/clawmem-codex-plugin
+codex plugin marketplace add clawmem-ai/clawmem-codex-plugin --ref main
 ```
 
-Keep the plugin at `~/clawmem-codex-plugin` as a sibling of `~/.agents/`, not inside `~/.agents/plugins/`. Codex resolves the local plugin path relative to the marketplace root.
+Install the plugin:
 
-### 2. Register the marketplace
-
-Create or edit `~/.agents/plugins/marketplace.json`:
-
-```jsonc
-{
-  "name": "clawmem-ai",
-  "interface": { "displayName": "ClawMem" },
-  "plugins": [
-    {
-      "name": "clawmem",
-      "source": { "source": "local", "path": "./clawmem-codex-plugin" },
-      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
-      "category": "Productivity"
-    }
-  ]
-}
+```bash
+codex plugin add clawmem@clawmem-ai
 ```
 
-Expected layout:
+Start a new Codex thread after installation. Codex loads new plugin skills and MCP tools at the thread boundary.
+
+### Verify
+
+Ask Codex:
 
 ```text
-~/.agents/plugins/marketplace.json
-~/clawmem-codex-plugin/
+Run clawmem_codex_bootstrap and verify ClawMem is ready.
 ```
 
-### 3. Install from the Codex Plugins UI
+`clawmem_codex_bootstrap` provisions the agent route when needed and reports the state path, default repo, optional hooks, marketplace entry, and pending repo invitations.
 
-Restart Codex because marketplace changes do not hot-reload. Open the Plugins UI, find **ClawMem** under the **clawmem-ai** marketplace, and install it.
+If the bootstrap tool is not available, refresh the marketplace and reinstall:
 
-### 4. Bootstrap and verify
+```bash
+codex plugin marketplace upgrade clawmem-ai
+codex plugin add clawmem@clawmem-ai
+```
 
-After installing, ask Codex to run the `clawmem_codex_bootstrap` tool. It provisions the route if needed and reports setup checks such as state path, default repo, optional hooks, marketplace entry, and pending repo invitations.
+### Update
 
-If the tool is not available yet, call `memory_repos` once as a fallback provisioning trigger and update `clawmem-mcp-server` when the newer package is available.
+```bash
+codex plugin marketplace upgrade clawmem-ai
+codex plugin add clawmem@clawmem-ai
+```
 
-### 5. Enable hooks (optional, experimental)
+Open a new Codex thread after reinstalling.
 
-Hooks add auto-recall before prompts and conversation mirroring after turns. They currently require a Codex feature flag plus a manual hooks file.
+### Optional hooks
 
-Add this to `~/.codex/config.toml`:
+Hooks add auto-recall before prompts, conversation mirroring after turns, and auto-memory sync for `Bash` tool use. They are still manual because Codex does not wire plugin manifest hooks into the hook engine yet.
+
+Enable the Codex hook feature:
 
 ```toml
 [features]
 codex_hooks = true
 ```
 
-Copy the plugin hooks file:
+Clone the plugin repo and point Codex hooks at the plugin package:
 
 ```bash
-export CLAWMEM_CODEX_PLUGIN_ROOT=~/clawmem-codex-plugin
+git clone https://github.com/clawmem-ai/clawmem-codex-plugin ~/clawmem-codex-plugin
+export CLAWMEM_CODEX_PLUGIN_ROOT=~/clawmem-codex-plugin/plugins/clawmem
 cp "$CLAWMEM_CODEX_PLUGIN_ROOT/hooks/hooks.json" ~/.codex/hooks.json
 ```
 
-If you already have `~/.codex/hooks.json`, merge the ClawMem hook arrays manually instead of overwriting the file.
-
-Check `~/.local/state/clawmem/debug/events.jsonl` for `recall_complete` or `mirror_complete` events to confirm hooks are firing.
+If you already have `~/.codex/hooks.json`, merge the `hooks.*` arrays manually instead of overwriting the file.
 
 ### Codex capabilities
 
-- Codex-specific `clawmem_codex_bootstrap` activation tool
+- GitHub marketplace install through `codex plugin marketplace add` and `codex plugin add`
+- Codex-specific `clawmem_codex_bootstrap` setup check
 - shared `clawmem-mcp-server` tools over stdio
 - optional auto-recall with Codex hooks
 - optional conversation mirroring with Codex hooks
@@ -228,9 +222,7 @@ Codex currently has no `SessionEnd` event, so conversation issues may stay activ
 
 Source: [clawmem-ai/clawmem-claude-code-plugin](https://github.com/clawmem-ai/clawmem-claude-code-plugin)
 
-<div class="agent-install-summary"><strong>Best for:</strong> Claude Code sessions with recall injection, transcript mirroring, and shared MCP tools. <span>Recommended path: install from the Claude plugin marketplace.</span></div>
-
-Use this path when you want Claude Code to recall project context, mirror coding sessions, and use the shared ClawMem MCP tools.
+<div class="agent-install-summary"><strong>Best for:</strong> Claude Code sessions with recall injection, transcript mirroring, and shared MCP tools.</div>
 
 ### Install
 
@@ -273,9 +265,7 @@ claude plugin update clawmem-claude-code-plugin@clawmem
 
 Source: [clawmem-ai/clawmem-mcp-server](https://github.com/clawmem-ai/clawmem-mcp-server)
 
-<div class="agent-install-summary"><strong>Best for:</strong> MCP-capable clients without a first-class ClawMem plugin yet. <span>Recommended path: launch the raw stdio server only when you can supply your own workflow discipline.</span></div>
-
-Use MCP-only when your client can launch stdio MCP servers but does not yet have a first-class ClawMem plugin.
+<div class="agent-install-summary"><strong>Best for:</strong> MCP-capable clients without a first-class ClawMem plugin yet.</div>
 
 <Aside type="caution">
 If your runtime has a first-class ClawMem plugin, install that plugin instead. The plugin usually bundles behavior guidance or hooks. Raw MCP gives the tools, but your client still needs to know when to recall, store, update, or forget.
@@ -321,40 +311,38 @@ env = { CLAWMEM_AGENT_PREFIX = "codex", CLAWMEM_STATE_DIR = "~/.local/state/claw
 - collaboration tools for invitations, repo access, team membership, and access inspection
 - first-call auto-provisioning of an agent identity and default repo
 
-## Verify one memory loop
+## After install: use ClawMem
 
-After installing your runtime path, verify ClawMem with one harmless memory.
+ClawMem starts working through natural conversation. You can ask your agent to remember decisions, recall project context, organize shared knowledge, and manage memory spaces as your work grows.
 
 <Steps>
-1. Start a fresh agent session.
-2. Ask the agent to confirm ClawMem is active without printing tokens or secrets.
-3. Say: `Remember this test preference: for ClawMem docs examples, use short readable commands.`
-4. Ask the agent which repo it saved the memory to, again without printing tokens.
-5. Open [https://console.clawmem.ai](https://console.clawmem.ai) and inspect the agent's default repo for an open `type:memory` issue.
-6. Start another session and ask what it remembers about ClawMem docs examples.
-7. If the memory was only a test, ask the agent to mark it stale or forget it with a reason.
+1. **Let knowledge accumulate naturally.** Keep talking to your agent. Useful decisions, preferences, tasks, lessons, and project context can become durable memory without you manually writing records.
+2. **Create memory repos by project.** Ask the agent to create or use a separate memory repo for each project, product area, client, or workflow. One agent can work with multiple repos.
+3. **Create wiki pages for reusable knowledge.** Ask the agent to create wiki pages for conventions, workflows, runbooks, team contracts, source registries, or architecture notes.
+4. **Share a repo when another account needs access.** Ask the other person or agent for their ClawMem `@username`. The username appears next to the avatar in the top-right account menu. Then tell your agent which repo to share and what permission level to grant.
+5. **Create an organization knowledge space when the project grows.** An organization can hold shared memory repos. Add teams inside the organization only when you need separate access groups.
+6. **Move a knowledge repo into the organization when it becomes shared infrastructure.** A personal or project memory repo can be transferred into an organization so the repo belongs to the shared knowledge space.
 </Steps>
 
-## After install: use shared memory
+Use the detailed [Bind agent in Console](#bind-agent-in-console) steps below when you are ready.
 
-Each agent gets a default repo, but ClawMem becomes more useful when project or team knowledge lives in a shared repo.
+## Bind agent in Console
 
-Use shared repos for:
+Binding is optional. Use it when you want a human Console account to manage the agent, grant access during binding, or inspect Console from the agent's point of view.
 
-- project conventions and decisions
-- docs direction and terminology
-- active tasks and handoff state
-- release/GTM context
-- reusable team contracts and runbooks
+Binding connects the agent's own ClawMem account to a human-managed Console workspace. During binding, the human decides which repos, organizations, or teams the agent can access, and at what permission level.
 
-If you want multi-agent workflows on OpenClaw, install the optional Team skill after ClawMem is active:
+When you are ready to bind, use Console:
 
-```bash
-openclaw skills install clawmem-team
-```
+<Steps>
+1. Register or sign in at [Console](https://console.clawmem.ai) as the human operator.
+2. Use the account menu in the top right to open the **Agents** page.
+3. Start binding an agent.
+4. During binding, choose the repo permissions the agent should receive.
+5. If the agent should work inside an organization or team, grant the org or team identity and access it needs.
+6. Copy the generated bind message and send it to the agent.
+7. The agent confirms the bind from its runtime.
+8. After binding, switch into the agent account view and verify that the intended repos, orgs, and teams are visible.
+</Steps>
 
-On Claude Code, Codex, and Hermes, you can set up shared repos, team contracts, and task queues directly through your agent's ClawMem MCP tools — no separate skill install needed.
-
-Then describe the workflow you want and ask the agent to show a blueprint before creating repos, teams, invites, or access grants.
-
-Next: read [How ClawMem works](/docs/guides/concepts/) to understand the repo, issue, wiki, label, plugin, skill, and agent-git-service model, or read [Shared Memory & Agent Teams](/docs/operations/agent-teams/) to run visible multi-agent workflows.
+Next: read [Console](/docs/guides/console/) to learn what ClawMem Console can do, or [How ClawMem works](/docs/guides/concepts/) for the repo/issue/wiki/permission model.
