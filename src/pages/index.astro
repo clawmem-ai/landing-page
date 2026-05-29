@@ -173,54 +173,29 @@ claude plugin install clawmem-claude-code-plugin@clawmem</code>
               <div class="agent-panel" data-agent-panel="codex" hidden>
                 <div class="agent-steps">
                   <div class="agent-step">
-                    <div class="agent-step-label">Step 1 · Clone the plugin</div>
+                    <div class="agent-step-label">Step 1 · Add the ClawMem marketplace</div>
                     <div class="install-command install-command--mini install-command--bash">
-                      <code>git clone https://github.com/clawmem-ai/clawmem-codex-plugin ~/clawmem-codex-plugin</code>
-                      <button type="button" class="copy-btn" data-copy-button="hero-codex-clone" data-copy-text="git clone https://github.com/clawmem-ai/clawmem-codex-plugin ~/clawmem-codex-plugin" aria-label="Copy Codex clone command">
+                      <code>codex plugin marketplace add clawmem-ai/clawmem-codex-plugin --ref main</code>
+                      <button type="button" class="copy-btn" data-copy-button="hero-codex-marketplace-add" data-copy-text="codex plugin marketplace add clawmem-ai/clawmem-codex-plugin --ref main" aria-label="Copy Codex marketplace add command">
                         <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                         <svg class="copy-icon copy-icon-check" viewBox="0 0 24 24" width="14" height="14"><path d="M20 7L10 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                       </button>
                     </div>
-                    <p class="agent-step-text">Keep the repo at <code>~/clawmem-codex-plugin</code> as a sibling of <code>~/.agents</code> — not inside <code>~/.agents/plugins</code>.</p>
+                    <p class="agent-step-text">Codex now supports the official ClawMem plugin marketplace flow directly from GitHub.</p>
                   </div>
                   <div class="agent-step">
-                    <div class="agent-step-label">Step 2 · Create ~/.agents/plugins/marketplace.json</div>
-                    <div class="install-command install-command--json">
-                      <code>&#123;
-  "name": "clawmem-ai",
-  "interface": &#123; "displayName": "ClawMem" &#125;,
-  "plugins": [&#123;
-    "name": "clawmem",
-    "source": &#123; "source": "local", "path": "./clawmem-codex-plugin" &#125;,
-    "policy": &#123; "installation": "AVAILABLE", "authentication": "ON_INSTALL" &#125;,
-    "category": "Productivity"
-  &#125;]
-&#125;</code>
-                      <button type="button" class="copy-btn" data-copy-button="hero-codex-marketplace-json" data-copy-text="&#123;&#10;  &quot;name&quot;: &quot;clawmem-ai&quot;,&#10;  &quot;interface&quot;: &#123; &quot;displayName&quot;: &quot;ClawMem&quot; &#125;,&#10;  &quot;plugins&quot;: [&#123;&#10;    &quot;name&quot;: &quot;clawmem&quot;,&#10;    &quot;source&quot;: &#123; &quot;source&quot;: &quot;local&quot;, &quot;path&quot;: &quot;./clawmem-codex-plugin&quot; &#125;,&#10;    &quot;policy&quot;: &#123; &quot;installation&quot;: &quot;AVAILABLE&quot;, &quot;authentication&quot;: &quot;ON_INSTALL&quot; &#125;,&#10;    &quot;category&quot;: &quot;Productivity&quot;&#10;  &#125;]&#10;&#125;" aria-label="Copy Codex marketplace JSON">
-                        <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                        <svg class="copy-icon copy-icon-check" viewBox="0 0 24 24" width="14" height="14"><path d="M20 7L10 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                      </button>
-                    </div>
-                  </div>
-                  <div class="agent-step">
-                    <div class="agent-step-label">Step 3 · Restart Codex and install from the Plugins UI</div>
-                    <p class="agent-step-text">Restart Codex because marketplace changes do not hot-reload. Then open the Plugins UI, install ClawMem from the clawmem-ai marketplace, and skip extra MCP config unless you want the raw tools only.</p>
-                  </div>
-                  <div class="agent-step">
-                    <div class="agent-step-label">Step 4 · Optional: enable hooks for auto-recall and mirroring</div>
-                    <div class="install-command install-command--mini install-command--config">
-                      <code>[features]
-codex_hooks = true</code>
-                    </div>
+                    <div class="agent-step-label">Step 2 · Install the plugin</div>
                     <div class="install-command install-command--mini install-command--bash">
-                      <code>export CLAWMEM_CODEX_PLUGIN_ROOT=~/clawmem-codex-plugin
-cp "$CLAWMEM_CODEX_PLUGIN_ROOT/hooks/hooks.json" ~/.codex/hooks.json</code>
-                      <button type="button" class="copy-btn" data-copy-button="hero-codex-hooks" data-copy-text="export CLAWMEM_CODEX_PLUGIN_ROOT=~/clawmem-codex-plugin&#10;cp &quot;$CLAWMEM_CODEX_PLUGIN_ROOT/hooks/hooks.json&quot; ~/.codex/hooks.json" aria-label="Copy Codex hooks setup">
+                      <code>codex plugin add clawmem@clawmem-ai</code>
+                      <button type="button" class="copy-btn" data-copy-button="hero-codex-plugin-add" data-copy-text="codex plugin add clawmem@clawmem-ai" aria-label="Copy Codex plugin install command">
                         <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                         <svg class="copy-icon copy-icon-check" viewBox="0 0 24 24" width="14" height="14"><path d="M20 7L10 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                       </button>
                     </div>
-                    <p class="agent-step-text">Put the export in your shell init so it persists. If you already have <code>~/.codex/hooks.json</code>, merge the <code>hooks.*</code> arrays instead of overwriting.</p>
+                  </div>
+                  <div class="agent-step">
+                    <div class="agent-step-label">Step 3 · Start a new Codex thread</div>
+                    <p class="agent-step-text">Open a new Codex thread after install so the plugin skill and MCP tools load cleanly.</p>
                   </div>
                 </div>
               </div>
@@ -745,54 +720,29 @@ claude plugin install clawmem-claude-code-plugin@clawmem</code>
             <div class="agent-panel" data-agent-panel="codex" hidden>
               <div class="agent-steps">
                 <div class="agent-step">
-                  <div class="agent-step-label">Step 1 · Clone the plugin</div>
+                  <div class="agent-step-label">Step 1 · Add the ClawMem marketplace</div>
                   <div class="install-command install-command--mini install-command--bash">
-                    <code>git clone https://github.com/clawmem-ai/clawmem-codex-plugin ~/clawmem-codex-plugin</code>
-                    <button type="button" class="copy-btn" data-copy-button="cta-codex-clone" data-copy-text="git clone https://github.com/clawmem-ai/clawmem-codex-plugin ~/clawmem-codex-plugin" aria-label="Copy Codex clone command">
+                    <code>codex plugin marketplace add clawmem-ai/clawmem-codex-plugin --ref main</code>
+                    <button type="button" class="copy-btn" data-copy-button="cta-codex-marketplace-add" data-copy-text="codex plugin marketplace add clawmem-ai/clawmem-codex-plugin --ref main" aria-label="Copy Codex marketplace add command">
                       <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                       <svg class="copy-icon copy-icon-check" viewBox="0 0 24 24" width="14" height="14"><path d="M20 7L10 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </button>
                   </div>
-                  <p class="agent-step-text">Keep the repo at <code>~/clawmem-codex-plugin</code> as a sibling of <code>~/.agents</code> — not inside <code>~/.agents/plugins</code>.</p>
+                  <p class="agent-step-text">Codex now supports the official ClawMem plugin marketplace flow directly from GitHub.</p>
                 </div>
                 <div class="agent-step">
-                  <div class="agent-step-label">Step 2 · Create ~/.agents/plugins/marketplace.json</div>
-                  <div class="install-command install-command--json">
-                    <code>&#123;
-  "name": "clawmem-ai",
-  "interface": &#123; "displayName": "ClawMem" &#125;,
-  "plugins": [&#123;
-    "name": "clawmem",
-    "source": &#123; "source": "local", "path": "./clawmem-codex-plugin" &#125;,
-    "policy": &#123; "installation": "AVAILABLE", "authentication": "ON_INSTALL" &#125;,
-    "category": "Productivity"
-  &#125;]
-&#125;</code>
-                    <button type="button" class="copy-btn" data-copy-button="codex-marketplace-json" data-copy-text="&#123;&#10;  &quot;name&quot;: &quot;clawmem-ai&quot;,&#10;  &quot;interface&quot;: &#123; &quot;displayName&quot;: &quot;ClawMem&quot; &#125;,&#10;  &quot;plugins&quot;: [&#123;&#10;    &quot;name&quot;: &quot;clawmem&quot;,&#10;    &quot;source&quot;: &#123; &quot;source&quot;: &quot;local&quot;, &quot;path&quot;: &quot;./clawmem-codex-plugin&quot; &#125;,&#10;    &quot;policy&quot;: &#123; &quot;installation&quot;: &quot;AVAILABLE&quot;, &quot;authentication&quot;: &quot;ON_INSTALL&quot; &#125;,&#10;    &quot;category&quot;: &quot;Productivity&quot;&#10;  &#125;]&#10;&#125;" aria-label="Copy Codex marketplace JSON">
-                      <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                      <svg class="copy-icon copy-icon-check" viewBox="0 0 24 24" width="14" height="14"><path d="M20 7L10 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    </button>
-                  </div>
-                </div>
-                <div class="agent-step">
-                  <div class="agent-step-label">Step 3 · Restart Codex and install from the Plugins UI</div>
-                  <p class="agent-step-text">Restart Codex because marketplace changes do not hot-reload. Then install ClawMem from the clawmem-ai marketplace, and skip extra MCP config unless you want the raw tools only.</p>
-                </div>
-                <div class="agent-step">
-                  <div class="agent-step-label">Step 4 · Optional: enable hooks for auto-recall and mirroring</div>
-                  <div class="install-command install-command--mini install-command--config">
-                    <code>[features]
-codex_hooks = true</code>
-                  </div>
+                  <div class="agent-step-label">Step 2 · Install the plugin</div>
                   <div class="install-command install-command--mini install-command--bash">
-                    <code>export CLAWMEM_CODEX_PLUGIN_ROOT=~/clawmem-codex-plugin
-cp "$CLAWMEM_CODEX_PLUGIN_ROOT/hooks/hooks.json" ~/.codex/hooks.json</code>
-                    <button type="button" class="copy-btn" data-copy-button="cta-codex-hooks" data-copy-text="export CLAWMEM_CODEX_PLUGIN_ROOT=~/clawmem-codex-plugin&#10;cp &quot;$CLAWMEM_CODEX_PLUGIN_ROOT/hooks/hooks.json&quot; ~/.codex/hooks.json" aria-label="Copy Codex hooks setup">
+                    <code>codex plugin add clawmem@clawmem-ai</code>
+                    <button type="button" class="copy-btn" data-copy-button="cta-codex-plugin-add" data-copy-text="codex plugin add clawmem@clawmem-ai" aria-label="Copy Codex plugin install command">
                       <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                       <svg class="copy-icon copy-icon-check" viewBox="0 0 24 24" width="14" height="14"><path d="M20 7L10 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </button>
                   </div>
-                  <p class="agent-step-text">Put the export in your shell init so it persists. If you already have <code>~/.codex/hooks.json</code>, merge the <code>hooks.*</code> arrays instead of overwriting.</p>
+                </div>
+                <div class="agent-step">
+                  <div class="agent-step-label">Step 3 · Start a new Codex thread</div>
+                  <p class="agent-step-text">Open a new Codex thread after install so the plugin skill and MCP tools load cleanly.</p>
                 </div>
               </div>
             </div>
