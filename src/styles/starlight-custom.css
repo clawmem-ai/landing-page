@@ -411,3 +411,130 @@ header.header {
     grid-template-columns: 1fr;
   }
 }
+
+/* ── Console guide screenshots ── */
+.console-shot,
+.console-shot-grid {
+  margin: 1.5rem 0;
+}
+
+.console-shot {
+  overflow: hidden;
+  border: 1px solid var(--claw-panel-border);
+  border-radius: 24px;
+  background: var(--claw-panel);
+  box-shadow: 0 16px 40px var(--claw-shadow);
+}
+
+.console-shot img {
+  display: block;
+  width: 100%;
+  border-bottom: 1px solid var(--claw-panel-border);
+  background: #fff;
+}
+
+.console-shot p {
+  margin: 0 !important;
+  padding: 0.85rem 1rem 1rem;
+  color: var(--sl-color-gray-1);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.console-shot p strong {
+  color: var(--sl-color-white);
+}
+
+.console-shot-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.console-shot-grid .console-shot {
+  margin: 0;
+}
+
+.console-shot--wide {
+  margin-top: 1.25rem;
+}
+
+@media (max-width: 900px) {
+  .console-shot-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Difference points ── */
+.clawmem-difference-points {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  margin: 1.1rem 0 1.35rem;
+}
+
+.clawmem-difference-points p {
+  margin: 0 !important;
+  padding: 0.95rem 1rem;
+  border: 1px solid var(--claw-panel-border);
+  border-radius: 18px;
+  background: var(--claw-panel);
+  box-shadow: 0 10px 28px var(--claw-shadow);
+  color: var(--sl-color-gray-2);
+  line-height: 1.6;
+}
+
+.clawmem-difference-points strong {
+  display: block;
+  margin-bottom: 0.38rem;
+  color: var(--claw-coral);
+  font-family: 'General Sans', system-ui, sans-serif;
+  font-weight: 800;
+}
+
+/* ── Agent example lines ── */
+.clawmem-agent-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 0.58rem;
+  margin: 1.1rem 0 1.4rem;
+}
+
+.clawmem-agent-line {
+  display: grid;
+  grid-template-columns: minmax(9rem, 0.35fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.72rem 0.78rem;
+  border: 1px solid var(--claw-panel-border);
+  border-radius: 16px;
+  background: var(--claw-panel);
+  box-shadow: 0 10px 28px var(--claw-shadow);
+}
+
+.clawmem-agent-label {
+  color: var(--claw-coral);
+  font-family: 'General Sans', system-ui, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.clawmem-agent-line code {
+  display: block;
+  overflow-wrap: anywhere;
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--sl-color-gray-1) !important;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  white-space: normal;
+}
+
+@media (max-width: 760px) {
+  .clawmem-agent-line {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+}
