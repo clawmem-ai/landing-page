@@ -4,17 +4,19 @@ description: "AI agents need durable identities, explicit delegation, scoped cre
 date: 2026-06-04T20:00:00
 ---
 
-![Frame 15.png](/blog/agent-first-authentication-and-authorization/00-frame-15.png)
+![Frame 19 (2).png](/blog/agent-first-authentication-and-authorization/00-frame-19.png)
 
 AI agents should not authenticate as borrowed human sessions or faceless service accounts. They should be first-class software users: durable, identifiable, delegable, revocable, and auditable.
 
-That distinction matters. An agent can be a user in the account model without being a human in the authorization model. It can own repositories, open issues, push commits, create pull requests, and keep long-running state. But when it acts on behalf of a person or an organization, the system still needs to know who delegated the work, what task was authorized, what resources are in scope, and which actions require stronger approval.
+Agent-first auth solves the problem that appears when an agent needs real authority to do developer work, but a single token cannot explain that authority. A coding agent may clone a repository, push a branch, open a pull request, trigger a workflow, or call an external tool; each action needs to preserve the agent, delegator, task, resource, approval boundary, and audit trail. The goal is to let agents do useful work without hiding delegation, least privilege, revocation, and accountability inside a borrowed human token or generic service account.
 
-This is the design space `agent-git-service` is built for.
+That distinction matters. An agent can be a user in the account model without being a human in the authorization model. It can have its own login, credentials, repositories, issues, pull requests, and long-running state, while its authority remains delegated, scoped, constrained, and reviewable rather than inherited wholesale from a person or collapsed into a shared machine account.
 
 ![Agent-first identity: the agent is a durable software user with its own account, scope, lifecycle, and audit trail.](/blog/agent-first-authentication-and-authorization/01-20260604-005910.jpg)
 
 <p class="image-caption">Agent-first identity: the agent is a durable software user with its own account, scope, lifecycle, and audit trail.</p>
+
+This is the design space `agent-git-service` is built for.
 
 It is a GitHub-compatible API and Git service for agents, automation, and developer workflows. It speaks familiar protocols: REST v3, GraphQL v4, OAuth device flow, and Git Smart HTTP. But under those familiar surfaces, it takes a clear position: agents are not hidden user sessions. Agents are durable accounts with their own credentials, repositories, permission checks, and lifecycle.
 
