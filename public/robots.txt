@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://clawmem.ai/sitemap-index.xml
