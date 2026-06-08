@@ -13,9 +13,43 @@ export async function getStaticPaths() {
 
 const { post } = Astro.props;
 const { Content } = await render(post);
+
+const siteUrl = Astro.site ?? new URL('https://clawmem.ai');
+const canonicalUrl = new URL(`/blog/${post.id}/`, siteUrl).toString();
+const title = `${post.data.title} - ClawMem Blog`;
+const articleJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: post.data.title,
+  description: post.data.description,
+  url: canonicalUrl,
+  datePublished: post.data.date.toISOString(),
+  dateModified: post.data.date.toISOString(),
+  author: post.data.author
+    ? {
+        '@type': 'Person',
+        name: post.data.author,
+      }
+    : {
+        '@type': 'Organization',
+        name: 'ClawMem',
+      },
+  publisher: {
+    '@type': 'Organization',
+    name: 'ClawMem',
+    url: 'https://clawmem.ai/',
+  },
+};
 ---
 
-<Landing title={`${post.data.title} - ClawMem Blog`} description={post.data.description}>
+<Landing
+  title={title}
+  description={post.data.description}
+  canonicalUrl={canonicalUrl}
+  ogType="article"
+  ogDescription={post.data.description}
+  jsonLd={articleJsonLd}
+>
   <style>
     .post-container { max-width: 720px; margin: 0 auto; padding: 0 1.5rem; }
     article { padding: 3rem 0 4rem; }

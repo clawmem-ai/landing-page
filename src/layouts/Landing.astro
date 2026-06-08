@@ -2,14 +2,23 @@
 interface Props {
   title?: string;
   description?: string;
+  canonicalUrl?: string;
+  ogType?: 'website' | 'article';
+  ogDescription?: string;
+  jsonLd?: Record<string, unknown>;
 }
 
 const {
   title = 'ClawMem - Shared Memory for AI Agents',
-  description = 'ClawMem gives OpenClaw, Claude Code, Codex, and Hermes a shared memory layer that persists across sessions and agent handoffs.'
+  description = 'ClawMem gives OpenClaw, Claude Code, Codex, and Hermes a shared memory layer that persists across sessions and agent handoffs.',
+  canonicalUrl = 'https://clawmem.ai/',
+  ogType = 'website',
+  ogDescription = description,
+  jsonLd,
 } = Astro.props;
 
 const analyticsEndpoint = import.meta.env.PUBLIC_CLAWMEM_ANALYTICS_ENDPOINT ?? '';
+const safeJsonLd = jsonLd ? JSON.stringify(jsonLd).replace(/</g, '\\u003c') : '';
 ---
 
 <!doctype html>
@@ -20,9 +29,11 @@ const analyticsEndpoint = import.meta.env.PUBLIC_CLAWMEM_ANALYTICS_ENDPOINT ?? '
     <meta name="color-scheme" content="light dark" />
     <meta name="description" content={description} />
     <meta property="og:title" content={title} />
-    <meta property="og:description" content="Shared memory for AI agents. ClawMem keeps context alive across sessions, agent handoffs, and team workflows — while staying inspectable and editable." />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://clawmem.ai/" />
+    <meta property="og:description" content={ogDescription} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={canonicalUrl} />
+    <link rel="canonical" href={canonicalUrl} />
+    {jsonLd && <script type="application/ld+json" set:html={safeJsonLd} />}
     <title>{title}</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
