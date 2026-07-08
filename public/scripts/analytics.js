@@ -5,20 +5,30 @@ function ph(event, props) {
 }
 
 function defaultAnalyticsEndpoint() {
+  const analyticsPath = "/api/ext/v1/analytics/events";
   const host = window.location.hostname;
   if (host === "staging.clawmem.ai") {
-    return "https://git.staging.clawmem.ai/api/v3/analytics/events";
+    return "https://git.staging.clawmem.ai" + analyticsPath;
   }
   if (host === "clawmem.ai" || host === "www.clawmem.ai") {
-    return "https://git.clawmem.ai/api/v3/analytics/events";
+    return "https://git.clawmem.ai" + analyticsPath;
   }
   if (host === "localhost" || host === "127.0.0.1") {
-    return "http://localhost:8080/api/v3/analytics/events";
+    return "http://localhost:8080" + analyticsPath;
   }
   return "";
 }
 
-const analyticsEndpoint = window.__CLAWMEM_ANALYTICS_ENDPOINT || defaultAnalyticsEndpoint();
+function normalizeAnalyticsEndpoint(endpoint) {
+  return (endpoint || "").replace(
+    "/api/v3/analytics/events",
+    "/api/ext/v1/analytics/events"
+  );
+}
+
+const analyticsEndpoint =
+  normalizeAnalyticsEndpoint(window.__CLAWMEM_ANALYTICS_ENDPOINT) ||
+  defaultAnalyticsEndpoint();
 
 function currentPath() {
   return window.location.pathname || "/";
