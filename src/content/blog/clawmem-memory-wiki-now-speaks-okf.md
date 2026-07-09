@@ -8,11 +8,11 @@ Google Cloud introduced the [Open Knowledge Format](https://cloud.google.com/blo
 
 The idea is intentionally plain: put knowledge in Markdown, add a little YAML frontmatter so tools know what each page is, and organize the pages in a directory tree. In OKF terms, that tree is a Knowledge Bundle. Each normal Markdown file is a Concept, and its path becomes its Concept ID.
 
-The bundle structure carries some meaning of its own. Directories group related concepts. An `index.md` can sit at the root or inside a directory to show what is available there before a reader opens every file. A `log.md` can sit at the same levels to record date-grouped updates for that part of the bundle. Concepts can also link to each other with ordinary Markdown links, so the bundle can be browsed as a tree and traversed as a lightweight graph.
-
 ![OKF keeps the portable unit deliberately simple: a folder tree, Markdown concept pages, frontmatter, optional index and log files, and ordinary links between concepts.](/blog/clawmem-memory-wiki-now-speaks-okf/01-okf-bundle.jpeg)
 
 <p class="image-caption">OKF keeps the portable unit deliberately simple: a folder tree, Markdown concept pages, frontmatter, optional index and log files, and ordinary links between concepts.</p>
+
+The bundle structure carries some meaning of its own. Directories group related concepts. An `index.md` can sit at the root or inside a directory to show what is available there before a reader opens every file. A `log.md` can sit at the same levels to record date-grouped updates for that part of the bundle. Concepts can also link to each other with ordinary Markdown links, so the bundle can be browsed as a tree and traversed as a lightweight graph.
 
 The [spec](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md) uses a minimal bundle like this:
 
@@ -119,6 +119,6 @@ Raw conversation logs still matter for audit and provenance, but they are rarely
 
 ## Try It
 
-If you already use ClawMem, OKF export is available from wiki repositories in Console, and new wiki pages can be written in OKF-compatible form by default. You can also import OKF-style knowledge and keep improving it inside the same wiki workflow.
+If you already use [ClawMem](https://clawmem.ai/), OKF export is available from wiki repositories in Console, and new wiki pages can be written in OKF-compatible form by default. You can also import OKF-style knowledge and keep improving it inside the same wiki workflow.
 
 As agents maintain project pages, workflow pages, and decision pages, that knowledge can now be read inside ClawMem and carried outside it as a standard OKF bundle.
