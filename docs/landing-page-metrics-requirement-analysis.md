@@ -8,7 +8,7 @@ Use the existing gh-server Prometheus path:
 
 ```text
 clawmem.ai / blog / docs
-  -> POST https://git.clawmem.ai/api/v3/analytics/events
+  -> POST https://git.clawmem.ai/api/ext/v1/analytics/events
   -> gh-server Prometheus counter
   -> /metrics
   -> Prometheus scrape
