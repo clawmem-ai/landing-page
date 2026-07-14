@@ -197,6 +197,10 @@ claude plugin install clawmem-claude-code-plugin@clawmem</code>
                     <div class="agent-step-label">Step 3 · Start a new Codex thread</div>
                     <p class="agent-step-text">Open a new Codex thread after install so the plugin skill and MCP tools load cleanly.</p>
                   </div>
+                  <div class="agent-step">
+                    <div class="agent-step-label">Step 4 · Verify</div>
+                    <p class="agent-step-text">Ask Codex: <code>Run clawmem_codex_bootstrap and verify ClawMem is ready.</code></p>
+                  </div>
                 </div>
               </div>
 
@@ -205,8 +209,8 @@ claude plugin install clawmem-claude-code-plugin@clawmem</code>
                   <div class="agent-step">
                     <div class="agent-step-label">Step 1 · Launch the raw MCP server</div>
                     <div class="install-command install-command--bash">
-                      <code>npx -y clawmem-mcp-server</code>
-                      <button type="button" class="copy-btn" data-copy-button="hero-mcp" data-copy-text="npx -y clawmem-mcp-server" aria-label="Copy MCP quick start">
+                      <code>npx -y clawmem-mcp-server@^0.1.9</code>
+                      <button type="button" class="copy-btn" data-copy-button="hero-mcp" data-copy-text="npx -y clawmem-mcp-server@^0.1.9" aria-label="Copy MCP quick start">
                         <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                         <svg class="copy-icon copy-icon-check" viewBox="0 0 24 24" width="14" height="14"><path d="M20 7L10 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                       </button>
@@ -219,11 +223,11 @@ claude plugin install clawmem-claude-code-plugin@clawmem</code>
   "mcpServers": &#123;
     "clawmem": &#123;
       "command": "npx",
-      "args": ["-y", "clawmem-mcp-server"]
+      "args": ["-y", "clawmem-mcp-server@^0.1.9"]
     &#125;
   &#125;
 &#125;</code>
-                    <button type="button" class="copy-btn" data-copy-button="mcp-config-json" data-copy-text="&#123;&#10;  &quot;mcpServers&quot;: &#123;&#10;    &quot;clawmem&quot;: &#123;&#10;      &quot;command&quot;: &quot;npx&quot;,&#10;      &quot;args&quot;: [&quot;-y&quot;, &quot;clawmem-mcp-server&quot;]&#10;    &#125;&#10;  &#125;&#10;&#125;" aria-label="Copy MCP config JSON">
+                    <button type="button" class="copy-btn" data-copy-button="mcp-config-json" data-copy-text="&#123;&#10;  &quot;mcpServers&quot;: &#123;&#10;    &quot;clawmem&quot;: &#123;&#10;      &quot;command&quot;: &quot;npx&quot;,&#10;      &quot;args&quot;: [&quot;-y&quot;, &quot;clawmem-mcp-server@^0.1.9&quot;]&#10;    &#125;&#10;  &#125;&#10;&#125;" aria-label="Copy MCP config JSON">
                       <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                       <svg class="copy-icon copy-icon-check" viewBox="0 0 24 24" width="14" height="14"><path d="M20 7L10 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </button>
@@ -744,6 +748,10 @@ claude plugin install clawmem-claude-code-plugin@clawmem</code>
                   <div class="agent-step-label">Step 3 · Start a new Codex thread</div>
                   <p class="agent-step-text">Open a new Codex thread after install so the plugin skill and MCP tools load cleanly.</p>
                 </div>
+                <div class="agent-step">
+                  <div class="agent-step-label">Step 4 · Verify</div>
+                  <p class="agent-step-text">Ask Codex: <code>Run clawmem_codex_bootstrap and verify ClawMem is ready.</code></p>
+                </div>
               </div>
             </div>
 
@@ -752,8 +760,8 @@ claude plugin install clawmem-claude-code-plugin@clawmem</code>
                 <div class="agent-step">
                   <div class="agent-step-label">Step 1 · Launch the raw MCP server</div>
                   <div class="install-command install-command--bash">
-                    <code>npx -y clawmem-mcp-server</code>
-                    <button type="button" class="copy-btn" data-copy-button="cta-mcp" data-copy-text="npx -y clawmem-mcp-server" aria-label="Copy MCP quick start">
+                    <code>npx -y clawmem-mcp-server@^0.1.9</code>
+                    <button type="button" class="copy-btn" data-copy-button="cta-mcp" data-copy-text="npx -y clawmem-mcp-server@^0.1.9" aria-label="Copy MCP quick start">
                       <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                       <svg class="copy-icon copy-icon-check" viewBox="0 0 24 24" width="14" height="14"><path d="M20 7L10 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </button>
@@ -766,11 +774,11 @@ claude plugin install clawmem-claude-code-plugin@clawmem</code>
   "mcpServers": &#123;
     "clawmem": &#123;
       "command": "npx",
-      "args": ["-y", "clawmem-mcp-server"]
+      "args": ["-y", "clawmem-mcp-server@^0.1.9"]
     &#125;
   &#125;
 &#125;</code>
-                    <button type="button" class="copy-btn" data-copy-button="mcp-config-json" data-copy-text="&#123;&#10;  &quot;mcpServers&quot;: &#123;&#10;    &quot;clawmem&quot;: &#123;&#10;      &quot;command&quot;: &quot;npx&quot;,&#10;      &quot;args&quot;: [&quot;-y&quot;, &quot;clawmem-mcp-server&quot;]&#10;    &#125;&#10;  &#125;&#10;&#125;" aria-label="Copy MCP config JSON">
+                    <button type="button" class="copy-btn" data-copy-button="mcp-config-json" data-copy-text="&#123;&#10;  &quot;mcpServers&quot;: &#123;&#10;    &quot;clawmem&quot;: &#123;&#10;      &quot;command&quot;: &quot;npx&quot;,&#10;      &quot;args&quot;: [&quot;-y&quot;, &quot;clawmem-mcp-server@^0.1.9&quot;]&#10;    &#125;&#10;  &#125;&#10;&#125;" aria-label="Copy MCP config JSON">
                       <svg class="copy-icon copy-icon-default" viewBox="0 0 24 24" width="14" height="14"><path d="M9 9a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                       <svg class="copy-icon copy-icon-check" viewBox="0 0 24 24" width="14" height="14"><path d="M20 7L10 17l-5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </button>
