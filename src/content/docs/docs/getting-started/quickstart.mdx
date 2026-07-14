@@ -168,6 +168,8 @@ Run clawmem_codex_bootstrap and verify ClawMem is ready.
 
 `clawmem_codex_bootstrap` provisions the agent route when needed and reports the state path, default repo, optional hooks, marketplace entry, and pending repo invitations.
 
+This plugin requires `clawmem-mcp-server` `^0.1.9` or newer. Its bundled MCP configuration requests that compatible version automatically; an existing installation must update the plugin and start a new Codex thread before retrying bootstrap.
+
 If the bootstrap tool is not available, refresh the marketplace and reinstall:
 
 ```bash
@@ -210,6 +212,7 @@ If you already have `~/.codex/hooks.json`, merge the `hooks.*` arrays manually i
 - GitHub marketplace install through `codex plugin marketplace add` and `codex plugin add`
 - Codex-specific `clawmem_codex_bootstrap` setup check
 - shared `clawmem-mcp-server` tools over stdio
+- a skill-focused default tool surface for memory and Wiki work; generic issue and collaboration administration stays in explicit MCP-only full-profile installs
 - optional auto-recall with Codex hooks
 - optional conversation mirroring with Codex hooks
 - repo-backed memory shared with other ClawMem runtimes
@@ -245,6 +248,8 @@ Installing or updating the plugin loads plugin configuration. The ClawMem route 
 
 To verify immediately, start Claude Code and ask it to call `memory_repos`. A clean repo list means the route is provisioned and usable.
 
+This plugin requires `clawmem-mcp-server` `^0.1.9` or newer. Its bundled MCP configuration requests that compatible version automatically; existing installations need a plugin update and a new Claude Code session before retrying.
+
 ### Update
 
 ```bash
@@ -254,12 +259,12 @@ claude plugin update clawmem-claude-code-plugin@clawmem
 
 ### Claude Code capabilities
 
-- first-use bootstrap with `POST /api/v3/agents`
+- first-use bootstrap with `POST /api/ext/v1/agents` (with legacy self-hosted fallback)
 - route persistence in Claude's plugin data directory
 - recall context injection through the `UserPromptSubmit` hook
 - conversation mirroring through the `Stop` hook
 - session close labeling through the `SessionEnd` hook
-- shared MCP tools for memory, issue, repo, console URL, and collaboration operations
+- shared MCP tools for memory, Wiki, repo selection, and console access; generic issue and collaboration administration stays in explicit MCP-only full-profile installs
 
 ## MCP-only
 
@@ -278,7 +283,7 @@ If your runtime has a first-class ClawMem plugin, install that plugin instead. T
   "mcpServers": {
     "clawmem": {
       "command": "npx",
-      "args": ["-y", "clawmem-mcp-server"]
+      "args": ["-y", "clawmem-mcp-server@^0.1.9"]
     }
   }
 }
@@ -289,8 +294,8 @@ If your runtime has a first-class ClawMem plugin, install that plugin instead. T
 ```toml
 [mcp_servers.clawmem]
 command = "npx"
-args = ["-y", "clawmem-mcp-server"]
-env = { CLAWMEM_AGENT_PREFIX = "codex", CLAWMEM_STATE_DIR = "~/.local/state/clawmem" }
+args = ["-y", "clawmem-mcp-server@^0.1.9"]
+env = { CLAWMEM_AGENT_PREFIX = "codex", CLAWMEM_STATE_DIR = "~/.local/state/clawmem", CLAWMEM_TOOL_PROFILE = "full" }
 ```
 
 ### Useful environment variables
@@ -300,6 +305,7 @@ env = { CLAWMEM_AGENT_PREFIX = "codex", CLAWMEM_STATE_DIR = "~/.local/state/claw
 | `CLAWMEM_BASE_URL` | API base URL. Defaults to `https://git.clawmem.ai/api/v3`. |
 | `CLAWMEM_STATE_DIR` | Where token and route state are persisted. |
 | `CLAWMEM_AGENT_PREFIX` | Prefix for the auto-provisioned agent login. |
+| `CLAWMEM_TOOL_PROFILE` | `skill` for the focused plugin surface (set by Codex/Claude plugins); `full` for an explicit MCP-only administrative client. |
 | `CLAWMEM_DEFAULT_REPO_NAME` | Name of the auto-provisioned default repo. |
 | `CLAWMEM_TOKEN` | Override token for testing or existing identities. |
 | `CLAWMEM_MEMORY_RECALL_LIMIT` | Default recall page size. |
