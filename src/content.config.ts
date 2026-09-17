@@ -11,6 +11,8 @@ const blog = defineCollection({
     date: z.date(),
     author: z.string().optional(),
     authorPhoto: z.string().optional(),
+    authorOrganization: z.string().optional(),
+    authorOrganizationUrl: z.string().url().regex(/^https?:\/\//).optional(),
     category: z.enum(['official', 'community']).default('official'),
     tag: z.enum(['ClawMem', 'AGS', 'Use case', 'Product announcement']),
     coverImage: z.string().optional(),
