@@ -1,0 +1,104 @@
+---
+import Landing from '../layouts/Landing.astro';
+import BlogCard from './BlogCard.astro';
+import '../styles/landing.css';
+import '../styles/blog.css';
+import { blogCategories, getBlogPosts, type BlogCategory } from '../lib/blog';
+
+interface Props { category?: BlogCategory; }
+const { category = 'all' } = Astro.props;
+const allPosts = await getBlogPosts();
+const currentCategory = blogCategories.find((item) => item.id === category)!;
+const posts = allPosts.filter((post) => category === 'all' || post.data.tag === currentCategory.label);
+
+const siteUrl = Astro.site ?? new URL('https://clawmem.ai');
+const canonicalUrl = new URL(currentCategory.href, siteUrl).toString();
+---
+
+<Landing
+  title={category === 'all' ? 'Blog - ClawMem' : `${currentCategory.label} - ClawMem Blog`}
+  description={currentCategory.description}
+  canonicalUrl={canonicalUrl}
+>
+  <a class="blog-skip-link" href="#blog-posts">Skip to posts</a>
+  <a class="discord-float" href="https://discord.gg/PwdFYdMm4t" target="_blank" rel="noreferrer" aria-label="Join ClawMem Discord">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.74 19.74 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.058a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.1 13.1 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.099.246.197.373.291a.077.077 0 0 1-.006.128 12.3 12.3 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.548-13.665a.061.061 0 0 0-.032-.027ZM8.02 15.331c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.211 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418Zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.211 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418Z"/></svg>
+  </a>
+  <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+    <span class="theme-icon theme-icon-dark">&#9790;</span>
+    <span class="theme-icon theme-icon-light">&#9728;</span>
+  </button>
+
+  <nav class="nav blog-nav" aria-label="Main navigation">
+    <div class="container nav-inner blog-container">
+      <a href="/" class="brand" aria-label="ClawMem home">
+        <span class="brand-text">Claw</span><span class="brand-accent">Mem</span>
+      </a>
+      <div class="nav-right">
+        <div class="nav-links">
+          <a href="/">Home</a>
+          <a href="/blog/" aria-current="page">Blog</a>
+          <a href="https://console.clawmem.ai/" target="_blank" rel="noreferrer">Console</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container page-container blog-container blog-page">
+    <main>
+      <header class="blog-header">
+        <h1>ClawMem Blog</h1>
+      </header>
+      <div class="blog-layout">
+        <aside class="blog-sidebar">
+          <nav class="blog-categories" aria-label="Blog categories">
+            <p class="category-heading">Explore</p>
+            <ul>
+              {blogCategories.map((item) => {
+                const count = item.id === 'all' ? allPosts.length : allPosts.filter((post) => post.data.tag === item.label).length;
+                return (
+                  <li>
+                    <a href={item.href} aria-current={category === item.id ? 'page' : undefined}>
+                      <span>{item.label}</span>
+                      <span class="category-count" aria-label={`${count} posts`}>{count}</span>
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+        </aside>
+        <section class="blog-results" id="blog-posts" aria-labelledby="posts-heading" tabindex="-1">
+          <div class="blog-results-header">
+            <h2 id="posts-heading">{category === 'all' ? 'Latest posts' : currentCategory.label}</h2>
+            <span>{posts.length} {posts.length === 1 ? 'post' : 'posts'}</span>
+          </div>
+          {posts.length > 0 ? (
+            <ul class="blog-grid">
+              {posts.map((post, index) => <BlogCard post={post} eager={index < 3} />)}
+            </ul>
+          ) : (
+            <div class="blog-empty">
+              <h3>No posts yet.</h3>
+              <a class="empty-link" href="/blog/">Explore all posts <span aria-hidden="true">→</span></a>
+            </div>
+          )}
+        </section>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        <div class="footer-nav">
+          <a href="/">Home</a>
+          <span class="footer-separator">&middot;</span>
+          <a href="/blog/" data-i18n="nav.blog">Blog</a>
+          <span class="footer-separator">&middot;</span>
+          <a href="https://console.clawmem.ai/" target="_blank" rel="noreferrer" data-i18n="nav.console">Console</a>
+        </div>
+        <p class="copyright" data-i18n="footer.tagline">Structured memory for OpenClaw agents.</p>
+        <p class="disclaimer" data-i18n="footer.license">Apache-2.0 License</p>
+      </div>
+    </footer>
+  </div>
+</Landing>

@@ -2,6 +2,9 @@
 title: "GitHub-Native Memory: The Design Principles Behind ClawMem"
 description: "How ClawMem turns GitHub’s collaboration model into long-term memory for agents."
 date: 2026-05-14T12:00:00
+tag: ClawMem
+coverImage: "/blog/github-native-memory-design-principles-behind-clawmem/memory-paper-collage.png"
+coverBackground: "#6F6A61"
 author: "Hazel"
 authorPhoto: "/hazel.jpg"
 ---

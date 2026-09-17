@@ -2,6 +2,9 @@
 title: "ClawMem's Memory Wiki Now Speaks OKF"
 description: "ClawMem wiki pages now support OKF-compatible writing, import, and export, giving team memory an open format for sharing across agents and tools."
 date: 2026-07-09T12:00:00
+tag: Product announcement
+coverImage: "/blog/clawmem-memory-wiki-now-speaks-okf/okf-tree-banner.png"
+coverBackground: "#f6f2eb"
 ---
 
 Google Cloud introduced the [Open Knowledge Format](https://cloud.google.com/blog/products/data-analytics/how-the-open-knowledge-format-can-improve-data-sharing) (OKF) as a small, open way to represent knowledge as files that both people and agents can read.

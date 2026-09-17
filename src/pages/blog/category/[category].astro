@@ -1,0 +1,14 @@
+---
+import BlogIndex from '../../../components/BlogIndex.astro';
+import { blogCategories } from '../../../lib/blog';
+
+export function getStaticPaths() {
+  return blogCategories.filter((item) => item.id !== 'all').map((item) => ({
+    params: { category: item.id },
+    props: { category: item.id },
+  }));
+}
+
+const { category } = Astro.props;
+---
+<BlogIndex category={category} />

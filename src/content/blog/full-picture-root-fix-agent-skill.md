@@ -2,6 +2,9 @@
 title: "Full-Picture Root-Fix: An Agent Skill for Bugs That Don't Stay Fixed"
 description: "Turn a vague engineering symptom into an owner-level repair, then prove the real workflow recovered."
 date: 2026-08-01T12:00:00
+tag: Use case
+coverImage: "/blog/full-picture-root-fix-agent-skill/root-fix-illustration-coral.png"
+coverBackground: "#F7DADC"
 author: "Hazel"
 authorPhoto: "/hazel.jpg"
 ---

@@ -2,6 +2,9 @@
 title: "Codex Is Becoming the AI Agent Workbench Teams Actually Need"
 description: "Codex is moving beyond repo-bound coding into workflows, plugins, browser use, automations, and memory. ClawMem adds the shared team memory layer long-lived agents still need."
 date: 2026-05-29T20:00:00
+tag: ClawMem
+coverImage: "/blog/codex-ai-agent-workbench-clawmem/workbench-coral-black-book.png"
+coverBackground: "#E0475A"
 author: "Hazel"
 authorPhoto: "/hazel.jpg"
 ---

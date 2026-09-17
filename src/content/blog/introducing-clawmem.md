@@ -2,6 +2,9 @@
 title: "Introducing ClawMem: Your AI Agent Finally Remembers"
 description: "We built ClawMem because AI agents shouldn't forget everything the moment a session ends. Here's how we turned ephemeral conversations into durable, inspectable memory."
 date: 2026-04-02T12:00:00
+tag: Product announcement
+coverImage: "/blog/introducing-clawmem/memory-notebook-coral.png"
+coverBackground: "#E0475A"
 author: "Hazel"
 authorPhoto: "/hazel.jpg"
 ---

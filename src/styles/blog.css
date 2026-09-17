@@ -1,0 +1,75 @@
+/* Blog-only layout: preserve the landing page's shared theme and typography. */
+.blog-container { max-width: 1280px; padding-inline: clamp(1.25rem, 4vw, 4rem); }
+.blog-page { overflow: visible; min-height: calc(100vh - 90px); }
+.blog-header { padding: 2rem 0 1.5rem; border-bottom: 1px solid var(--border-subtle); margin-bottom: 1.75rem; }
+.blog-header h1 { font-size: clamp(1.75rem, 3vw, 2.25rem); font-weight: 600; letter-spacing: -0.035em; margin: 0; }
+.blog-nav .nav-links a[aria-current="page"] { color: var(--coral-bright); }
+.blog-nav .nav-inner { padding-right: 124px; }
+.blog-layout { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 2.75rem; padding-bottom: 3rem; }
+.blog-sidebar { min-width: 0; }
+.blog-categories { position: sticky; top: 5rem; }
+.category-heading { font-size: 0.875rem; color: var(--text-secondary); margin: 0 0 1rem 0.875rem; }
+.blog-categories ul { list-style: none; display: grid; gap: 0.375rem; }
+.blog-categories a { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.75rem 0.875rem; border-radius: 10px; color: var(--text-secondary); font-size: 1rem; min-height: 48px; }
+.blog-categories a:hover { background: var(--surface-interactive); color: var(--text-primary); }
+.blog-categories a[aria-current="page"] { background: var(--surface-coral-soft); color: var(--text-primary); font-weight: 700; box-shadow: inset 3px 0 var(--coral-bright); }
+.blog-categories a > span:first-child { min-width: 0; overflow-wrap: break-word; }
+.category-count { flex-shrink: 0; font-size: 0.875rem; font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+.blog-results { padding: 0; min-width: 0; scroll-margin-top: 1.5rem; }
+.blog-results-header { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; }
+.blog-results-header h2 { font-size: 1rem; font-weight: 500; color: var(--text-secondary); }
+.blog-results-header > span { color: var(--text-secondary); font-size: 0.875rem; }
+.blog-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); list-style: none; gap: 1.25rem; }
+.post-item { min-width: 0; }
+.post-card { display: flex; flex-direction: column; height: 100%; border: 1px solid var(--border-subtle); border-radius: 16px; background: var(--surface-card-strong); overflow: hidden; color: var(--text-primary); transition: border-color 180ms ease; }
+.post-card:hover { color: var(--text-primary); border-color: var(--text-muted); }
+.post-card:focus-visible { outline-offset: 5px; border-radius: 16px; }
+.post-cover { aspect-ratio: 16 / 9; flex-shrink: 0; padding: 1rem; display: flex; flex-direction: column; justify-content: space-between; gap: 0.5rem; color: #18202a; background: #ee9d99; position: relative; overflow: hidden; }
+.post-cover--mint { background: #83c4ae; }
+.post-cover--sky { background: #99c6e4; }
+.post-cover--sand { background: #e5cda2; }
+.post-cover--plum { background: #c7b4de; }
+.cover-brand { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; position: relative; }
+.cover-title { font-family: var(--font-display); font-size: clamp(1.375rem, 2vw, 1.75rem); font-weight: 600; line-height: 1.1; letter-spacing: -0.04em; max-width: 90%; position: relative; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.post-cover:not(.post-cover--image)::before { content: ''; position: absolute; width: 75%; aspect-ratio: 1; right: -35%; top: -35%; border: 1px solid rgba(24, 32, 42, 0.18); border-radius: 50%; box-shadow: 0 0 0 24px rgba(255, 255, 255, 0.08), 0 0 0 48px rgba(255, 255, 255, 0.06); }
+.post-cover--image { padding: 0; background: var(--cover-background, #f8f5ee); }
+.post-cover img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: contain; }
+.post-card-body { display: flex; flex-direction: column; flex: 1; padding: 1.25rem; }
+.post-meta { margin-bottom: 0.875rem; font-size: 0.875rem; color: var(--text-secondary); }
+.post-card h3 { font-size: 1.125rem; font-weight: 600; line-height: 1.4; letter-spacing: -0.025em; margin: 0; overflow-wrap: anywhere; }
+.post-card-footer { margin-top: auto; padding-top: 1.5rem; }
+.post-tag { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.4; }
+.blog-empty { padding: clamp(2rem, 6vw, 5rem) 1.5rem; text-align: center; border: 1px solid var(--border-subtle); border-radius: 22px; background: var(--surface-card); }
+.blog-empty h3 { font-size: 1.5rem; margin-bottom: 0.75rem; }
+.empty-link { display: inline-flex; gap: 0.75rem; align-items: center; min-height: 44px; color: var(--text-primary); font-weight: 600; border-bottom: 1px solid var(--coral-bright); }
+.blog-skip-link { position: fixed; top: -100px; left: 1rem; z-index: 1000; background: var(--bg-surface); color: var(--text-primary); padding: 0.75rem 1rem; border-radius: 8px; }
+.blog-skip-link:focus { top: 1rem; }
+
+@media (max-width: 1180px) {
+  .blog-layout { grid-template-columns: 165px minmax(0, 1fr); gap: 2rem; }
+  .blog-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cover-title { font-size: 1.75rem; }
+}
+@media (max-width: 760px) {
+  .blog-header { padding: 1.5rem 0 1.25rem; margin-bottom: 1.25rem; }
+  .blog-layout { grid-template-columns: minmax(0, 1fr); gap: 1.75rem; }
+  .blog-categories { position: static; }
+  .category-heading { display: none; }
+  .blog-categories ul { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .blog-categories a { gap: 0.625rem; border: 1px solid var(--border-subtle); padding: 0.625rem 0.875rem; }
+  .blog-categories a[aria-current="page"] { box-shadow: none; border-color: var(--coral-bright); }
+  .blog-grid { gap: 1rem; }
+  .cover-title { font-size: 1.5rem; }
+}
+@media (max-width: 540px) {
+  .blog-grid { grid-template-columns: minmax(0, 1fr); }
+  .post-cover { aspect-ratio: 16 / 9; }
+  .cover-title { font-size: 1.75rem; }
+  .post-card-body { padding: 1rem; }
+  .blog-nav .nav-inner { flex-wrap: wrap; gap: 1rem; padding: 1rem 1.25rem; }
+  .blog-nav .nav-right { flex-basis: 100%; }
+  .blog-nav .nav-links { gap: 1.25rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .post-card { transition: none; }
+}
