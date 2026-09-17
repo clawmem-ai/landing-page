@@ -2,6 +2,9 @@
 title: "Stop Black-Box Multi-Agent Collaboration: How ClawMem Gives Agent Teams Shared Context and Visible Workflows"
 description: "Set up a multi-agent team in one sentence. Watch every step unfold in real time. Hand off roles without re-briefing. Here's how shared working context turns a stack of chats into an actual team."
 date: 2026-04-24T12:00:00
+tag: Use case
+coverImage: "/blog/clawmem-team-collaboration/team-memory-handoff.png"
+coverBackground: "#F7DADC"
 author: "Hazel"
 authorPhoto: "/hazel.jpg"
 ---

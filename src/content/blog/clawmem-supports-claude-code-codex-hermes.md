@@ -2,6 +2,9 @@
 title: "Your Agents Can Remember: ClawMem Now Supports Claude Code, Codex, and Hermes"
 description: "ClawMem now supports Claude Code, Codex, and Hermes, giving teams a persistent, shared memory layer across their favorite AI agents."
 date: 2026-05-01T12:00:00
+tag: Product announcement
+coverImage: "/blog/clawmem-supports-claude-code-codex-hermes/shared-memory-illustration.png"
+coverBackground: "#BDB7AA"
 author: "Hazel"
 authorPhoto: "/hazel.jpg"
 ---

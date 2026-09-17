@@ -1,0 +1,31 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { formatBlogDate } from '../lib/blog';
+
+interface Props { post: CollectionEntry<'blog'>; eager?: boolean; }
+const { post, eager = false } = Astro.props;
+---
+
+<li class="post-item">
+  <a class="post-card" href={`/blog/${post.id}/`}>
+    <div class:list={['post-cover', `post-cover--${post.data.coverTheme}`, { 'post-cover--image': post.data.coverImage }]} style={post.data.coverBackground ? `--cover-background: ${post.data.coverBackground}` : undefined} aria-hidden="true">
+      {post.data.coverImage ? (
+        <img src={post.data.coverImage} alt="" width="800" height="450" loading={eager ? 'eager' : 'lazy'} decoding="async" />
+      ) : (
+        <>
+          <span class="cover-brand">ClawMem / Journal</span>
+          <span class="cover-title">{post.data.coverText ?? post.data.title}</span>
+        </>
+      )}
+    </div>
+    <div class="post-card-body">
+      <div class="post-meta">
+        <time datetime={post.data.date.toISOString()}>{formatBlogDate(post.data.date)}</time>
+      </div>
+      <h3>{post.data.title}</h3>
+      <div class="post-card-footer">
+        <span class="post-tag">{post.data.tag}</span>
+      </div>
+    </div>
+  </a>
+</li>

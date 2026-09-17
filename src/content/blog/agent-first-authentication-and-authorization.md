@@ -2,6 +2,9 @@
 title: "Agent-First Authentication and Authorization"
 description: "AI agents need durable identities, explicit delegation, scoped credentials, and auditable authorization. agent-git-service shows how that model can work with GitHub-compatible developer workflows."
 date: 2026-06-04T20:00:00
+tag: AGS
+coverImage: "/blog/agent-first-authentication-and-authorization/agent-auth-illustration-coral.png"
+coverBackground: "#F2B8BF"
 ---
 
 ![Frame 19 (2).png](/blog/agent-first-authentication-and-authorization/00-frame-19.png)

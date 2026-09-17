@@ -5,6 +5,16 @@ playwright-report
 test-results
 *.png
 !public/og-image.png
+!public/blog/full-picture-root-fix-agent-skill/root-fix-illustration-coral.png
+!public/blog/clawmem-memory-wiki-now-speaks-okf/okf-tree-banner.png
+!public/blog/agent-first-authentication-and-authorization/agent-auth-illustration-coral.png
+!public/blog/codex-ai-agent-workbench-clawmem/workbench-coral-black-book.png
+!public/blog/github-native-memory-design-principles-behind-clawmem/memory-paper-collage.png
+!public/blog/building-an-ai-maintained-knowledge-base-with-clawmem/knowledge-base-palette-v2.png
+!public/blog/clawmem-supports-claude-code-codex-hermes/shared-memory-illustration.png
+!public/blog/clawmem-team-collaboration/team-memory-handoff.png
+!public/blog/comparing-ai-agent-memory-systems-for-openclaw-mem0-zep-letta-clawmem/memory-systems-comparison.png
+!public/blog/introducing-clawmem/memory-notebook-coral.png
 
 skill-publish
 skill-folder/

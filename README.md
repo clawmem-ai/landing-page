@@ -28,6 +28,43 @@ npm run build      # production build
 npm run preview    # preview production build
 ```
 
+## Blog content
+
+Posts live in `src/content/blog/*.md`. The blog index uses a card grid with
+All posts, ClawMem, AGS, Use case, and Product announcement filters.
+Each filter matches the card's single tag; counts update automatically.
+
+Add these fields to a post's existing frontmatter to classify and style it:
+
+```yaml
+category: community # optional internal authorship metadata, not a visible filter
+author: "Original author's name" # required for community posts
+tag: AGS # exactly one: ClawMem | AGS | Use case | Product announcement
+coverImage: "/blog/my-post/cover.jpg" # optional, file lives under public/
+coverBackground: "#f6f2eb" # optional, match the image edges in letterboxed space
+coverText: "A short cover headline" # optional fallback when there is no image
+coverTheme: mint # coral | mint | sky | sand | plum
+```
+
+Each post must have exactly one `tag`, shared by its card, sidebar filter, and
+article breadcrumb. `category` is internal authorship metadata only; community
+contributions must still credit their original author on the article page.
+Cards show a cover, date, title, and tag—no excerpt, source badge, author, or avatar.
+Article pages retain attribution; descriptions remain available for page metadata.
+
+Use a landscape cover image when available. Without one, the card uses a colored
+text cover. Place assets in `public/blog/<post-slug>/`. Tag-filter pages live
+under `/blog/category/<tag>/`, separate from the article URLs.
+Only add approved content: an empty category shows a real empty state, not demo posts.
+
+PNG files are ignored by default. Add an exact exception in `.gitignore` for each
+approved PNG cover and commit the image itself alongside its frontmatter. Never
+reference local Downloads or generated-image paths. Covers under `public/blog/`
+are deployed with the site and do not require a separate image-hosting service.
+After building, run `node scripts/check-blog-assets.mjs` to verify cover decoding,
+rendered image paths, category pages, and byte-for-byte copies in `dist/`. Before
+committing, stage the assets and add `--tracked` to also verify their Git index bytes.
+
 ## Deployment
 
 ```bash

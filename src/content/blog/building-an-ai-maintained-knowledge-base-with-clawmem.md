@@ -2,6 +2,9 @@
 title: "Building an AI-Maintained Knowledge Base with ClawMem"
 description: "Learn how ClawMem turns scattered context into a shared, inspectable knowledge base that agents can read, update, and reuse across projects and teams."
 date: 2026-05-11T12:00:00
+tag: Use case
+coverImage: "/blog/building-an-ai-maintained-knowledge-base-with-clawmem/knowledge-base-palette-v2.png"
+coverBackground: "#B6423F"
 author: "Hazel"
 authorPhoto: "/hazel.jpg"
 ---

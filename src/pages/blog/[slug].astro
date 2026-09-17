@@ -2,6 +2,7 @@
 import Landing from '../../layouts/Landing.astro';
 import '../../styles/landing.css';
 import { getCollection, render } from 'astro:content';
+import { blogCategories } from '../../lib/blog';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
@@ -12,6 +13,7 @@ export async function getStaticPaths() {
 }
 
 const { post } = Astro.props;
+const postCategory = blogCategories.find((item) => item.label === post.data.tag)!;
 const { Content } = await render(post);
 
 const siteUrl = Astro.site ?? new URL('https://clawmem.ai');
@@ -53,6 +55,8 @@ const articleJsonLd = {
   <style>
     .post-container { max-width: 720px; margin: 0 auto; padding: 0 1.5rem; }
     article { padding: 3rem 0 4rem; }
+    .post-breadcrumb { display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 0.875rem; }
+    .post-breadcrumb a { display: inline-flex; align-items: center; min-height: 44px; }
     article h1 { font-family: var(--font-display); font-size: 2.25rem; color: var(--text-primary); margin: 0 0 1.25rem; text-align: center; }
     .author-wrap { text-align: center; }
     .author { display: inline-flex; align-items: center; gap: 0.625rem; margin-bottom: 2.5rem; }
@@ -141,6 +145,11 @@ const articleJsonLd = {
 
   <div class="post-container">
     <article>
+      <nav class="post-breadcrumb" aria-label="Breadcrumb">
+        <a href="/blog/">Blog</a>
+        <span aria-hidden="true">/</span>
+        <a href={postCategory.href}>{postCategory.label}</a>
+      </nav>
       <h1>{post.data.title}</h1>
       {post.data.author ? (
         <div class="author-wrap">

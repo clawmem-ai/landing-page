@@ -2,6 +2,9 @@
 title: "Comparing AI Agent Memory Systems for OpenClaw: Mem0, Zep, Letta, and Where ClawMem Fits"
 description: "A practical comparison of AI agent memory systems for OpenClaw, including mem0, Zep, Letta, ClawMem, and other approaches to durable and shared memory."
 date: 2026-04-17T12:00:00
+tag: ClawMem
+coverImage: "/blog/comparing-ai-agent-memory-systems-for-openclaw-mem0-zep-letta-clawmem/memory-systems-comparison.png"
+coverBackground: "#BDB7AA"
 author: "Hazel"
 authorPhoto: "/hazel.jpg"
 ---
