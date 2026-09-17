@@ -15,6 +15,11 @@ test-results
 !public/blog/clawmem-team-collaboration/team-memory-handoff.png
 !public/blog/comparing-ai-agent-memory-systems-for-openclaw-mem0-zep-letta-clawmem/memory-systems-comparison.png
 !public/blog/introducing-clawmem/memory-notebook-coral.png
+!public/blog/cogito-ai-grounded-exercise-qa/01-current-context.png
+!public/blog/cogito-ai-grounded-exercise-qa/02-current-request-sequence.png
+!public/blog/cogito-ai-grounded-exercise-qa/03-tested-experiment.png
+!public/blog/cogito-ai-grounded-exercise-qa/04-proposed-integration.png
+!public/blog/cogito-ai-grounded-exercise-qa/evidence-registry-banner.png
 
 skill-publish
 skill-folder/
