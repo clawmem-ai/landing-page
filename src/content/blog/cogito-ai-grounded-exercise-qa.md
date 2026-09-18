@@ -125,16 +125,4 @@ Before any product integration, we also need a defined corpus-version handshake,
 
 The useful outcome for COGITO AI is a reproducible basis for those decisions: TiDB can preserve the tested exercise boundary, the current answer gate needs further work, and AGS holds the evidence for both claims where the next person can check it. That is the story we can support today.
 
-## Diagrams and source files
-
-Diagrams describe source snapshot `008de57` on `codex/cogito-ai-qa-experiment`. COGITO background is available in the [original app overview](https://clinical-neuropsychology.de/cogito-en/).
-
-- [Architecture PDF: all four diagrams](https://drive.google.com/file/d/1w1V1YwPMacHUjcLnLaccnjJqEsuwArd8/view)
-- [Current product context](/blog/cogito-ai-grounded-exercise-qa/01-current-context.png)
-- [Current request sequence](/blog/cogito-ai-grounded-exercise-qa/02-current-request-sequence.png)
-- [Tested experiment](/blog/cogito-ai-grounded-exercise-qa/03-tested-experiment.png)
-- [Proposed integration](/blog/cogito-ai-grounded-exercise-qa/04-proposed-integration.png)
-- [Editable SVG sources and generator](https://drive.google.com/file/d/1HSBfFm6CmTht6yiAPvhiQhewCsXkcssR/view)
-- [Technical architecture notes](https://drive.google.com/file/d/1D8tRtHT_6NRZNIykxiNVGIxTiu8Yhi7r/view)
-- [Original Markdown draft](https://drive.google.com/file/d/1YQr8qlxeST_guRvOvYF08i31IxdXFnRE/view)
-- [All diagrams, editable sources, and technical notes](https://drive.google.com/drive/folders/1b6nMk0cDAIEJiNgMRYFQxOml5ZXI2caH)
+> COGITO background is available in the [original app overview](https://clinical-neuropsychology.de/cogito-en/).
